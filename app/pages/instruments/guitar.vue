@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { GUITAR_TUNINGS, type TuningPreset } from '#shared/constants/tunings'
+
 const theoryStore = useTheoryStore()
 const { getNoteNames, getScaleNotes, getChordNotes } = useMusicTheory()
 
@@ -8,6 +10,41 @@ const mode = ref<'scale' | 'chord'>('scale')
 const selectedScaleId = ref('')
 const selectedChordId = ref('')
 const lastClickedNote = ref('')
+
+// Tuning
+const selectedTuningIndex = ref(0)
+const customTuning = ref<string[] | null>(null)
+
+const activeTuning = computed(() => {
+  if (customTuning.value) return customTuning.value
+  return [...GUITAR_TUNINGS[selectedTuningIndex.value]!.notes]
+})
+
+const tuningLabel = computed(() => {
+  return activeTuning.value.map(n => n.replace(/\d+$/, '')).join('-')
+})
+
+const tuningsByCategory = computed(() => {
+  const categories: Record<string, TuningPreset[]> = {}
+  for (const t of GUITAR_TUNINGS) {
+    if (!categories[t.category]) categories[t.category] = []
+    categories[t.category]!.push(t)
+  }
+  return categories
+})
+
+const categoryLabels: Record<string, string> = {
+  standard: 'Standard',
+  alternate: 'Alternate Standard',
+  drop: 'Drop Tunings',
+  open: 'Open Tunings',
+  special: 'Special / Modal',
+}
+
+function selectTuning(index: number) {
+  selectedTuningIndex.value = index
+  customTuning.value = null
+}
 
 const highlightedNotes = computed(() => {
   if (mode.value === 'scale' && selectedScaleId.value) {
@@ -53,6 +90,38 @@ onMounted(async () => {
       </NuxtLink>
     </div>
     <p class="text-text-muted mb-6">Interactive 6-string fretboard — visualize scales, chords, and fingering patterns.</p>
+
+    <!-- Tuning Selector -->
+    <NordCard class="mb-4">
+      <div class="flex flex-wrap items-center gap-3">
+        <div class="flex items-center gap-2">
+          <svg class="w-5 h-5 text-text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2v20M9 5l6-2M9 9l6-2" /><circle cx="12" cy="19" r="3" />
+          </svg>
+          <span class="text-sm font-medium text-text">Tuning:</span>
+        </div>
+        <select
+          :value="selectedTuningIndex"
+          class="bg-surface-alt text-text border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+          @change="selectTuning(Number(($event.target as HTMLSelectElement).value))"
+        >
+          <template v-for="(tunings, category) in tuningsByCategory" :key="category">
+            <optgroup :label="categoryLabels[category] || category">
+              <option
+                v-for="t in tunings"
+                :key="t.name"
+                :value="GUITAR_TUNINGS.indexOf(t)"
+              >
+                {{ t.name }} ({{ t.notes.map(n => n.replace(/\d+$/, '')).join('-') }})
+              </option>
+            </optgroup>
+          </template>
+        </select>
+        <span class="text-xs text-text-muted font-mono bg-surface-alt px-2 py-1 rounded">
+          {{ tuningLabel }}
+        </span>
+      </div>
+    </NordCard>
 
     <!-- Controls -->
     <NordCard class="mb-6">
@@ -124,6 +193,7 @@ onMounted(async () => {
     <!-- Fretboard -->
     <NordCard class="mb-6">
       <GuitarFretboard
+        :tuning="activeTuning"
         :highlighted-notes="highlightedNotes"
         :root-note="selectedRoot"
         @note-click="handleNoteClick"

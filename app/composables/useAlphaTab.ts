@@ -17,9 +17,11 @@ export function useAlphaTab(containerRef: Ref<HTMLElement | null>) {
     const settings = new alphaTab.Settings()
     settings.core.engine = 'html5'
     settings.core.logLevel = alphaTab.LogLevel.None
+    settings.core.fontDirectory = '/font/'
     settings.player.enablePlayer = true
     settings.player.enableCursor = true
     settings.player.enableUserInteraction = true
+    settings.player.soundFont = '/soundfonts/sonivox.sf2'
     settings.display.resources.staffLineColor = '#4C566A' as any
     settings.display.resources.barSeparatorColor = '#4C566A' as any
     settings.display.resources.mainGlyphColor = '#ECEFF4' as any

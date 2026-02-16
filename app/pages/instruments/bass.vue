@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { BASS_TUNINGS, type TuningPreset } from '#shared/constants/tunings'
+
 const theoryStore = useTheoryStore()
 const { getNoteNames, getScaleNotes, getChordNotes } = useMusicTheory()
 
@@ -9,6 +11,27 @@ const mode = ref<'scale' | 'chord'>('scale')
 const selectedScaleId = ref('')
 const selectedChordId = ref('')
 const lastClickedNote = ref('')
+
+// Tuning
+const selectedTuningIndex = ref(0)
+
+const availableTunings = computed(() => BASS_TUNINGS[stringCount.value] || [])
+
+const activeTuning = computed(() => {
+  const tunings = availableTunings.value
+  const idx = Math.min(selectedTuningIndex.value, tunings.length - 1)
+  return tunings[idx] ? [...tunings[idx].notes] : undefined
+})
+
+const tuningLabel = computed(() => {
+  if (!activeTuning.value) return ''
+  return activeTuning.value.map(n => n.replace(/\d+$/, '')).join('-')
+})
+
+function onStringCountChange(count: 4 | 5 | 6) {
+  stringCount.value = count
+  selectedTuningIndex.value = 0
+}
 
 const highlightedNotes = computed(() => {
   if (mode.value === 'scale' && selectedScaleId.value) {
@@ -55,6 +78,34 @@ onMounted(async () => {
     </div>
     <p class="text-text-muted mb-6">4, 5, or 6-string bass fretboard — explore scales and chord tones across tunings.</p>
 
+    <!-- Tuning Selector -->
+    <NordCard class="mb-4">
+      <div class="flex flex-wrap items-center gap-3">
+        <div class="flex items-center gap-2">
+          <svg class="w-5 h-5 text-text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2v20M9 5l6-2M9 9l6-2" /><circle cx="12" cy="19" r="3" />
+          </svg>
+          <span class="text-sm font-medium text-text">Tuning:</span>
+        </div>
+        <select
+          :value="selectedTuningIndex"
+          class="bg-surface-alt text-text border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+          @change="selectedTuningIndex = Number(($event.target as HTMLSelectElement).value)"
+        >
+          <option
+            v-for="(t, i) in availableTunings"
+            :key="t.name"
+            :value="i"
+          >
+            {{ t.name }} ({{ t.notes.map(n => n.replace(/\d+$/, '')).join('-') }})
+          </option>
+        </select>
+        <span class="text-xs text-text-muted font-mono bg-surface-alt px-2 py-1 rounded">
+          {{ tuningLabel }}
+        </span>
+      </div>
+    </NordCard>
+
     <!-- Controls -->
     <NordCard class="mb-6">
       <div class="flex flex-wrap items-end gap-4">
@@ -70,7 +121,7 @@ onMounted(async () => {
                 stringCount === count ? 'bg-primary text-nord0' : 'bg-surface-alt text-text',
                 count !== 4 ? 'border-l-0' : '',
               ]"
-              @click="stringCount = count"
+              @click="onStringCountChange(count)"
             >
               {{ count }}
             </button>
@@ -145,6 +196,7 @@ onMounted(async () => {
     <NordCard>
       <BassFretboard
         :strings="stringCount"
+        :tuning="activeTuning"
         :highlighted-notes="highlightedNotes"
         :root-note="selectedRoot"
         @note-click="handleNoteClick"
