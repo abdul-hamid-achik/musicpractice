@@ -26,7 +26,8 @@ export const usePracticeStore = defineStore('practice', () => {
   const fetchSessions = async () => {
     isLoading.value = true
     try {
-      sessions.value = await $fetch('/api/sessions')
+      const res = await $fetch<{ data: PracticeSession[]; total: number }>('/api/sessions')
+      sessions.value = res.data
     } finally {
       isLoading.value = false
     }

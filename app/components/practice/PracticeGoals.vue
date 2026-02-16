@@ -24,7 +24,8 @@ onMounted(async () => {
 async function fetchGoals() {
   isLoading.value = true
   try {
-    goals.value = await $fetch('/api/goals')
+    const res = await $fetch<{ data: PracticeGoal[] }>('/api/goals')
+    goals.value = res.data
   } catch {
     goals.value = []
   } finally {
@@ -62,7 +63,6 @@ async function saveGoal() {
     await $fetch('/api/goals', {
       method: 'POST',
       body: {
-        userId: 'demo-user-id', // TODO: get from auth
         title: newGoal.value.title,
         targetMinutesPerWeek: newGoal.value.targetMinutesPerWeek,
         instrumentId: newGoal.value.instrumentId || null,
@@ -79,47 +79,59 @@ async function saveGoal() {
 
 <template>
   <div class="flex flex-col gap-4">
-    <!-- Goal cards -->
+    <!-- Loading skeletons -->
+    <template v-if="isLoading">
+      <div v-for="i in 2" :key="i" class="bg-card border border-border rounded-lg p-4 space-y-3">
+        <NordSkeleton height="1rem" width="60%" />
+        <NordSkeleton height="0.75rem" width="40%" />
+        <NordSkeleton height="0.625rem" rounded="rounded-full" />
+      </div>
+    </template>
+
+    <!-- Empty state -->
     <div
-      v-if="goals.length === 0 && !isLoading"
+      v-else-if="goals.length === 0"
       class="text-center py-8 text-text-muted"
     >
       <p>No practice goals set yet.</p>
       <p class="text-sm mt-1">Add a goal to track your progress.</p>
     </div>
 
-    <div
-      v-for="goal in goals"
-      :key="goal.id"
-      class="bg-card border border-border rounded-lg p-4"
-    >
-      <div class="flex justify-between items-start mb-2">
-        <div>
-          <h4 class="font-medium text-text">{{ goal.title }}</h4>
-          <p class="text-xs text-text-muted">{{ getInstrumentName(goal.instrumentId) }}</p>
+    <!-- Goal cards -->
+    <StaggeredList v-else class="flex flex-col gap-4">
+      <div
+        v-for="goal in goals"
+        :key="goal.id"
+        class="bg-card border border-border rounded-lg p-4"
+      >
+        <div class="flex justify-between items-start mb-2">
+          <div>
+            <h4 class="font-medium text-text">{{ goal.title }}</h4>
+            <p class="text-xs text-text-muted">{{ getInstrumentName(goal.instrumentId) }}</p>
+          </div>
+          <span
+            class="text-sm font-medium"
+            :class="progressPercent(goal) >= 100 ? 'text-success' : 'text-primary'"
+          >
+            {{ progressPercent(goal) }}%
+          </span>
         </div>
-        <span
-          class="text-sm font-medium"
-          :class="progressPercent(goal) >= 100 ? 'text-success' : 'text-primary'"
-        >
-          {{ progressPercent(goal) }}%
-        </span>
-      </div>
 
-      <!-- Progress bar -->
-      <div class="w-full bg-surface-alt rounded-full h-2.5 overflow-hidden mt-3">
-        <div
-          class="h-full rounded-full transition-all duration-500"
-          :class="progressPercent(goal) >= 100 ? 'bg-success' : 'bg-primary'"
-          :style="{ width: `${Math.min(100, progressPercent(goal))}%` }"
-        />
-      </div>
+        <!-- Progress bar -->
+        <div class="mt-3">
+          <NordProgressBar
+            :value="Math.min(100, progressPercent(goal))"
+            :color="progressPercent(goal) >= 100 ? 'success' : 'primary'"
+            size="md"
+          />
+        </div>
 
-      <div class="flex justify-between mt-1.5 text-xs text-text-muted">
-        <span>{{ getWeeklyMinutes(goal.instrumentId) }} min this week</span>
-        <span>Target: {{ goal.targetMinutesPerWeek }} min/week</span>
+        <div class="flex justify-between mt-1.5 text-xs text-text-muted">
+          <span>{{ getWeeklyMinutes(goal.instrumentId) }} min this week</span>
+          <span>Target: {{ goal.targetMinutesPerWeek }} min/week</span>
+        </div>
       </div>
-    </div>
+    </StaggeredList>
 
     <!-- Add goal form -->
     <div v-if="showForm" class="bg-card border border-border rounded-lg p-4 flex flex-col gap-3">
@@ -157,19 +169,17 @@ async function saveGoal() {
         </div>
       </div>
       <div class="flex gap-2 justify-end">
-        <button
-          class="px-4 py-2 rounded-md text-sm bg-surface-alt text-text-muted hover:bg-border transition-colors"
-          @click="showForm = false"
-        >
+        <NordButton variant="ghost" size="sm" @click="showForm = false">
           Cancel
-        </button>
-        <button
-          class="px-4 py-2 rounded-md text-sm bg-primary text-nord0 hover:brightness-110 transition-colors font-medium"
+        </NordButton>
+        <NordButton
+          variant="primary"
+          size="sm"
           :disabled="!newGoal.title.trim()"
           @click="saveGoal"
         >
           Save Goal
-        </button>
+        </NordButton>
       </div>
     </div>
 

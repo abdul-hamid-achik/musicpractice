@@ -4,17 +4,14 @@ import { requireAuth } from '../../utils/auth'
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 export default defineEventHandler(async (event) => {
-  await requireAuth(event)
+  const user = await requireAuth(event)
   const db = useDb()
   const body = await readBody(event)
 
-  if (!body.userId || !body.songId) {
-    throw createError({ statusCode: 400, message: 'userId and songId are required' })
+  if (!body.songId) {
+    throw createError({ statusCode: 400, message: 'songId is required' })
   }
 
-  if (!UUID_RE.test(body.userId)) {
-    throw createError({ statusCode: 400, message: 'Invalid userId format' })
-  }
   if (!UUID_RE.test(body.songId)) {
     throw createError({ statusCode: 400, message: 'Invalid songId format' })
   }
@@ -30,7 +27,7 @@ export default defineEventHandler(async (event) => {
 
   try {
     const [progress] = await db.insert(userProgress).values({
-      userId: body.userId,
+      userId: user.id,
       songId: body.songId,
       completionPercent: body.completionPercent ?? 0,
       maxTempoBpm: body.maxTempoBpm ?? null,

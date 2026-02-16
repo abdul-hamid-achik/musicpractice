@@ -112,8 +112,8 @@ function selectMinor(key: string, index: number) {
         <g v-for="seg in outerSegments" :key="'outer-' + seg.index">
           <path
             :d="seg.path"
-            :fill="seg.isSelected ? '#88C0D0' : seg.isHovered ? '#4C566A' : '#434C5E'"
-            stroke="#2E3440"
+            :fill="seg.isSelected ? '#88C0D0' : seg.isHovered ? 'var(--color-nord3)' : 'var(--color-nord2)'"
+            style="stroke: var(--color-nord0)"
             stroke-width="2"
             class="cursor-pointer transition-colors duration-150"
             @click="selectMajor(seg.key, seg.index)"
@@ -138,8 +138,8 @@ function selectMinor(key: string, index: number) {
         <g v-for="seg in innerSegments" :key="'inner-' + seg.index">
           <path
             :d="seg.path"
-            :fill="seg.isSelected ? '#5E81AC' : seg.isHovered ? '#3B4252' : '#2E3440'"
-            stroke="#3B4252"
+            :fill="seg.isSelected ? '#5E81AC' : seg.isHovered ? 'var(--color-nord1)' : 'var(--color-nord0)'"
+            style="stroke: var(--color-nord1)"
             stroke-width="1.5"
             class="cursor-pointer transition-colors duration-150"
             @click="selectMinor(seg.key, seg.index - 12)"
@@ -161,7 +161,7 @@ function selectMinor(key: string, index: number) {
         </g>
 
         <!-- Center circle -->
-        <circle :cx="cx" :cy="cy" r="38" fill="#2E3440" stroke="#3B4252" stroke-width="1.5" />
+        <circle :cx="cx" :cy="cy" r="38" style="fill: var(--color-nord0); stroke: var(--color-nord1)" stroke-width="1.5" />
         <text
           v-if="selectedKey"
           :x="cx"
@@ -181,7 +181,7 @@ function selectMinor(key: string, index: number) {
           :y="cy"
           text-anchor="middle"
           dominant-baseline="central"
-          fill="#4C566A"
+          style="fill: var(--color-nord3)"
           font-size="10"
           class="select-none"
         >

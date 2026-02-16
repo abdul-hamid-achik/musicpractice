@@ -90,7 +90,7 @@ function handleNoteClick(string: number, fret: number, note: string) {
       :y1="topPadding - 8"
       :x2="nutX"
       :y2="topPadding + (tuning.length - 1) * stringSpacing + 8"
-      stroke="#ECEFF4"
+      style="stroke: var(--color-nord6)"
       stroke-width="5"
     />
 
@@ -102,7 +102,7 @@ function handleNoteClick(string: number, fret: number, note: string) {
       :y1="topPadding - 6"
       :x2="fretX(f)"
       :y2="topPadding + (tuning.length - 1) * stringSpacing + 6"
-      stroke="#4C566A"
+      style="stroke: var(--color-nord3)"
       stroke-width="2"
     />
 
@@ -114,13 +114,13 @@ function handleNoteClick(string: number, fret: number, note: string) {
             :cx="fretX(marker) - fretSpacing / 2"
             :cy="markerY(marker) - 12"
             r="4"
-            fill="#4C566A"
+            style="fill: var(--color-nord3)"
           />
           <circle
             :cx="fretX(marker) - fretSpacing / 2"
             :cy="markerY(marker) + 12"
             r="4"
-            fill="#4C566A"
+            style="fill: var(--color-nord3)"
           />
         </template>
         <circle
@@ -141,7 +141,7 @@ function handleNoteClick(string: number, fret: number, note: string) {
       :y1="topPadding + s * stringSpacing"
       :x2="fretboardWidth"
       :y2="topPadding + s * stringSpacing"
-      stroke="#D8DEE9"
+      style="stroke: var(--color-nord4)"
       :stroke-width="stringThickness[s] || 1"
     />
 
@@ -205,7 +205,17 @@ function handleNoteClick(string: number, fret: number, note: string) {
   transition: fill 0.15s;
 }
 g:hover .hover-dot {
-  fill: #4c566a;
+  fill: var(--color-nord3);
+}
+
+@keyframes note-glow {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.2); filter: drop-shadow(0 0 3px rgba(136, 192, 208, 0.5)); }
+  100% { transform: scale(1); filter: none; }
+}
+
+g:active circle {
+  animation: note-glow 250ms ease-out;
 }
 .hover-label {
   opacity: 0;

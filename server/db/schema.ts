@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, integer, timestamp, jsonb, real, boolean, pgEnum } from 'drizzle-orm/pg-core'
+import { pgTable, uuid, text, integer, timestamp, jsonb, real, boolean, pgEnum, date } from 'drizzle-orm/pg-core'
 
 export const instrumentTypeEnum = pgEnum('instrument_type', ['guitar', 'bass', 'piano', 'violin'])
 export const difficultyEnum = pgEnum('difficulty', ['beginner', 'intermediate', 'advanced', 'expert'])
@@ -11,6 +11,9 @@ export const users = pgTable('users', {
   passwordHash: text('password_hash').notNull(),
   name: text('name').notNull(),
   avatarUrl: text('avatar_url'),
+  currentStreak: integer('current_streak').notNull().default(0),
+  longestStreak: integer('longest_streak').notNull().default(0),
+  lastPracticeDate: date('last_practice_date'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 })

@@ -87,13 +87,12 @@ onBeforeUnmount(() => {
     </div>
 
     <!-- Progress bar -->
-    <div class="w-full bg-surface-alt rounded-full h-3 overflow-hidden">
-      <div
-        class="h-full rounded-full transition-all duration-500"
-        :class="isComplete ? 'bg-success' : 'bg-primary'"
-        :style="{ width: `${progress}%` }"
-      />
-    </div>
+    <NordProgressBar
+      :value="progress"
+      :color="isComplete ? 'success' : 'primary'"
+      size="md"
+      :animated="isRunning"
+    />
 
     <!-- Current BPM -->
     <div class="text-center">
@@ -119,31 +118,19 @@ onBeforeUnmount(() => {
 
     <!-- Controls -->
     <div class="flex justify-center gap-3">
-      <button
+      <NordButton
         v-if="!isRunning"
-        class="px-6 py-2.5 rounded-lg font-semibold transition-colors"
-        :class="
-          isComplete
-            ? 'bg-primary text-nord0 hover:brightness-110'
-            : 'bg-success text-nord0 hover:brightness-110'
-        "
+        :variant="isComplete ? 'primary' : 'success'"
         @click="startTraining"
       >
         {{ isComplete ? 'Restart' : 'Start' }}
-      </button>
-      <button
-        v-else
-        class="px-6 py-2.5 rounded-lg font-semibold bg-error text-white hover:brightness-110 transition-colors"
-        @click="stopTraining"
-      >
+      </NordButton>
+      <NordButton v-else variant="danger" @click="stopTraining">
         Stop
-      </button>
-      <button
-        class="px-6 py-2.5 rounded-lg font-semibold bg-surface-alt text-text-muted hover:bg-border transition-colors"
-        @click="reset"
-      >
+      </NordButton>
+      <NordButton variant="ghost" @click="reset">
         Reset
-      </button>
+      </NordButton>
     </div>
   </div>
 </template>

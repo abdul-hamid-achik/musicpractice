@@ -5,7 +5,7 @@ import { requireAuth } from '../../utils/auth'
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 export default defineEventHandler(async (event) => {
-  await requireAuth(event)
+  const user = await requireAuth(event)
   const db = useDb()
   const query = getQuery(event)
 
@@ -14,14 +14,7 @@ export default defineEventHandler(async (event) => {
   const offset = (page - 1) * limit
 
   try {
-    const conditions = []
-
-    if (query.userId) {
-      if (!UUID_RE.test(query.userId as string)) {
-        throw createError({ statusCode: 400, message: 'Invalid userId format' })
-      }
-      conditions.push(eq(userProgress.userId, query.userId as string))
-    }
+    const conditions = [eq(userProgress.userId, user.id)]
 
     if (query.songId) {
       if (!UUID_RE.test(query.songId as string)) {
@@ -30,7 +23,7 @@ export default defineEventHandler(async (event) => {
       conditions.push(eq(userProgress.songId, query.songId as string))
     }
 
-    const where = conditions.length > 0 ? and(...conditions) : undefined
+    const where = and(...conditions)
 
     const [countRow] = await db.select({ count: count() }).from(userProgress).where(where)
     const total = countRow!.count

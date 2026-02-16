@@ -67,6 +67,60 @@ function handleTap() {
     }
   }, 2100)
 }
+
+// Presets
+const presets = ref<Array<{ id: string; name: string; tempoBpm: number; beatsPerMeasure: number; beatUnit: number }>>([])
+const showSavePreset = ref(false)
+const presetName = ref('')
+const presetsLoading = ref(false)
+
+async function loadPresets() {
+  try {
+    presetsLoading.value = true
+    const result = await $fetch<{ data: typeof presets.value }>('/api/metronome-presets?userId=demo-user-id')
+    presets.value = result.data
+  } catch {
+    // Auth required or other error - silently ignore
+  } finally {
+    presetsLoading.value = false
+  }
+}
+
+async function savePreset() {
+  if (!presetName.value.trim()) return
+  try {
+    const preset = await $fetch('/api/metronome-presets', {
+      method: 'POST',
+      body: {
+        userId: 'demo-user-id',
+        name: presetName.value.trim(),
+        tempoBpm: bpm.value,
+        beatsPerMeasure: beatsPerMeasure.value,
+        beatUnit: 4,
+      },
+    })
+    presets.value.push(preset as any)
+    presetName.value = ''
+    showSavePreset.value = false
+  } catch {
+    // Handle error silently
+  }
+}
+
+function loadPreset(preset: (typeof presets.value)[number]) {
+  setBpm(preset.tempoBpm)
+  beatsPerMeasure.value = preset.beatsPerMeasure
+  const matchedSig = timeSignatures.find((s) => s.beats === preset.beatsPerMeasure)
+  if (matchedSig) {
+    selectedTimeSig.value = matchedSig.label
+  }
+}
+
+onMounted(() => {
+  loadPresets()
+})
+
+defineExpose({ setBpm, adjustBpm, togglePlayback, bpm, isRunning })
 </script>
 
 <template>
@@ -115,19 +169,15 @@ function handleTap() {
 
     <!-- Time Signature -->
     <div class="flex flex-wrap gap-2 justify-center">
-      <button
+      <NordButton
         v-for="sig in timeSignatures"
         :key="sig.label"
-        class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors"
-        :class="
-          selectedTimeSig === sig.label
-            ? 'bg-primary text-nord0'
-            : 'bg-surface-alt text-text-muted hover:bg-border'
-        "
+        :variant="selectedTimeSig === sig.label ? 'primary' : 'ghost'"
+        size="sm"
         @click="setTimeSignature(sig)"
       >
         {{ sig.label }}
-      </button>
+      </NordButton>
     </div>
 
     <!-- Visual Beat Indicator -->
@@ -139,8 +189,8 @@ function handleTap() {
         :class="[
           currentBeat === beat - 1 && isRunning
             ? beat === 1
-              ? 'bg-warning border-warning scale-110'
-              : 'bg-primary border-primary scale-110'
+              ? 'bg-warning border-warning scale-110 beat-ripple'
+              : 'bg-primary border-primary scale-110 beat-ripple'
             : 'border-border bg-transparent',
         ]"
       />
@@ -148,24 +198,72 @@ function handleTap() {
 
     <!-- Controls -->
     <div class="flex justify-center gap-4">
-      <button
-        class="px-8 py-3 rounded-lg text-lg font-semibold transition-colors"
-        :class="
-          isRunning
-            ? 'bg-error text-white hover:brightness-110'
-            : 'bg-success text-nord0 hover:brightness-110'
-        "
+      <NordButton
+        :variant="isRunning ? 'danger' : 'success'"
+        size="lg"
         @click="togglePlayback"
       >
         {{ isRunning ? 'Stop' : 'Start' }}
-      </button>
+      </NordButton>
 
-      <button
-        class="px-6 py-3 rounded-lg text-lg font-semibold bg-surface-alt text-text-muted hover:bg-border transition-colors"
-        @click="handleTap"
-      >
+      <NordButton variant="ghost" size="lg" @click="handleTap">
         Tap Tempo
-      </button>
+      </NordButton>
+    </div>
+
+    <!-- Presets -->
+    <div class="border-t border-border pt-4 mt-2">
+      <div class="flex items-center justify-between mb-3">
+        <h4 class="text-sm font-medium text-text-muted">Presets</h4>
+        <button
+          class="text-sm text-primary hover:text-text transition-colors"
+          @click="showSavePreset = !showSavePreset"
+        >
+          {{ showSavePreset ? 'Cancel' : 'Save Current' }}
+        </button>
+      </div>
+
+      <!-- Save preset form -->
+      <div v-if="showSavePreset" class="flex gap-2 mb-3">
+        <input
+          v-model="presetName"
+          type="text"
+          placeholder="Preset name..."
+          class="flex-1 bg-surface-alt text-text border border-border rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+          @keyup.enter="savePreset"
+        />
+        <button
+          class="px-3 py-1.5 rounded-md text-sm font-medium bg-primary text-nord0 hover:brightness-110 transition-colors disabled:opacity-50"
+          :disabled="!presetName.trim()"
+          @click="savePreset"
+        >
+          Save
+        </button>
+      </div>
+
+      <!-- Preset buttons -->
+      <div v-if="presets.length > 0" class="flex flex-wrap gap-2">
+        <button
+          v-for="preset in presets"
+          :key="preset.id"
+          class="px-3 py-1.5 rounded-md text-sm bg-surface-alt text-text-muted hover:bg-border hover:text-text transition-colors"
+          @click="loadPreset(preset)"
+        >
+          {{ preset.name }} ({{ preset.tempoBpm }})
+        </button>
+      </div>
+      <p v-else-if="!presetsLoading" class="text-xs text-text-muted">No saved presets</p>
     </div>
   </div>
 </template>
+
+<style scoped>
+.beat-ripple {
+  animation: beat-ripple 300ms ease-out;
+}
+
+@keyframes beat-ripple {
+  from { box-shadow: 0 0 0 0 rgba(136, 192, 208, 0.5); }
+  to   { box-shadow: 0 0 0 10px rgba(136, 192, 208, 0); }
+}
+</style>

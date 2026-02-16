@@ -16,10 +16,10 @@ const filteredSongs = computed(() => {
 })
 
 const difficultyColors: Record<string, string> = {
-  beginner: 'bg-green-900/30 text-green-400',
-  intermediate: 'bg-yellow-900/30 text-yellow-400',
-  advanced: 'bg-orange-900/30 text-orange-400',
-  expert: 'bg-red-900/30 text-red-400',
+  beginner: 'bg-nord14/20 text-nord14',
+  intermediate: 'bg-nord13/20 text-nord13',
+  advanced: 'bg-nord12/20 text-nord12',
+  expert: 'bg-nord11/20 text-nord11',
 }
 
 // Add song form
@@ -61,7 +61,7 @@ async function submitSong() {
     </div>
 
     <!-- Song List -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <StaggeredList class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       <NuxtLink
         v-for="song in filteredSongs"
         :key="song.id"
@@ -85,7 +85,7 @@ async function submitSong() {
           </div>
         </NordCard>
       </NuxtLink>
-    </div>
+    </StaggeredList>
 
     <div v-if="filteredSongs.length === 0" class="text-center py-12 text-text-muted">
       No songs found. Add your first song to get started.

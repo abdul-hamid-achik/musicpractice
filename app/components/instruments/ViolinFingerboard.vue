@@ -108,7 +108,7 @@ function handleClick(string: number, finger: number, note: string) {
       text-anchor="middle"
       font-size="14"
       font-weight="bold"
-      fill="#ECEFF4"
+      style="fill: var(--color-nord6)"
     >
       Position {{ position }}
     </text>
@@ -121,7 +121,7 @@ function handleClick(string: number, finger: number, note: string) {
       :y1="topPadding - 15"
       :x2="leftPadding + (s - 1) * stringSpacing"
       :y2="topPadding + 4.5 * fingerSpacing"
-      stroke="#D8DEE9"
+      style="stroke: var(--color-nord4)"
       :stroke-width="2.4 - (s - 1) * 0.4"
     />
 
@@ -133,7 +133,7 @@ function handleClick(string: number, finger: number, note: string) {
       :y="topPadding + 5 * fingerSpacing"
       text-anchor="middle"
       font-size="12"
-      fill="#D8DEE9"
+      style="fill: var(--color-nord4)"
     >
       {{ label }}
     </text>
@@ -146,7 +146,7 @@ function handleClick(string: number, finger: number, note: string) {
       :y1="topPadding + f * fingerSpacing"
       :x2="leftPadding + 3 * stringSpacing + 15"
       :y2="topPadding + f * fingerSpacing"
-      stroke="#4C566A"
+      style="stroke: var(--color-nord3)"
       stroke-width="1"
       stroke-dasharray="4,3"
     />
@@ -159,7 +159,7 @@ function handleClick(string: number, finger: number, note: string) {
       :y="topPadding + f * fingerSpacing + 4"
       text-anchor="middle"
       font-size="11"
-      fill="#4C566A"
+      style="fill: var(--color-nord3)"
     >
       {{ f }}
     </text>
@@ -210,7 +210,7 @@ function handleClick(string: number, finger: number, note: string) {
   transition: fill 0.15s;
 }
 g:hover .hover-circle {
-  fill: #4c566a;
+  fill: var(--color-nord3);
 }
 .hover-text {
   opacity: 0.5;

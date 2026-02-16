@@ -59,6 +59,15 @@ export const useSettingsStore = defineStore('settings', () => {
     }
   }
 
+  // Apply theme class to <html>
+  function applyTheme() {
+    if (!import.meta.client) return
+    document.documentElement.classList.toggle('light', theme.value === 'light')
+  }
+
+  applyTheme()
+  watch(theme, applyTheme)
+
   // Auto-persist on any change
   watch([theme, defaultInstrument, defaultTempo, showNotation, showTablature, volume], persist)
 

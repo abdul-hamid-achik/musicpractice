@@ -118,7 +118,24 @@ function getTextFill(note: string, isBlack: boolean): string {
   return isBlack ? '#D8DEE9' : '#4C566A'
 }
 
+const pressedKey = ref<string | null>(null)
+const tappedKey = ref<string | null>(null)
+
+function keyId(key: KeyData): string {
+  return `${key.note}-${key.octave}`
+}
+
+function handleMouseDown(key: KeyData) {
+  pressedKey.value = keyId(key)
+}
+
+function handleMouseUp() {
+  pressedKey.value = null
+}
+
 function handleClick(key: KeyData) {
+  tappedKey.value = keyId(key)
+  setTimeout(() => { tappedKey.value = null }, 250)
   emit('noteClick', { note: key.note, octave: key.octave, midi: key.midi })
 }
 </script>
@@ -136,15 +153,19 @@ function handleClick(key: KeyData) {
       v-for="key in whiteKeys"
       :key="`white-${key.note}-${key.octave}`"
       class="cursor-pointer"
+      :class="{ 'note-tapped': tappedKey === keyId(key) }"
       @click="handleClick(key)"
+      @mousedown="handleMouseDown(key)"
+      @mouseup="handleMouseUp"
+      @mouseleave="handleMouseUp"
     >
       <rect
         :x="key.x"
-        :y="key.y"
+        :y="pressedKey === keyId(key) ? key.y + 2 : key.y"
         :width="key.w"
         :height="key.h"
         :fill="getWhiteKeyFill(key.note)"
-        stroke="#4C566A"
+        style="stroke: var(--color-nord3)"
         stroke-width="1"
         rx="0"
         ry="0"
@@ -166,15 +187,19 @@ function handleClick(key: KeyData) {
       v-for="key in blackKeys"
       :key="`black-${key.note}-${key.octave}`"
       class="cursor-pointer"
+      :class="{ 'note-tapped': tappedKey === keyId(key) }"
       @click="handleClick(key)"
+      @mousedown="handleMouseDown(key)"
+      @mouseup="handleMouseUp"
+      @mouseleave="handleMouseUp"
     >
       <rect
         :x="key.x"
-        :y="key.y"
+        :y="pressedKey === keyId(key) ? key.y + 2 : key.y"
         :width="key.w"
         :height="key.h"
         :fill="getBlackKeyFill(key.note)"
-        stroke="#3B4252"
+        style="stroke: var(--color-nord1)"
         stroke-width="1"
         rx="0"
         ry="0"
@@ -186,15 +211,26 @@ function handleClick(key: KeyData) {
 
 <style scoped>
 .white-key {
-  transition: fill 0.1s;
+  transition: fill 0.1s, y 0.05s ease;
 }
 .white-key:hover {
   filter: brightness(0.92);
 }
 .black-key {
-  transition: fill 0.1s;
+  transition: fill 0.1s, y 0.05s ease;
 }
 .black-key:hover {
   filter: brightness(1.3);
+}
+
+@keyframes note-glow {
+  0%   { transform: scale(1); filter: none; }
+  50%  { transform: scale(1.08); filter: drop-shadow(0 0 4px rgba(136, 192, 208, 0.6)); }
+  100% { transform: scale(1); filter: none; }
+}
+
+.note-tapped {
+  animation: note-glow 250ms ease-out;
+  transform-origin: center;
 }
 </style>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 defineProps<{
-  variant?: 'primary' | 'secondary' | 'danger' | 'ghost'
+  variant?: 'primary' | 'secondary' | 'danger' | 'success' | 'ghost'
   size?: 'sm' | 'md' | 'lg'
   disabled?: boolean
   loading?: boolean
@@ -14,6 +14,7 @@ const variantClasses: Record<string, string> = {
   primary: 'bg-primary text-nord0 hover:brightness-110',
   secondary: 'bg-secondary text-nord0 hover:brightness-110',
   danger: 'bg-error text-white hover:brightness-110',
+  success: 'bg-success text-nord0 hover:brightness-110',
   ghost: 'bg-transparent text-text-muted hover:bg-surface-alt',
 }
 

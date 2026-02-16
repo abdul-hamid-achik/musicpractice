@@ -59,8 +59,8 @@
 /* ── Base layer for dark-first design ── */
 @layer base {
   html {
-    background-color: var(--color-nord0);
-    color: var(--color-nord6);
+    background-color: var(--color-surface);
+    color: var(--color-text);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -79,4 +79,46 @@
     outline: 2px solid var(--color-nord8);
     outline-offset: 2px;
   }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Light Mode — Snow Storm backgrounds, Polar Night text
+   ═══════════════════════════════════════════════════════════════ */
+html.light {
+  --color-surface:     #ECEFF4;  /* nord6 */
+  --color-surface-alt: #E5E9F0;  /* nord5 */
+  --color-card:        #FFFFFF;
+  --color-border:      #D8DEE9;  /* nord4 */
+  --color-text:        #2E3440;  /* nord0 */
+  --color-text-muted:  #4C566A;  /* nord3 */
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Page Transitions
+   ═══════════════════════════════════════════════════════════════ */
+.page-enter-active,
+.page-leave-active {
+  transition: opacity 150ms ease;
+}
+.page-enter-from,
+.page-leave-to {
+  opacity: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Animations
+   ═══════════════════════════════════════════════════════════════ */
+@keyframes beat-ripple {
+  from { box-shadow: 0 0 0 0 rgba(136, 192, 208, 0.5); }
+  to   { box-shadow: 0 0 0 10px rgba(136, 192, 208, 0); }
+}
+
+@keyframes note-tap {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.note-tapped {
+  animation: note-tap 250ms ease-out;
 }

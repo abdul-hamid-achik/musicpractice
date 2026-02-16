@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
+const auth = useAuth()
 const mobileOpen = ref(false)
 
 const sections = [
@@ -53,11 +54,11 @@ const standaloneLinks = [
   <!-- Sidebar -->
   <aside
     :class="[
-      'fixed left-0 top-16 w-64 h-[calc(100vh-4rem)] bg-surface-alt border-r border-border overflow-y-auto transition-transform duration-200 z-30',
+      'fixed left-0 top-16 w-64 h-[calc(100vh-4rem)] bg-surface-alt border-r border-border overflow-y-auto transition-transform duration-200 z-30 flex flex-col',
       mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
     ]"
   >
-    <nav aria-label="Main navigation" class="p-4 space-y-6">
+    <nav aria-label="Main navigation" class="p-4 space-y-6 flex-1">
       <div v-for="section in sections" :key="section.label">
         <h4 class="uppercase text-xs text-text-muted tracking-wider mb-2 px-4">
           {{ section.label }}
@@ -87,6 +88,24 @@ const standaloneLinks = [
         </NuxtLink>
       </div>
     </nav>
+
+    <!-- User section at bottom -->
+    <div v-if="auth.isAuthenticated.value" class="p-4 border-t border-border">
+      <div class="flex items-center gap-3 px-2">
+        <div class="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center text-sm font-bold shrink-0">
+          {{ auth.userName.value?.charAt(0)?.toUpperCase() }}
+        </div>
+        <div class="min-w-0 flex-1">
+          <p class="text-sm font-medium text-text truncate">{{ auth.userName.value }}</p>
+          <button
+            class="text-xs text-text-muted hover:text-text transition-colors"
+            @click="auth.logout"
+          >
+            Sign out
+          </button>
+        </div>
+      </div>
+    </div>
   </aside>
 
   <!-- Mobile backdrop -->

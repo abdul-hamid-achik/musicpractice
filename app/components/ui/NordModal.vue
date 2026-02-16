@@ -57,7 +57,7 @@ watch(() => props.open, (isOpen) => {
     >
       <div
         v-if="open"
-        class="fixed inset-0 bg-black/50 z-50"
+        class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
         @click.self="emit('close')"
         @keydown="handleKeydown"
       >
@@ -66,7 +66,7 @@ watch(() => props.open, (isOpen) => {
           role="dialog"
           aria-modal="true"
           :aria-label="title"
-          class="bg-card border border-border rounded-xl max-w-lg mx-auto mt-20 p-6"
+          class="bg-card border border-border rounded-xl max-w-lg mx-auto mt-20 p-6 animate-modal-in"
         >
           <div class="flex items-center justify-between mb-4">
             <h2 v-if="title" class="text-lg font-semibold text-text">{{ title }}</h2>
@@ -86,3 +86,20 @@ watch(() => props.open, (isOpen) => {
     </Transition>
   </Teleport>
 </template>
+
+<style scoped>
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-modal-in {
+  animation: modal-in 200ms ease-out;
+}
+</style>

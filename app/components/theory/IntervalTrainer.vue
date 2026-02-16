@@ -148,12 +148,9 @@ function buttonClass(interval: Interval): string {
   <div class="bg-card border border-border rounded-lg p-6 space-y-6">
     <div class="flex items-center justify-between">
       <h2 class="text-xl font-semibold text-text">Interval Trainer</h2>
-      <button
-        class="px-3 py-1.5 rounded-md text-sm font-medium bg-surface-alt text-text-muted hover:bg-border transition-all"
-        @click="reset"
-      >
+      <NordButton variant="ghost" size="sm" @click="reset">
         Reset
-      </button>
+      </NordButton>
     </div>
 
     <!-- Score Display -->
@@ -165,58 +162,47 @@ function buttonClass(interval: Interval): string {
           <span v-if="total > 0" class="text-text-muted">({{ scorePercent }}%)</span>
         </span>
       </div>
-      <div class="w-full bg-surface-alt rounded-full h-2">
-        <div
-          class="bg-primary rounded-full h-2 transition-all duration-300"
-          :style="{ width: `${scorePercent}%` }"
-        />
-      </div>
+      <NordProgressBar :value="scorePercent" color="primary" size="sm" />
     </div>
 
     <!-- Mode Toggle -->
     <div>
       <label class="block text-sm font-medium text-text-muted mb-2">Direction</label>
       <div class="flex gap-2">
-        <button
+        <NordButton
           v-for="m in (['ascending', 'descending', 'both'] as const)"
           :key="m"
-          class="px-3 py-1.5 rounded-md text-sm font-medium transition-all capitalize"
-          :class="mode === m ? 'bg-primary text-nord0' : 'bg-surface-alt text-text-muted hover:bg-border'"
+          :variant="mode === m ? 'primary' : 'ghost'"
+          size="sm"
+          class="capitalize"
           @click="mode = m"
         >
           {{ m }}
-        </button>
+        </NordButton>
       </div>
     </div>
 
     <!-- Play Button -->
     <div class="flex gap-3">
-      <button
-        class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-md font-medium transition-all duration-200"
-        :class="isPlaying
-          ? 'bg-surface-alt text-text-muted cursor-not-allowed'
-          : currentInterval
-            ? 'bg-secondary text-nord0 hover:brightness-110'
-            : 'bg-primary text-nord0 hover:brightness-110'"
+      <NordButton
+        class="flex-1"
+        :variant="currentInterval ? 'secondary' : 'primary'"
         :disabled="isPlaying"
+        :loading="isPlaying"
         @click="currentInterval ? playInterval() : newQuestion()"
       >
-        <svg v-if="isPlaying" class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-        </svg>
-        <svg v-else class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+        <svg v-if="!isPlaying" class="h-5 w-5 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
           <path d="M8 5v14l11-7z" />
         </svg>
         {{ !currentInterval ? 'Start' : isPlaying ? 'Playing...' : 'Replay' }}
-      </button>
-      <button
+      </NordButton>
+      <NordButton
         v-if="answered && !lastGuessCorrect"
-        class="px-4 py-3 rounded-md font-medium bg-primary text-nord0 hover:brightness-110 transition-all"
+        variant="primary"
         @click="newQuestion()"
       >
         Next
-      </button>
+      </NordButton>
     </div>
 
     <!-- Answer Buttons -->

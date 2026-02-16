@@ -7,6 +7,26 @@ const settingsStore = useSettingsStore()
     <h1 class="text-3xl font-bold text-text mb-8">Settings</h1>
 
     <div class="max-w-2xl space-y-6">
+      <!-- Theme -->
+      <NordCard title="Theme">
+        <label class="flex items-center justify-between cursor-pointer">
+          <div>
+            <span class="text-text">Dark Mode</span>
+            <p class="text-xs text-text-muted mt-0.5">Toggle between dark and light appearance</p>
+          </div>
+          <div class="relative">
+            <input
+              type="checkbox"
+              :checked="settingsStore.theme === 'dark'"
+              class="sr-only peer"
+              @change="settingsStore.updateSetting('theme', settingsStore.theme === 'dark' ? 'light' : 'dark')"
+            />
+            <div class="w-11 h-6 bg-surface-alt rounded-full peer peer-checked:bg-primary transition-colors" />
+            <div class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full transition-transform peer-checked:translate-x-5" />
+          </div>
+        </label>
+      </NordCard>
+
       <!-- Instrument -->
       <NordCard title="Instrument">
         <div>

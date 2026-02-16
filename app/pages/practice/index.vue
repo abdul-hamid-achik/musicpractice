@@ -5,7 +5,7 @@
   <div>
     <h1 class="text-3xl font-bold text-text mb-8">Practice Hub</h1>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <StaggeredList tag="div" class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <!-- Start Session -->
       <NordCard title="Start Session">
         <p class="text-text-muted mb-4">
@@ -39,6 +39,6 @@
       <NordCard title="Practice Goals">
         <PracticeGoals />
       </NordCard>
-    </div>
+    </StaggeredList>
   </div>
 </template>

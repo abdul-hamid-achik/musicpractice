@@ -2,10 +2,8 @@ import { eq, and, count } from 'drizzle-orm'
 import { practiceGoals, instruments } from '../../db/schema'
 import { requireAuth } from '../../utils/auth'
 
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-
 export default defineEventHandler(async (event) => {
-  await requireAuth(event)
+  const user = await requireAuth(event)
   const db = useDb()
   const query = getQuery(event)
 
@@ -14,21 +12,14 @@ export default defineEventHandler(async (event) => {
   const offset = (page - 1) * limit
 
   try {
-    const conditions = []
-
-    if (query.userId) {
-      if (!UUID_RE.test(query.userId as string)) {
-        throw createError({ statusCode: 400, message: 'Invalid userId format' })
-      }
-      conditions.push(eq(practiceGoals.userId, query.userId as string))
-    }
+    const conditions = [eq(practiceGoals.userId, user.id)]
 
     if (query.isActive !== undefined) {
       const isActive = query.isActive === 'true'
       conditions.push(eq(practiceGoals.isActive, isActive))
     }
 
-    const where = conditions.length > 0 ? and(...conditions) : undefined
+    const where = and(...conditions)
 
     const [countRow] = await db.select({ count: count() }).from(practiceGoals).where(where)
     const total = countRow!.count
