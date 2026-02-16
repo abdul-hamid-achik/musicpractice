@@ -18,14 +18,19 @@ export function useAlphaTab(containerRef: Ref<HTMLElement | null>) {
     settings.core.engine = 'html5'
     settings.core.logLevel = alphaTab.LogLevel.None
     settings.core.fontDirectory = '/font/'
+    settings.core.scriptFile = '/alphatab/alphaTab.worker.mjs'
     settings.player.enablePlayer = true
     settings.player.enableCursor = true
     settings.player.enableUserInteraction = true
     settings.player.soundFont = '/soundfonts/sonivox.sf2'
-    settings.display.resources.staffLineColor = '#4C566A' as any
-    settings.display.resources.barSeparatorColor = '#4C566A' as any
-    settings.display.resources.mainGlyphColor = '#ECEFF4' as any
-    settings.display.resources.secondaryGlyphColor = '#D8DEE9' as any
+
+    // Nord theme colors
+    const Color = (alphaTab as any).model.Color
+    settings.display.resources.staffLineColor = new Color(76, 86, 106) // #4C566A
+    settings.display.resources.barSeparatorColor = new Color(76, 86, 106) // #4C566A
+    settings.display.resources.mainGlyphColor = new Color(236, 239, 244) // #ECEFF4
+    settings.display.resources.secondaryGlyphColor = new Color(216, 222, 233) // #D8DEE9
+    settings.display.resources.scoreInfoColor = new Color(216, 222, 233) // #D8DEE9
 
     api.value = new alphaTab.AlphaTabApi(containerRef.value, settings)
 
