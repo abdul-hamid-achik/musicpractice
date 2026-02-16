@@ -2,7 +2,10 @@
 const search = ref('')
 const showAddModal = ref(false)
 
-const { data: songs, refresh } = await useAsyncData('songs', () => $fetch<any[]>('/api/songs'))
+const { data: songs, refresh } = await useAsyncData('songs', async () => {
+  const res = await $fetch<{ data: any[] }>('/api/songs')
+  return res.data
+})
 
 const filteredSongs = computed(() => {
   if (!songs.value) return []

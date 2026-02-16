@@ -23,11 +23,13 @@ export const useTheoryStore = defineStore('theory', () => {
   })
 
   const fetchScales = async () => {
-    scales.value = await $fetch<Scale[]>('/api/scales')
+    const res = await $fetch<{ data: Scale[] }>('/api/scales')
+    scales.value = res.data
   }
 
   const fetchChords = async () => {
-    chords.value = await $fetch<Chord[]>('/api/chords')
+    const res = await $fetch<{ data: Chord[] }>('/api/chords')
+    chords.value = res.data
   }
 
   const setRoot = (note: string) => {

@@ -22,7 +22,8 @@ export const useInstrumentStore = defineStore('instrument', () => {
   })
 
   const fetchInstruments = async () => {
-    instruments.value = await $fetch<Instrument[]>('/api/instruments')
+    const res = await $fetch<{ data: Instrument[] }>('/api/instruments')
+    instruments.value = res.data
   }
 
   const setActiveInstrument = (id: string) => {
