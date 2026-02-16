@@ -1,0 +1,125 @@
+<script setup lang="ts">
+const practiceStore = usePracticeStore()
+const { formatTime } = usePracticeSession()
+
+const filterInstrument = ref('all')
+const filterRange = ref<'week' | 'month' | 'all'>('all')
+
+const totalSessions = computed(() => practiceStore.sessions.length)
+
+const totalTimeFormatted = computed(() => {
+  const secs = practiceStore.totalPracticeTime
+  const h = Math.floor(secs / 3600)
+  const m = Math.floor((secs % 3600) / 60)
+  return `${h}h ${m}m`
+})
+
+const averageDuration = computed(() => {
+  if (!practiceStore.sessions.length) return '0:00'
+  const avg = Math.floor(practiceStore.totalPracticeTime / practiceStore.sessions.length)
+  const m = Math.floor(avg / 60)
+  const s = avg % 60
+  return `${m}:${s.toString().padStart(2, '0')}`
+})
+
+const mostPracticedInstrument = computed(() => {
+  const counts: Record<string, number> = {}
+  for (const s of practiceStore.sessions) {
+    const inst = s.instrumentId || 'unknown'
+    counts[inst] = (counts[inst] || 0) + 1
+  }
+  let max = ''
+  let maxCount = 0
+  for (const [k, v] of Object.entries(counts)) {
+    if (v > maxCount) {
+      max = k
+      maxCount = v
+    }
+  }
+  return max || '-'
+})
+
+const filteredSessions = computed(() => {
+  let sessions = [...practiceStore.sessions]
+
+  if (filterInstrument.value !== 'all') {
+    sessions = sessions.filter((s: any) => s.instrumentId === filterInstrument.value)
+  }
+
+  if (filterRange.value === 'week') {
+    const weekAgo = new Date()
+    weekAgo.setDate(weekAgo.getDate() - 7)
+    sessions = sessions.filter((s: any) => new Date(s.startedAt) >= weekAgo)
+  } else if (filterRange.value === 'month') {
+    const monthAgo = new Date()
+    monthAgo.setMonth(monthAgo.getMonth() - 1)
+    sessions = sessions.filter((s: any) => new Date(s.startedAt) >= monthAgo)
+  }
+
+  return sessions.sort(
+    (a: any, b: any) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime(),
+  )
+})
+
+const instrumentOptions = computed(() => {
+  const ids = new Set(practiceStore.sessions.map((s: any) => s.instrumentId).filter(Boolean))
+  return Array.from(ids)
+})
+
+onMounted(() => {
+  practiceStore.fetchSessions()
+})
+</script>
+
+<template>
+  <div>
+    <h1 class="text-3xl font-bold text-text mb-8">Practice History</h1>
+
+    <!-- Summary Stats -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <NordCard title="Total Sessions">
+        <div class="text-2xl font-bold text-primary">{{ totalSessions }}</div>
+      </NordCard>
+      <NordCard title="Total Time">
+        <div class="text-2xl font-bold text-primary">{{ totalTimeFormatted }}</div>
+      </NordCard>
+      <NordCard title="Average Duration">
+        <div class="text-2xl font-bold text-primary">{{ averageDuration }}</div>
+      </NordCard>
+      <NordCard title="Most Practiced">
+        <div class="text-2xl font-bold text-primary capitalize">{{ mostPracticedInstrument }}</div>
+      </NordCard>
+    </div>
+
+    <!-- Filters -->
+    <div class="flex flex-wrap gap-4 mb-6">
+      <div>
+        <label class="block text-sm text-text-muted mb-1">Instrument</label>
+        <select
+          v-model="filterInstrument"
+          class="bg-surface-alt text-text border border-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+        >
+          <option value="all">All Instruments</option>
+          <option v-for="inst in instrumentOptions" :key="inst" :value="inst" class="capitalize">
+            {{ inst }}
+          </option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-sm text-text-muted mb-1">Time Range</label>
+        <select
+          v-model="filterRange"
+          class="bg-surface-alt text-text border border-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+        >
+          <option value="all">All Time</option>
+          <option value="month">This Month</option>
+          <option value="week">This Week</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Session List -->
+    <SessionLog :sessions="filteredSessions" />
+  </div>
+</template>

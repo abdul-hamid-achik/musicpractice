@@ -1,0 +1,43 @@
+{
+  "name": "music-practice",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "nuxt dev",
+    "build": "nuxt build",
+    "preview": "nuxt preview",
+    "test": "vitest",
+    "test:unit": "vitest run",
+    "test:watch": "vitest watch",
+    "lint": "eslint .",
+    "typecheck": "nuxt typecheck",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio",
+    "db:seed": "bun run server/db/seed.ts"
+  },
+  "dependencies": {
+    "@coderline/alphatab": "^1.7.1",
+    "@pinia/nuxt": "^0.9.0",
+    "drizzle-orm": "^0.45.0",
+    "nuxt": "^4.3.0",
+    "pinia": "^3.0.0",
+    "postgres": "^3.4.0",
+    "tone": "^15.1.0",
+    "vexflow": "^5.0.0",
+    "vue": "^3.5.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.0.0",
+    "@vitejs/plugin-vue": "^5.2.0",
+    "@vue/test-utils": "^2.4.6",
+    "drizzle-kit": "^0.30.0",
+    "happy-dom": "^16.0.0",
+    "tailwindcss": "^4.0.0",
+    "turbo": "^2.4.0",
+    "typescript": "^5.7.0",
+    "unplugin-auto-import": "^21.0.0",
+    "vitest": "^3.0.0"
+  }
+}

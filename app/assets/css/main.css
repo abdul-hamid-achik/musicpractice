@@ -1,0 +1,82 @@
+@import "tailwindcss";
+
+/* ═══════════════════════════════════════════════════════════════
+   Nord Theme — Tailwind CSS 4
+   https://www.nordtheme.com/docs/colors-and-palettes
+   ═══════════════════════════════════════════════════════════════ */
+
+@theme {
+  /* ── Polar Night (dark backgrounds) ── */
+  --color-nord0:  #2E3440;
+  --color-nord1:  #3B4252;
+  --color-nord2:  #434C5E;
+  --color-nord3:  #4C566A;
+
+  /* ── Snow Storm (light foregrounds) ── */
+  --color-nord4:  #D8DEE9;
+  --color-nord5:  #E5E9F0;
+  --color-nord6:  #ECEFF4;
+
+  /* ── Frost (accent blues/teals) ── */
+  --color-nord7:  #8FBCBB;
+  --color-nord8:  #88C0D0;
+  --color-nord9:  #81A1C1;
+  --color-nord10: #5E81AC;
+
+  /* ── Aurora (status colors) ── */
+  --color-nord11: #BF616A; /* Red    — error / danger   */
+  --color-nord12: #D08770; /* Orange — warning          */
+  --color-nord13: #EBCB8B; /* Yellow — caution / accent */
+  --color-nord14: #A3BE8C; /* Green  — success          */
+  --color-nord15: #B48EAD; /* Purple — info / creative  */
+
+  /* ── Semantic Aliases ── */
+  --color-surface:     var(--color-nord0);
+  --color-surface-alt: var(--color-nord1);
+  --color-card:        var(--color-nord2);
+  --color-border:      var(--color-nord3);
+  --color-text:        var(--color-nord6);
+  --color-text-muted:  var(--color-nord4);
+  --color-primary:     var(--color-nord8);
+  --color-secondary:   var(--color-nord9);
+  --color-accent:      var(--color-nord7);
+  --color-error:       var(--color-nord11);
+  --color-warning:     var(--color-nord12);
+  --color-success:     var(--color-nord14);
+  --color-info:        var(--color-nord15);
+
+  /* ── Typography ── */
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* ── Border Radius ── */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+}
+
+/* ── Base layer for dark-first design ── */
+@layer base {
+  html {
+    background-color: var(--color-nord0);
+    color: var(--color-nord6);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    min-height: 100vh;
+  }
+
+  ::selection {
+    background-color: var(--color-nord8);
+    color: var(--color-nord0);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-nord8);
+    outline-offset: 2px;
+  }
+}
