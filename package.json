@@ -32,6 +32,7 @@
     "vue": "^3.5.0"
   },
   "devDependencies": {
+    "@coderline/alphatab-vite": "^1.8.1",
     "@tailwindcss/vite": "^4.0.0",
     "@types/bcrypt": "^6.0.0",
     "@types/jsonwebtoken": "^9.0.10",

@@ -42,7 +42,6 @@ export function useAlphaTab(containerRef: Ref<HTMLElement | null>) {
     settings.core.engine = 'html5'
     settings.core.logLevel = alphaTab.LogLevel.None
     settings.core.fontDirectory = '/font/'
-    settings.core.scriptFile = '/alphatab/alphaTab.worker.mjs'
     settings.player.enablePlayer = true
     settings.player.enableCursor = true
     settings.player.enableUserInteraction = true

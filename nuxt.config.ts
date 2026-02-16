@@ -1,4 +1,5 @@
 import tailwindcss from '@tailwindcss/vite'
+import { alphaTab } from '@coderline/alphatab-vite'
 
 export default defineNuxtConfig({
   compatibilityDate: '2025-01-01',
@@ -29,6 +30,7 @@ export default defineNuxtConfig({
   vite: {
     plugins: [
       tailwindcss() as any,
+      ...alphaTab() as any,
     ],
     optimizeDeps: {
       include: ['tone'],
