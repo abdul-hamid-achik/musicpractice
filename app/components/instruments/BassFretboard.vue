@@ -63,7 +63,7 @@ const fretboardNotes = computed(() => {
     for (let f = 0; f <= props.frets; f++) {
       const note = transposeNote(open.note, f)
       const x = f === 0 ? nutX / 2 : nutX + (f - 0.5) * fretSpacing
-      const y = topPadding + s * stringSpacing
+      const y = topPadding + (activeTuning.value.length - 1 - s) * stringSpacing
       stringNotes.push({ string: s, fret: f, note, x, y })
     }
     notes.push(stringNotes)
@@ -163,9 +163,9 @@ function handleNoteClick(string: number, fret: number, note: string) {
       v-for="(_, s) in activeTuning"
       :key="`string-${s}`"
       :x1="nutX"
-      :y1="topPadding + s * stringSpacing"
+      :y1="topPadding + (activeTuning.length - 1 - s) * stringSpacing"
       :x2="fretboardWidth"
-      :y2="topPadding + s * stringSpacing"
+      :y2="topPadding + (activeTuning.length - 1 - s) * stringSpacing"
       style="stroke: var(--color-nord4)"
       :stroke-width="stringThickness[s]"
     />
