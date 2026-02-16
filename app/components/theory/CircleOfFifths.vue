@@ -112,8 +112,8 @@ function selectMinor(key: string, index: number) {
         <g v-for="seg in outerSegments" :key="'outer-' + seg.index">
           <path
             :d="seg.path"
-            :fill="seg.isSelected ? '#88C0D0' : seg.isHovered ? 'var(--color-nord3)' : 'var(--color-nord2)'"
-            style="stroke: var(--color-nord0)"
+            :fill="seg.isSelected ? '#88C0D0' : seg.isHovered ? 'var(--color-border)' : 'var(--color-card)'"
+            style="stroke: var(--color-surface)"
             stroke-width="2"
             class="cursor-pointer transition-colors duration-150"
             @click="selectMajor(seg.key, seg.index)"
@@ -138,8 +138,8 @@ function selectMinor(key: string, index: number) {
         <g v-for="seg in innerSegments" :key="'inner-' + seg.index">
           <path
             :d="seg.path"
-            :fill="seg.isSelected ? '#5E81AC' : seg.isHovered ? 'var(--color-nord1)' : 'var(--color-nord0)'"
-            style="stroke: var(--color-nord1)"
+            :fill="seg.isSelected ? '#5E81AC' : seg.isHovered ? 'var(--color-surface-alt)' : 'var(--color-surface)'"
+            style="stroke: var(--color-surface-alt)"
             stroke-width="1.5"
             class="cursor-pointer transition-colors duration-150"
             @click="selectMinor(seg.key, seg.index - 12)"
@@ -161,7 +161,7 @@ function selectMinor(key: string, index: number) {
         </g>
 
         <!-- Center circle -->
-        <circle :cx="cx" :cy="cy" r="38" style="fill: var(--color-nord0); stroke: var(--color-nord1)" stroke-width="1.5" />
+        <circle :cx="cx" :cy="cy" r="38" style="fill: var(--color-surface); stroke: var(--color-surface-alt)" stroke-width="1.5" />
         <text
           v-if="selectedKey"
           :x="cx"
@@ -181,7 +181,7 @@ function selectMinor(key: string, index: number) {
           :y="cy"
           text-anchor="middle"
           dominant-baseline="central"
-          style="fill: var(--color-nord3)"
+          style="fill: var(--color-text-muted)"
           font-size="10"
           class="select-none"
         >
