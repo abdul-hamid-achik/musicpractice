@@ -87,8 +87,15 @@ async function submitSong() {
       </NuxtLink>
     </StaggeredList>
 
-    <div v-if="filteredSongs.length === 0" class="text-center py-12 text-text-muted">
-      No songs found. Add your first song to get started.
+    <div v-if="filteredSongs.length === 0" class="text-center py-16">
+      <svg class="w-16 h-16 mx-auto text-text-muted/50 mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 18V5l12-2v13" />
+        <circle cx="6" cy="18" r="3" />
+        <circle cx="18" cy="16" r="3" />
+      </svg>
+      <p class="text-lg text-text-muted mb-2">Your song library is empty</p>
+      <p class="text-sm text-text-muted mb-6">Add your first song to start building your personal library.</p>
+      <NordButton variant="primary" @click="showAddModal = true">Add Your First Song</NordButton>
     </div>
 
     <!-- Add Song Modal -->

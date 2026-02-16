@@ -92,34 +92,50 @@ onMounted(() => {
     </div>
 
     <!-- Filters -->
-    <div class="flex flex-wrap gap-4 mb-6">
-      <div>
-        <label class="block text-sm text-text-muted mb-1">Instrument</label>
-        <select
-          v-model="filterInstrument"
-          class="bg-surface-alt text-text border border-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-        >
-          <option value="all">All Instruments</option>
-          <option v-for="inst in instrumentOptions" :key="inst" :value="inst" class="capitalize">
-            {{ inst }}
-          </option>
-        </select>
-      </div>
+    <div class="bg-surface-alt rounded-lg p-4 mb-6">
+      <div class="flex flex-wrap gap-4">
+        <div>
+          <label class="block text-sm text-text-muted mb-1">Instrument</label>
+          <select
+            v-model="filterInstrument"
+            class="bg-surface text-text border border-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+          >
+            <option value="all">All Instruments</option>
+            <option v-for="inst in instrumentOptions" :key="inst" :value="inst" class="capitalize">
+              {{ inst }}
+            </option>
+          </select>
+        </div>
 
-      <div>
-        <label class="block text-sm text-text-muted mb-1">Time Range</label>
-        <select
-          v-model="filterRange"
-          class="bg-surface-alt text-text border border-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-        >
-          <option value="all">All Time</option>
-          <option value="month">This Month</option>
-          <option value="week">This Week</option>
-        </select>
+        <div>
+          <label class="block text-sm text-text-muted mb-1">Time Range</label>
+          <select
+            v-model="filterRange"
+            class="bg-surface text-text border border-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+          >
+            <option value="all">All Time</option>
+            <option value="month">This Month</option>
+            <option value="week">This Week</option>
+          </select>
+        </div>
       </div>
     </div>
 
+    <!-- Empty state -->
+    <div v-if="filteredSessions.length === 0" class="text-center py-16">
+      <svg class="w-16 h-16 mx-auto text-text-muted/50 mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 18V5l12-2v13" />
+        <circle cx="6" cy="18" r="3" />
+        <circle cx="18" cy="16" r="3" />
+      </svg>
+      <p class="text-lg text-text-muted mb-2">No practice sessions yet</p>
+      <p class="text-sm text-text-muted mb-6">Track your progress by starting your first practice session.</p>
+      <NuxtLink to="/practice/session">
+        <NordButton variant="primary">Start Your First Session</NordButton>
+      </NuxtLink>
+    </div>
+
     <!-- Session List -->
-    <SessionLog :sessions="filteredSessions" />
+    <SessionLog v-else :sessions="filteredSessions" />
   </div>
 </template>

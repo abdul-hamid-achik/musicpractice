@@ -1,5 +1,6 @@
 <script setup lang="ts">
 const { noteToMidi } = useMusicTheory()
+const { playNote } = useInstrumentSound()
 
 const props = withDefaults(
   defineProps<{
@@ -136,6 +137,7 @@ function handleMouseUp() {
 function handleClick(key: KeyData) {
   tappedKey.value = keyId(key)
   setTimeout(() => { tappedKey.value = null }, 250)
+  playNote(key.note, key.octave, 'piano')
   emit('noteClick', { note: key.note, octave: key.octave, midi: key.midi })
 }
 </script>

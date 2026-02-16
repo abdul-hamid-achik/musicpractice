@@ -8,6 +8,7 @@ const stringCount = ref<4 | 5 | 6>(4)
 const mode = ref<'scale' | 'chord'>('scale')
 const selectedScaleId = ref('')
 const selectedChordId = ref('')
+const lastClickedNote = ref('')
 
 const highlightedNotes = computed(() => {
   if (mode.value === 'scale' && selectedScaleId.value) {
@@ -20,6 +21,10 @@ const highlightedNotes = computed(() => {
   }
   return []
 })
+
+function handleNoteClick(payload: { string: number; fret: number; note: string; octave: number }) {
+  lastClickedNote.value = `${payload.note}${payload.octave}`
+}
 
 function clearSelection() {
   selectedScaleId.value = ''
@@ -35,12 +40,20 @@ onMounted(async () => {
 
 <template>
   <div>
-    <div class="flex items-center justify-between mb-6">
+    <!-- Breadcrumb -->
+    <nav class="flex items-center gap-1.5 text-sm text-text-muted mb-4">
+      <NuxtLink to="/instruments" class="hover:text-primary transition-colors">Instruments</NuxtLink>
+      <span>/</span>
+      <span class="text-text">Bass</span>
+    </nav>
+
+    <div class="flex items-center justify-between mb-2">
       <h1 class="text-3xl font-bold text-text">Bass</h1>
       <NuxtLink to="/practice/session?instrument=bass">
         <NordButton variant="primary" size="sm">Practice Bass</NordButton>
       </NuxtLink>
     </div>
+    <p class="text-text-muted mb-6">4, 5, or 6-string bass fretboard — explore scales and chord tones across tunings.</p>
 
     <!-- Controls -->
     <NordCard class="mb-6">
@@ -134,7 +147,15 @@ onMounted(async () => {
         :strings="stringCount"
         :highlighted-notes="highlightedNotes"
         :root-note="selectedRoot"
+        @note-click="handleNoteClick"
       />
+    </NordCard>
+
+    <!-- Note Display -->
+    <NordCard v-if="lastClickedNote" title="Last Played" class="mt-6">
+      <div class="text-center">
+        <span class="text-2xl font-bold text-primary">{{ lastClickedNote }}</span>
+      </div>
     </NordCard>
   </div>
 </template>

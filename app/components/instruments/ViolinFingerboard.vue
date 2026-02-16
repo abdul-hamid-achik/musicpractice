@@ -1,5 +1,6 @@
 <script setup lang="ts">
-const { transposeNote } = useMusicTheory()
+const { transposeNote, noteToMidi, midiToNote } = useMusicTheory()
+const { playNote } = useInstrumentSound()
 
 const props = withDefaults(
   defineProps<{
@@ -15,7 +16,7 @@ const props = withDefaults(
 )
 
 const emit = defineEmits<{
-  noteClick: [payload: { note: string; string: number; finger: number }]
+  noteClick: [payload: { note: string; string: number; finger: number; octave: number }]
 }>()
 
 const openStrings = ['G3', 'D4', 'A4', 'E5']
@@ -88,8 +89,17 @@ function isRoot(note: string): boolean {
   return props.rootNote === note
 }
 
+function getActualOctave(stringIndex: number, finger: number): number {
+  const open = parseNote(openStrings[stringIndex]!)
+  const openMidi = noteToMidi(open.note, open.octave)
+  const semitones = finger === 0 ? 0 : (props.position - 1) * 2 + finger
+  return midiToNote(openMidi + semitones).octave
+}
+
 function handleClick(string: number, finger: number, note: string) {
-  emit('noteClick', { note, string, finger })
+  const octave = getActualOctave(string, finger)
+  playNote(note, octave, 'violin')
+  emit('noteClick', { note, string, finger, octave })
 }
 </script>
 

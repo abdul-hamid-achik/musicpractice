@@ -36,12 +36,20 @@ onMounted(async () => {
 
 <template>
   <div>
-    <div class="flex items-center justify-between mb-6">
+    <!-- Breadcrumb -->
+    <nav class="flex items-center gap-1.5 text-sm text-text-muted mb-4">
+      <NuxtLink to="/instruments" class="hover:text-primary transition-colors">Instruments</NuxtLink>
+      <span>/</span>
+      <span class="text-text">Piano</span>
+    </nav>
+
+    <div class="flex items-center justify-between mb-2">
       <h1 class="text-3xl font-bold text-text">Piano</h1>
       <NuxtLink to="/practice/session?instrument=piano">
         <NordButton variant="primary" size="sm">Practice Piano</NordButton>
       </NuxtLink>
     </div>
+    <p class="text-text-muted mb-6">Interactive keyboard — play notes, visualize scales and chords across octaves.</p>
 
     <!-- Controls -->
     <NordCard class="mb-6">

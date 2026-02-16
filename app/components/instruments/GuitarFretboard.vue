@@ -1,5 +1,6 @@
 <script setup lang="ts">
-const { transposeNote } = useMusicTheory()
+const { transposeNote, noteToMidi, midiToNote } = useMusicTheory()
+const { playNote } = useInstrumentSound()
 
 const props = withDefaults(
   defineProps<{
@@ -7,17 +8,19 @@ const props = withDefaults(
     frets?: number
     highlightedNotes?: string[]
     rootNote?: string
+    instrument?: 'guitar' | 'bass'
   }>(),
   {
     tuning: () => ['E2', 'A2', 'D3', 'G3', 'B3', 'E4'],
     frets: 24,
     highlightedNotes: () => [],
     rootNote: '',
+    instrument: 'guitar',
   },
 )
 
 const emit = defineEmits<{
-  noteClick: [payload: { string: number; fret: number; note: string }]
+  noteClick: [payload: { string: number; fret: number; note: string; octave: number }]
 }>()
 
 const fretMarkers = [3, 5, 7, 9, 12, 15, 17, 19, 21, 24]
@@ -71,8 +74,17 @@ function markerY(marker: number): number {
   return topPadding + totalStringHeight / 2
 }
 
+function getActualOctave(stringIndex: number, fret: number): number {
+  const open = parseNote(props.tuning[stringIndex]!)
+  const openMidi = noteToMidi(open.note, open.octave)
+  const frettedMidi = openMidi + fret
+  return midiToNote(frettedMidi).octave
+}
+
 function handleNoteClick(string: number, fret: number, note: string) {
-  emit('noteClick', { string, fret, note })
+  const octave = getActualOctave(string, fret)
+  playNote(note, octave, props.instrument)
+  emit('noteClick', { string, fret, note, octave })
 }
 </script>
 

@@ -20,9 +20,10 @@ const cards = [
 
 <template>
   <div>
-    <h1 class="text-3xl font-bold text-text mb-8">Music Theory</h1>
+    <h1 class="text-3xl font-bold text-text mb-2">Music Theory</h1>
+    <p class="text-text-muted mb-8">Build your understanding of scales, chords, intervals, and harmonic relationships.</p>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
       <NordCard v-for="card in cards" :key="card.title" :title="card.title">
         <p class="text-text-muted text-sm mb-4">{{ card.description }}</p>
         <template #footer>
@@ -31,11 +32,11 @@ const cards = [
           </NuxtLink>
         </template>
       </NordCard>
-
-      <!-- Circle of Fifths inline -->
-      <NordCard title="Circle of Fifths">
-        <CircleOfFifths />
-      </NordCard>
     </div>
+
+    <!-- Circle of Fifths full-width -->
+    <NordCard title="Circle of Fifths">
+      <CircleOfFifths />
+    </NordCard>
   </div>
 </template>

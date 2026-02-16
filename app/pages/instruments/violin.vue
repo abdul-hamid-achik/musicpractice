@@ -6,6 +6,7 @@ const noteNames = getNoteNames()
 const selectedRoot = ref('C')
 const position = ref(1)
 const selectedScaleId = ref('')
+const lastClickedNote = ref('')
 
 const highlightedNotes = computed(() => {
   if (selectedScaleId.value) {
@@ -15,6 +16,10 @@ const highlightedNotes = computed(() => {
   return []
 })
 
+function handleNoteClick(payload: { note: string; string: number; finger: number; octave: number }) {
+  lastClickedNote.value = `${payload.note}${payload.octave}`
+}
+
 onMounted(async () => {
   if (!theoryStore.scales.length) await theoryStore.fetchScales()
   if (theoryStore.scales.length) selectedScaleId.value = theoryStore.scales[0]!.id
@@ -23,12 +28,20 @@ onMounted(async () => {
 
 <template>
   <div>
-    <div class="flex items-center justify-between mb-6">
+    <!-- Breadcrumb -->
+    <nav class="flex items-center gap-1.5 text-sm text-text-muted mb-4">
+      <NuxtLink to="/instruments" class="hover:text-primary transition-colors">Instruments</NuxtLink>
+      <span>/</span>
+      <span class="text-text">Violin</span>
+    </nav>
+
+    <div class="flex items-center justify-between mb-2">
       <h1 class="text-3xl font-bold text-text">Violin</h1>
       <NuxtLink to="/practice/session?instrument=violin">
         <NordButton variant="primary" size="sm">Practice Violin</NordButton>
       </NuxtLink>
     </div>
+    <p class="text-text-muted mb-6">Fingerboard with position guides — visualize scales and finger placements.</p>
 
     <!-- Controls -->
     <NordCard class="mb-6">
@@ -77,7 +90,15 @@ onMounted(async () => {
         :position="position"
         :highlighted-notes="highlightedNotes"
         :root-note="selectedRoot"
+        @note-click="handleNoteClick"
       />
+    </NordCard>
+
+    <!-- Note Display -->
+    <NordCard v-if="lastClickedNote" title="Last Played" class="mt-6">
+      <div class="text-center">
+        <span class="text-2xl font-bold text-primary">{{ lastClickedNote }}</span>
+      </div>
     </NordCard>
   </div>
 </template>

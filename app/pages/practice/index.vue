@@ -3,7 +3,8 @@
 
 <template>
   <div>
-    <h1 class="text-3xl font-bold text-text mb-8">Practice Hub</h1>
+    <h1 class="text-3xl font-bold text-text mb-2">Practice Hub</h1>
+    <p class="text-text-muted mb-8">Start a timed session, set goals, and track your musical progress.</p>
 
     <StaggeredList tag="div" class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <!-- Start Session -->
