@@ -5,7 +5,7 @@ const props = defineProps<{
 }>()
 
 const containerRef = ref<HTMLElement | null>(null)
-const { isLoaded, isPlaying, loadAlphaTex, loadFile, play, stop, setTempo } =
+const { api, isLoaded, isPlaying, loadAlphaTex, loadFile, play, stop, setTempo } =
   useAlphaTab(containerRef)
 
 const tempoMultiplier = ref(100)
@@ -18,18 +18,21 @@ function formatTempo(value: number): string {
   return `${(value / 100).toFixed(2)}x`
 }
 
+// Watch both the API readiness and the prop to handle initial load
 watch(
-  () => props.alphaTex,
-  (tex) => {
-    if (tex) loadAlphaTex(tex)
+  [api, () => props.alphaTex],
+  ([apiVal, tex]) => {
+    if (apiVal && tex) loadAlphaTex(tex)
   },
+  { immediate: true },
 )
 
 watch(
-  () => props.fileData,
-  (data) => {
-    if (data) loadFile(data as any)
+  [api, () => props.fileData],
+  ([apiVal, data]) => {
+    if (apiVal && data) loadFile(data as any)
   },
+  { immediate: true },
 )
 </script>
 
