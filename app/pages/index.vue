@@ -94,7 +94,7 @@ const isBlackKey = (i: number) => [1, 3, 6, 8, 10, 13].includes(i)
       <div
         v-for="(note, i) in floatingNotes"
         :key="i"
-        class="absolute text-primary/10 pointer-events-none select-none animate-float"
+        class="absolute text-primary/20 pointer-events-none select-none animate-float"
         :class="note.size"
         :style="{
           left: note.x + '%',
@@ -148,12 +148,12 @@ const isBlackKey = (i: number) => [1, 3, 6, 8, 10, 13].includes(i)
             Explore Features
           </NuxtLink>
         </div>
+      </div>
 
-        <!-- Scroll indicator -->
-        <div class="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-          <div class="w-6 h-10 rounded-full border-2 border-text-muted/30 flex justify-center pt-2">
-            <div class="w-1 h-2.5 rounded-full bg-text-muted/50 animate-scroll-dot" />
-          </div>
+      <!-- Scroll indicator -->
+      <div class="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce z-10">
+        <div class="w-6 h-10 rounded-full border-2 border-text-muted/30 flex justify-center pt-2">
+          <div class="w-1 h-2.5 rounded-full bg-text-muted/50 animate-scroll-dot" />
         </div>
       </div>
     </section>
