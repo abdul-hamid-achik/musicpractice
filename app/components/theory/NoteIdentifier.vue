@@ -24,6 +24,10 @@ const correctAnswer = ref<string | null>(null)
 const flashStates = ref<Record<string, 'correct' | 'incorrect' | null>>({})
 const vexReady = ref(false)
 
+function getCssVar(name: string): string {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim()
+}
+
 const scorePercent = computed(() => {
   if (total.value === 0) return 0
   return Math.round((correct.value / total.value) * 100)
@@ -82,7 +86,7 @@ async function renderNote(quiz: NoteQuiz) {
 
     const stave = new Stave(10, 30, 300)
     stave.addClef(clef.value)
-    stave.setStyle({ fillStyle: '#ECEFF4', strokeStyle: '#D8DEE9' })
+    stave.setStyle({ fillStyle: getCssVar('--color-text'), strokeStyle: getCssVar('--color-text-muted') })
     stave.setContext(context).draw()
 
     // Build VexFlow note
@@ -100,7 +104,7 @@ async function renderNote(quiz: NoteQuiz) {
       staveNote.addModifier(new Accidental('#'))
     }
 
-    staveNote.setStyle({ fillStyle: '#ECEFF4', strokeStyle: '#ECEFF4' })
+    staveNote.setStyle({ fillStyle: getCssVar('--color-text'), strokeStyle: getCssVar('--color-text') })
 
     Formatter.FormatAndDraw(context, stave, [staveNote])
   } catch {
@@ -155,8 +159,8 @@ function reset() {
 
 function buttonClass(note: string): string {
   const flash = flashStates.value[note]
-  if (flash === 'correct') return 'bg-success text-nord0'
-  if (flash === 'incorrect') return 'bg-error text-white'
+  if (flash === 'correct') return 'bg-success text-on-success'
+  if (flash === 'incorrect') return 'bg-error text-on-error'
   return 'bg-surface-alt text-text hover:bg-border'
 }
 
@@ -164,6 +168,13 @@ function buttonClass(note: string): string {
 watch([clef, difficulty], () => {
   if (currentNote.value) {
     newNote()
+  }
+})
+
+const settingsStore = useSettingsStore()
+watch(() => settingsStore.theme, () => {
+  if (currentNote.value) {
+    nextTick(() => renderNote(currentNote.value!))
   }
 })
 </script>
@@ -207,7 +218,7 @@ watch([clef, difficulty], () => {
             v-for="c in (['treble', 'bass'] as const)"
             :key="c"
             class="px-3 py-1.5 rounded-md text-sm font-medium transition-all capitalize"
-            :class="clef === c ? 'bg-primary text-nord0' : 'bg-surface-alt text-text-muted hover:bg-border'"
+            :class="clef === c ? 'bg-primary text-on-primary' : 'bg-surface-alt text-text-muted hover:bg-border'"
             @click="clef = c"
           >
             {{ c }}
@@ -223,7 +234,7 @@ watch([clef, difficulty], () => {
             v-for="d in (['easy', 'medium', 'hard'] as const)"
             :key="d"
             class="px-3 py-1.5 rounded-md text-sm font-medium transition-all capitalize"
-            :class="difficulty === d ? 'bg-primary text-nord0' : 'bg-surface-alt text-text-muted hover:bg-border'"
+            :class="difficulty === d ? 'bg-primary text-on-primary' : 'bg-surface-alt text-text-muted hover:bg-border'"
             @click="difficulty = d"
           >
             {{ d }}
@@ -237,7 +248,7 @@ watch([clef, difficulty], () => {
       <div v-if="!currentNote" class="text-text-muted text-center">
         <p class="mb-4">Press "New Note" to start identifying notes on the staff.</p>
         <button
-          class="px-6 py-3 rounded-md font-medium bg-primary text-nord0 hover:brightness-110 transition-all"
+          class="px-6 py-3 rounded-md font-medium bg-primary text-on-primary hover:brightness-110 transition-all"
           @click="newNote"
         >
           New Note
@@ -249,7 +260,7 @@ watch([clef, difficulty], () => {
     <!-- Action Buttons -->
     <div v-if="currentNote" class="flex gap-3">
       <button
-        class="px-4 py-2 rounded-md font-medium bg-secondary text-nord0 hover:brightness-110 transition-all"
+        class="px-4 py-2 rounded-md font-medium bg-secondary text-on-secondary hover:brightness-110 transition-all"
         @click="newNote"
       >
         {{ answered ? 'Next Note' : 'Skip' }}
@@ -291,24 +302,24 @@ watch([clef, difficulty], () => {
 }
 
 .vexflow-container :deep(.vf-stavenote) {
-  fill: #ECEFF4;
-  stroke: #ECEFF4;
+  fill: var(--color-text);
+  stroke: var(--color-text);
 }
 
 .vexflow-container :deep(.vf-stave) {
   fill: none;
-  stroke: #D8DEE9;
+  stroke: var(--color-text-muted);
 }
 
 .vexflow-container :deep(.vf-clef) {
-  fill: #D8DEE9;
+  fill: var(--color-text-muted);
 }
 
 .vexflow-container :deep(.vf-timesig) {
-  fill: #D8DEE9;
+  fill: var(--color-text-muted);
 }
 
 .vexflow-container :deep(text) {
-  fill: #ECEFF4;
+  fill: var(--color-text);
 }
 </style>

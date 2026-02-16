@@ -118,7 +118,7 @@ onMounted(async () => {
               :key="count"
               class="px-3 py-2 text-sm font-medium border border-border transition-colors first:rounded-l-md last:rounded-r-md"
               :class="[
-                stringCount === count ? 'bg-primary text-nord0' : 'bg-surface-alt text-text',
+                stringCount === count ? 'bg-primary text-on-primary' : 'bg-surface-alt text-text',
                 count !== 4 ? 'border-l-0' : '',
               ]"
               @click="onStringCountChange(count)"
@@ -145,14 +145,14 @@ onMounted(async () => {
           <div class="flex">
             <button
               class="px-3 py-2 text-sm font-medium rounded-l-md border border-border transition-colors"
-              :class="mode === 'scale' ? 'bg-primary text-nord0' : 'bg-surface-alt text-text'"
+              :class="mode === 'scale' ? 'bg-primary text-on-primary' : 'bg-surface-alt text-text'"
               @click="mode = 'scale'"
             >
               Scale
             </button>
             <button
               class="px-3 py-2 text-sm font-medium rounded-r-md border border-l-0 border-border transition-colors"
-              :class="mode === 'chord' ? 'bg-primary text-nord0' : 'bg-surface-alt text-text'"
+              :class="mode === 'chord' ? 'bg-primary text-on-primary' : 'bg-surface-alt text-text'"
               @click="mode = 'chord'"
             >
               Chord

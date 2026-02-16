@@ -139,7 +139,7 @@ onMounted(async () => {
         class="inline-flex items-center gap-2 px-4 py-2 rounded-md font-medium transition-all duration-200"
         :class="isPlaying
           ? 'bg-surface-alt text-text-muted cursor-not-allowed'
-          : 'bg-primary text-nord0 hover:brightness-110'"
+          : 'bg-primary text-on-primary hover:brightness-110'"
         :disabled="isPlaying || !selectedChord"
         @click="playChord"
       >
@@ -163,7 +163,7 @@ onMounted(async () => {
           :key="note"
           class="w-10 h-10 rounded-md text-sm font-medium transition-all duration-150"
           :class="selectedRoot === note
-            ? 'bg-primary text-nord0'
+            ? 'bg-primary text-on-primary'
             : 'bg-surface-alt text-text hover:bg-border'"
           @click="selectRoot(note)"
         >
@@ -226,14 +226,14 @@ onMounted(async () => {
       <div class="flex gap-2">
         <button
           class="px-3 py-1.5 rounded-md text-sm font-medium transition-all"
-          :class="viewMode === 'piano' ? 'bg-primary text-nord0' : 'bg-surface-alt text-text-muted hover:bg-border'"
+          :class="viewMode === 'piano' ? 'bg-primary text-on-primary' : 'bg-surface-alt text-text-muted hover:bg-border'"
           @click="viewMode = 'piano'"
         >
           Piano
         </button>
         <button
           class="px-3 py-1.5 rounded-md text-sm font-medium transition-all"
-          :class="viewMode === 'guitar' ? 'bg-primary text-nord0' : 'bg-surface-alt text-text-muted hover:bg-border'"
+          :class="viewMode === 'guitar' ? 'bg-primary text-on-primary' : 'bg-surface-alt text-text-muted hover:bg-border'"
           @click="viewMode = 'guitar'"
         >
           Guitar
@@ -251,7 +251,7 @@ onMounted(async () => {
               width="48"
               height="110"
               rx="3"
-              :fill="pianoKeys.active.includes(key) ? '#88C0D0' : '#ECEFF4'"
+              :fill="pianoKeys.active.includes(key) ? 'var(--color-primary)' : 'var(--color-key-white)'"
               style="stroke: var(--color-nord3)"
               stroke-width="1"
             />
@@ -259,7 +259,7 @@ onMounted(async () => {
               :x="i * 50 + 24"
               y="100"
               text-anchor="middle"
-              :fill="pianoKeys.active.includes(key) ? '#2E3440' : 'var(--color-nord3)'"
+              :fill="pianoKeys.active.includes(key) ? 'var(--color-on-highlight)' : 'var(--color-note-text)'"
               font-size="12"
               font-weight="bold"
             >
@@ -275,7 +275,7 @@ onMounted(async () => {
               width="32"
               height="68"
               rx="3"
-              :fill="pianoKeys.active.includes(key) ? '#5E81AC' : '#2E3440'"
+              :fill="pianoKeys.active.includes(key) ? 'var(--color-nord10)' : 'var(--color-key-black)'"
               style="stroke: var(--color-nord1)"
               stroke-width="1"
             />
@@ -284,7 +284,7 @@ onMounted(async () => {
               :x="i * 50 + 48"
               y="58"
               text-anchor="middle"
-              fill="#ECEFF4"
+              fill="var(--color-note-text-inv)"
               font-size="9"
               font-weight="bold"
             >
@@ -340,8 +340,8 @@ onMounted(async () => {
             :cx="28 + dot.string * 28.8"
             :cy="dot.fret === 0 ? 14 : 20 + (dot.fret - 1) * 32 + 16"
             :r="dot.fret === 0 ? 5 : 8"
-            :fill="dot.fret === 0 ? 'none' : '#88C0D0'"
-            :stroke="dot.fret === 0 ? '#88C0D0' : 'none'"
+            :fill="dot.fret === 0 ? 'none' : 'var(--color-primary)'"
+            :stroke="dot.fret === 0 ? 'var(--color-primary)' : 'none'"
             :stroke-width="dot.fret === 0 ? 2 : 0"
           />
         </svg>

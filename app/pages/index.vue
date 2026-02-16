@@ -65,6 +65,7 @@ const isBlackKey = (i: number) => [1, 3, 6, 8, 10, 13].includes(i)
           <span class="font-bold text-xl text-text">Music<span class="text-primary">Practice</span></span>
         </NuxtLink>
         <div class="flex items-center gap-4">
+          <ThemeToggle />
           <NuxtLink
             to="/auth/login"
             class="text-text-muted hover:text-text transition-colors duration-200 text-sm font-medium"
@@ -73,7 +74,7 @@ const isBlackKey = (i: number) => [1, 3, 6, 8, 10, 13].includes(i)
           </NuxtLink>
           <NuxtLink
             to="/auth/register"
-            class="bg-primary text-nord0 px-4 py-2 rounded-md text-sm font-medium hover:brightness-110 transition-all duration-200"
+            class="bg-primary text-on-primary px-4 py-2 rounded-md text-sm font-medium hover:brightness-110 transition-all duration-200"
           >
             Get Started Free
           </NuxtLink>
@@ -135,7 +136,7 @@ const isBlackKey = (i: number) => [1, 3, 6, 8, 10, 13].includes(i)
         <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
           <NuxtLink
             to="/auth/register"
-            class="group relative bg-primary text-nord0 px-8 py-3.5 rounded-lg text-lg font-semibold hover:brightness-110 transition-all duration-200 shadow-lg shadow-primary/20"
+            class="group relative bg-primary text-on-primary px-8 py-3.5 rounded-lg text-lg font-semibold hover:brightness-110 transition-all duration-200 shadow-lg shadow-primary/20"
           >
             <span class="relative z-10">Get Started Free</span>
             <div class="absolute inset-0 rounded-lg bg-gradient-to-r from-nord8 to-nord9 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -267,7 +268,7 @@ const isBlackKey = (i: number) => [1, 3, 6, 8, 10, 13].includes(i)
           <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
             <NuxtLink
               to="/auth/register"
-              class="bg-primary text-nord0 px-8 py-3.5 rounded-lg text-lg font-semibold hover:brightness-110 transition-all duration-200 shadow-lg shadow-primary/20"
+              class="bg-primary text-on-primary px-8 py-3.5 rounded-lg text-lg font-semibold hover:brightness-110 transition-all duration-200 shadow-lg shadow-primary/20"
             >
               Get Started Free
             </NuxtLink>

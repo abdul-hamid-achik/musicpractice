@@ -11,10 +11,10 @@ const emit = defineEmits<{
 }>()
 
 const variantClasses: Record<string, string> = {
-  primary: 'bg-primary text-nord0 hover:brightness-110',
-  secondary: 'bg-secondary text-nord0 hover:brightness-110',
-  danger: 'bg-error text-white hover:brightness-110',
-  success: 'bg-success text-nord0 hover:brightness-110',
+  primary: 'bg-primary text-on-primary hover:brightness-110',
+  secondary: 'bg-secondary text-on-secondary hover:brightness-110',
+  danger: 'bg-error text-on-error hover:brightness-110',
+  success: 'bg-success text-on-success hover:brightness-110',
   ghost: 'bg-transparent text-text-muted hover:bg-surface-alt',
 }
 

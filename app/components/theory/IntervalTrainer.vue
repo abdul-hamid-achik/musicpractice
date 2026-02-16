@@ -138,8 +138,8 @@ function reset() {
 
 function buttonClass(interval: Interval): string {
   const flash = flashStates.value[interval.short]
-  if (flash === 'correct') return 'bg-success text-nord0'
-  if (flash === 'incorrect') return 'bg-error text-white'
+  if (flash === 'correct') return 'bg-success text-on-success'
+  if (flash === 'incorrect') return 'bg-error text-on-error'
   return 'bg-surface-alt text-text hover:bg-border'
 }
 </script>

@@ -12,10 +12,10 @@ const emit = defineEmits<{
 }>()
 
 const typeClasses: Record<string, string> = {
-  success: 'bg-success',
-  error: 'bg-error',
-  warning: 'bg-warning',
-  info: 'bg-info',
+  success: 'bg-success text-on-success',
+  error: 'bg-error text-on-error',
+  warning: 'bg-warning text-on-warning',
+  info: 'bg-info text-on-info',
 }
 
 let timer: ReturnType<typeof setTimeout>
@@ -41,7 +41,7 @@ onUnmounted(() => {
     <div
       role="alert"
       aria-live="polite"
-      class="fixed bottom-4 right-4 z-50 flex items-center gap-3 rounded-lg px-4 py-3 text-white shadow-lg"
+      class="fixed bottom-4 right-4 z-50 flex items-center gap-3 rounded-lg px-4 py-3 shadow-lg"
       :class="typeClasses[type || 'info']"
     >
       <span>{{ message }}</span>

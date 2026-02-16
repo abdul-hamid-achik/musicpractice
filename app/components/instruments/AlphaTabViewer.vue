@@ -42,7 +42,7 @@ watch(
     <div class="flex items-center gap-3 bg-surface-alt rounded-lg px-4 py-2">
       <button
         class="flex items-center justify-center w-10 h-10 rounded-full transition-colors"
-        :class="isPlaying ? 'bg-warning text-nord0' : 'bg-primary text-nord0'"
+        :class="isPlaying ? 'bg-warning text-on-warning' : 'bg-primary text-on-primary'"
         :disabled="!isLoaded"
         @click="play()"
       >

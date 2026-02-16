@@ -140,7 +140,7 @@ function handleNoteClick(string: number, fret: number, note: string) {
           :cx="fretX(marker) - fretSpacing / 2"
           :cy="markerY(marker)"
           r="4"
-          fill="#4C566A"
+          style="fill: var(--color-nord3)"
         />
       </template>
     </template>
@@ -171,7 +171,7 @@ function handleNoteClick(string: number, fret: number, note: string) {
           :cx="n.x"
           :cy="n.y"
           r="10"
-          :fill="isRoot(n.note) ? '#88C0D0' : '#81A1C1'"
+          :fill="isRoot(n.note) ? 'var(--color-primary)' : 'var(--color-secondary)'"
         />
         <!-- Non-highlighted: small dot visible on hover -->
         <circle
@@ -191,7 +191,7 @@ function handleNoteClick(string: number, fret: number, note: string) {
           text-anchor="middle"
           :font-size="9"
           font-weight="bold"
-          :fill="isRoot(n.note) ? '#2E3440' : '#ECEFF4'"
+          fill="var(--color-on-highlight)"
         >
           {{ n.note }}
         </text>
@@ -202,7 +202,7 @@ function handleNoteClick(string: number, fret: number, note: string) {
           :y="n.y + 4"
           text-anchor="middle"
           :font-size="8"
-          fill="#D8DEE9"
+          fill="var(--color-note-label)"
           class="hover-label"
         >
           {{ n.note }}

@@ -49,6 +49,25 @@
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 
+  /* ── "On" tokens (text on colored backgrounds) ── */
+  --color-on-primary:   #2E3440;
+  --color-on-secondary: #2E3440;
+  --color-on-error:     #ECEFF4;
+  --color-on-success:   #2E3440;
+  --color-on-warning:   #2E3440;
+  --color-on-info:      #2E3440;
+
+  /* ── Overlay / Backdrop ── */
+  --color-backdrop: rgba(0,0,0,0.5);
+
+  /* ── Instrument diagram tokens ── */
+  --color-key-white:     #ECEFF4;
+  --color-key-black:     #2E3440;
+  --color-note-text:     #4C566A;
+  --color-note-text-inv: #D8DEE9;
+  --color-note-label:    #D8DEE9;
+  --color-on-highlight:  #2E3440;
+
   /* ── Border Radius ── */
   --radius-sm: 0.375rem;
   --radius-md: 0.5rem;
@@ -91,6 +110,25 @@ html.light {
   --color-border:      #D8DEE9;  /* nord4 */
   --color-text:        #2E3440;  /* nord0 */
   --color-text-muted:  #4C566A;  /* nord3 */
+
+  /* ── "On" tokens ── */
+  --color-on-primary:   #FFFFFF;
+  --color-on-secondary: #FFFFFF;
+  --color-on-error:     #FFFFFF;
+  --color-on-success:   #2E3440;
+  --color-on-warning:   #2E3440;
+  --color-on-info:      #FFFFFF;
+
+  /* ── Overlay / Backdrop ── */
+  --color-backdrop: rgba(46,52,64,0.4);
+
+  /* ── Instrument diagram tokens ── */
+  --color-key-white:     #FFFFFF;
+  --color-key-black:     #3B4252;
+  --color-note-text:     #4C566A;
+  --color-note-text-inv: #ECEFF4;
+  --color-note-label:    #4C566A;
+  --color-on-highlight:  #FFFFFF;
 }
 
 /* ═══════════════════════════════════════════════════════════════

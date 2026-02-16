@@ -103,20 +103,20 @@ function isRoot(note: string): boolean {
 }
 
 function getWhiteKeyFill(note: string): string {
-  if (isRoot(note)) return '#88C0D0'
-  if (isHighlighted(note)) return '#81A1C1'
-  return '#ECEFF4'
+  if (isRoot(note)) return 'var(--color-primary)'
+  if (isHighlighted(note)) return 'var(--color-secondary)'
+  return 'var(--color-key-white)'
 }
 
 function getBlackKeyFill(note: string): string {
-  if (isRoot(note)) return '#88C0D0'
-  if (isHighlighted(note)) return '#81A1C1'
-  return '#2E3440'
+  if (isRoot(note)) return 'var(--color-primary)'
+  if (isHighlighted(note)) return 'var(--color-secondary)'
+  return 'var(--color-key-black)'
 }
 
 function getTextFill(note: string, isBlack: boolean): string {
-  if (isRoot(note) || isHighlighted(note)) return '#2E3440'
-  return isBlack ? '#D8DEE9' : '#4C566A'
+  if (isRoot(note) || isHighlighted(note)) return 'var(--color-on-highlight)'
+  return isBlack ? 'var(--color-note-text-inv)' : 'var(--color-note-text)'
 }
 
 const pressedKey = ref<string | null>(null)

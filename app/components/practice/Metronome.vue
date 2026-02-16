@@ -233,7 +233,7 @@ defineExpose({ setBpm, adjustBpm, togglePlayback, bpm, isRunning })
           @keyup.enter="savePreset"
         />
         <button
-          class="px-3 py-1.5 rounded-md text-sm font-medium bg-primary text-nord0 hover:brightness-110 transition-colors disabled:opacity-50"
+          class="px-3 py-1.5 rounded-md text-sm font-medium bg-primary text-on-primary hover:brightness-110 transition-colors disabled:opacity-50"
           :disabled="!presetName.trim()"
           @click="savePreset"
         >

@@ -188,12 +188,12 @@ function handleClick(string: number, finger: number, note: string) {
           :r="fp.finger === 0 ? 10 : 12"
           :fill="
             isRoot(fp.note)
-              ? '#88C0D0'
+              ? 'var(--color-primary)'
               : isHighlighted(fp.note)
-                ? '#81A1C1'
+                ? 'var(--color-secondary)'
                 : 'transparent'
           "
-          :stroke="isHighlighted(fp.note) || isRoot(fp.note) ? 'none' : '#4C566A'"
+          :stroke="isHighlighted(fp.note) || isRoot(fp.note) ? 'none' : 'var(--color-nord3)'"
           :stroke-width="isHighlighted(fp.note) || isRoot(fp.note) ? 0 : 1"
           class="hover-circle"
         />
@@ -204,7 +204,7 @@ function handleClick(string: number, finger: number, note: string) {
           font-size="10"
           font-weight="bold"
           :fill="
-            isRoot(fp.note) || isHighlighted(fp.note) ? '#2E3440' : '#D8DEE9'
+            isRoot(fp.note) || isHighlighted(fp.note) ? 'var(--color-on-highlight)' : 'var(--color-note-label)'
           "
           :class="{ 'hover-text': !isHighlighted(fp.note) && !isRoot(fp.note) }"
         >

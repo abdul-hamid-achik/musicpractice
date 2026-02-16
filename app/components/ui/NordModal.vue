@@ -57,7 +57,7 @@ watch(() => props.open, (isOpen) => {
     >
       <div
         v-if="open"
-        class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
+        class="fixed inset-0 bg-[var(--color-backdrop)] backdrop-blur-sm z-50"
         @click.self="emit('close')"
         @keydown="handleKeydown"
       >

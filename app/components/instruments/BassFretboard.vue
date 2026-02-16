@@ -153,7 +153,7 @@ function handleNoteClick(string: number, fret: number, note: string) {
           :cx="fretX(marker) - fretSpacing / 2"
           :cy="markerCY()"
           r="4"
-          fill="#4C566A"
+          style="fill: var(--color-nord3)"
         />
       </template>
     </template>
@@ -183,7 +183,7 @@ function handleNoteClick(string: number, fret: number, note: string) {
           :cx="n.x"
           :cy="n.y"
           r="11"
-          :fill="isRoot(n.note) ? '#88C0D0' : '#81A1C1'"
+          :fill="isRoot(n.note) ? 'var(--color-primary)' : 'var(--color-secondary)'"
         />
         <circle
           v-else
@@ -201,7 +201,7 @@ function handleNoteClick(string: number, fret: number, note: string) {
           text-anchor="middle"
           :font-size="9"
           font-weight="bold"
-          fill="#2E3440"
+          fill="var(--color-on-highlight)"
         >
           {{ n.note }}
         </text>
@@ -211,7 +211,7 @@ function handleNoteClick(string: number, fret: number, note: string) {
           :y="n.y + 4"
           text-anchor="middle"
           :font-size="8"
-          fill="#D8DEE9"
+          fill="var(--color-note-label)"
           class="hover-label"
         >
           {{ n.note }}

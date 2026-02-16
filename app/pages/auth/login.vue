@@ -21,6 +21,9 @@ async function handleLogin() {
 
 <template>
   <div class="min-h-screen bg-surface flex items-center justify-center px-4">
+    <div class="fixed top-4 right-4 z-50">
+      <ThemeToggle />
+    </div>
     <div class="w-full max-w-sm">
       <div class="text-center mb-8">
         <NuxtLink to="/" class="inline-flex items-center gap-2">
@@ -64,7 +67,7 @@ async function handleLogin() {
         <button
           type="submit"
           :disabled="auth.loading.value"
-          class="w-full bg-primary text-nord0 font-medium py-2.5 rounded-lg hover:brightness-110 transition-all disabled:opacity-50"
+          class="w-full bg-primary text-on-primary font-medium py-2.5 rounded-lg hover:brightness-110 transition-all disabled:opacity-50"
         >
           {{ auth.loading.value ? 'Signing in...' : 'Sign in' }}
         </button>

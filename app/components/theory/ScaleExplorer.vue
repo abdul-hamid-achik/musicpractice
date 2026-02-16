@@ -133,7 +133,7 @@ onMounted(async () => {
         class="inline-flex items-center gap-2 px-4 py-2 rounded-md font-medium transition-all duration-200"
         :class="isPlaying
           ? 'bg-surface-alt text-text-muted cursor-not-allowed'
-          : 'bg-primary text-nord0 hover:brightness-110'"
+          : 'bg-primary text-on-primary hover:brightness-110'"
         :disabled="isPlaying || !selectedScale"
         @click="playScale"
       >
@@ -157,7 +157,7 @@ onMounted(async () => {
           :key="note"
           class="w-10 h-10 rounded-md text-sm font-medium transition-all duration-150"
           :class="selectedRoot === note
-            ? 'bg-primary text-nord0'
+            ? 'bg-primary text-on-primary'
             : 'bg-surface-alt text-text hover:bg-border'"
           @click="selectRoot(note)"
         >

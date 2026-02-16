@@ -27,14 +27,14 @@ function handleScoreUpdate(update: { correct: number; total: number }) {
     <div class="flex gap-1 mb-6 bg-surface-alt rounded-lg p-1 w-fit">
       <button
         class="px-4 py-2 rounded-md text-sm font-medium transition-colors"
-        :class="activeTab === 'intervals' ? 'bg-primary text-nord0' : 'text-text-muted hover:text-text'"
+        :class="activeTab === 'intervals' ? 'bg-primary text-on-primary' : 'text-text-muted hover:text-text'"
         @click="activeTab = 'intervals'"
       >
         Intervals
       </button>
       <button
         class="px-4 py-2 rounded-md text-sm font-medium transition-colors"
-        :class="activeTab === 'notes' ? 'bg-primary text-nord0' : 'text-text-muted hover:text-text'"
+        :class="activeTab === 'notes' ? 'bg-primary text-on-primary' : 'text-text-muted hover:text-text'"
         @click="activeTab = 'notes'"
       >
         Note Identification
