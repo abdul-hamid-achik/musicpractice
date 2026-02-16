@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#5E81AC"/>
+      <stop offset="100%" stop-color="#81A1C1"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="24" fill="url(#bg)"/>
+  <!-- Eighth notes connected by beam -->
+  <!-- First note stem -->
+  <rect x="34" y="28" width="5" height="58" rx="2" fill="#ECEFF4"/>
+  <!-- First note head -->
+  <ellipse cx="34" cy="88" rx="13" ry="10" transform="rotate(-15 34 88)" fill="#ECEFF4"/>
+  <!-- Second note stem -->
+  <rect x="74" y="36" width="5" height="50" rx="2" fill="#ECEFF4"/>
+  <!-- Second note head -->
+  <ellipse cx="74" cy="88" rx="13" ry="10" transform="rotate(-15 74 88)" fill="#ECEFF4"/>
+  <!-- Beam connecting the two notes -->
+  <polygon points="34,28 79,36 79,44 34,36" fill="#ECEFF4"/>
+  <!-- Accent dot -->
+  <circle cx="102" cy="58" r="6" fill="#A3BE8C"/>
+</svg>
