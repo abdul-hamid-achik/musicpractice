@@ -6,6 +6,10 @@ const accuracy = computed(() => {
   if (!score.value.total) return 0
   return Math.round((score.value.correct / score.value.total) * 100)
 })
+
+function handleScoreUpdate(update: { correct: number; total: number }) {
+  score.value = update
+}
 </script>
 
 <template>
@@ -38,7 +42,7 @@ const accuracy = computed(() => {
     </div>
 
     <!-- Content -->
-    <IntervalTrainer v-if="activeTab === 'intervals'" />
-    <NoteIdentifier v-else />
+    <IntervalTrainer v-if="activeTab === 'intervals'" @score-update="handleScoreUpdate" />
+    <NoteIdentifier v-else @score-update="handleScoreUpdate" />
   </div>
 </template>

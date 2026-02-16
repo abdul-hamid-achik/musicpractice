@@ -28,7 +28,7 @@ const newSong = ref({
   artist: '',
   instrumentType: 'guitar',
   difficulty: 'beginner',
-  notationFormat: 'alphatex',
+  format: 'alphatex',
   notationData: '',
 })
 
@@ -38,7 +38,7 @@ async function submitSong() {
     body: newSong.value,
   })
   showAddModal.value = false
-  newSong.value = { title: '', artist: '', instrumentType: 'guitar', difficulty: 'beginner', notationFormat: 'alphatex', notationData: '' }
+  newSong.value = { title: '', artist: '', instrumentType: 'guitar', difficulty: 'beginner', format: 'alphatex', notationData: '' }
   refresh()
 }
 </script>
@@ -144,7 +144,7 @@ async function submitSong() {
         <div>
           <label class="block text-sm text-text-muted mb-1">Notation Format</label>
           <select
-            v-model="newSong.notationFormat"
+            v-model="newSong.format"
             class="w-full bg-surface-alt text-text border border-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
           >
             <option value="alphatex">AlphaTex</option>

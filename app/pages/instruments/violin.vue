@@ -9,7 +9,7 @@ const selectedScaleId = ref('')
 
 const highlightedNotes = computed(() => {
   if (selectedScaleId.value) {
-    const scale = theoryStore.scales.find((s: any) => s.id === selectedScaleId.value)
+    const scale = theoryStore.scales.find((s) => s.id === selectedScaleId.value)
     if (scale) return getScaleNotes(selectedRoot.value, scale.intervals)
   }
   return []
@@ -17,7 +17,7 @@ const highlightedNotes = computed(() => {
 
 onMounted(async () => {
   if (!theoryStore.scales.length) await theoryStore.fetchScales()
-  if (theoryStore.scales.length) selectedScaleId.value = (theoryStore.scales[0] as any).id
+  if (theoryStore.scales.length) selectedScaleId.value = theoryStore.scales[0]!.id
 })
 </script>
 
@@ -63,8 +63,8 @@ onMounted(async () => {
             class="w-full bg-surface-alt text-text border border-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
           >
             <option value="">None</option>
-            <option v-for="scale in theoryStore.scales" :key="(scale as any).id" :value="(scale as any).id">
-              {{ (scale as any).name }}
+            <option v-for="scale in theoryStore.scales" :key="scale.id" :value="scale.id">
+              {{ scale.name }}
             </option>
           </select>
         </div>
@@ -74,6 +74,7 @@ onMounted(async () => {
     <!-- Fingerboard -->
     <NordCard>
       <ViolinFingerboard
+        :position="position"
         :highlighted-notes="highlightedNotes"
         :root-note="selectedRoot"
       />

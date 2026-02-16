@@ -1,8 +1,10 @@
 <script setup lang="ts">
+import type { PracticeGoal } from '#shared/types/practice'
+
 const practiceStore = usePracticeStore()
 const instrumentStore = useInstrumentStore()
 
-const goals = ref<any[]>([])
+const goals = ref<PracticeGoal[]>([])
 const isLoading = ref(false)
 const showForm = ref(false)
 
@@ -42,7 +44,7 @@ function getWeeklyMinutes(instrumentId: string | null): number {
     .reduce((sum, s) => sum + Math.floor((s.durationSeconds || 0) / 60), 0)
 }
 
-function progressPercent(goal: any): number {
+function progressPercent(goal: PracticeGoal): number {
   const actual = getWeeklyMinutes(goal.instrumentId)
   if (goal.targetMinutesPerWeek <= 0) return 0
   return Math.round((actual / goal.targetMinutesPerWeek) * 100)
@@ -60,6 +62,7 @@ async function saveGoal() {
     await $fetch('/api/goals', {
       method: 'POST',
       body: {
+        userId: 'demo-user-id', // TODO: get from auth
         title: newGoal.value.title,
         targetMinutesPerWeek: newGoal.value.targetMinutesPerWeek,
         instrumentId: newGoal.value.instrumentId || null,

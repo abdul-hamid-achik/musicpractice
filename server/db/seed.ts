@@ -1,15 +1,28 @@
 import 'dotenv/config'
+import bcrypt from 'bcrypt'
+import { eq } from 'drizzle-orm'
 import { db } from './index'
 import { instruments, scales, chords, songs, metronomePresets, users } from './schema'
 
 async function seed() {
   console.log('Seeding database...')
 
+  // Clear existing seed data (reverse dependency order)
+  await db.delete(metronomePresets)
+  await db.delete(songs)
+  await db.delete(scales)
+  await db.delete(chords)
+  await db.delete(instruments)
+
   // Seed a demo user for metronome presets
-  const [demoUser] = await db.insert(users).values({
+  const passwordHash = await bcrypt.hash('password123', 10)
+  await db.insert(users).values({
     email: 'demo@musicpractice.app',
+    username: 'demo',
+    passwordHash,
     name: 'Demo User',
-  }).returning()
+  }).onConflictDoNothing()
+  const [demoUser] = await db.select().from(users).where(eq(users.email, 'demo@musicpractice.app')).limit(1)
 
   // Seed instruments
   const [guitar, bass, piano, violin] = await db.insert(instruments).values([

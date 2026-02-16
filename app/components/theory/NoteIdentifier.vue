@@ -8,6 +8,10 @@ interface NoteQuiz {
   vexKey: string
 }
 
+const emit = defineEmits<{
+  scoreUpdate: [payload: { correct: number; total: number }]
+}>()
+
 const vexContainer = ref<HTMLDivElement | null>(null)
 const correct = ref(0)
 const total = ref(0)
@@ -45,8 +49,8 @@ function getNoteRange(): { notes: string[]; octaves: number[] } {
 
 function pickRandomNote(): NoteQuiz {
   const range = getNoteRange()
-  const note = range.notes[Math.floor(Math.random() * range.notes.length)]
-  const octave = range.octaves[Math.floor(Math.random() * range.octaves.length)]
+  const note = range.notes[Math.floor(Math.random() * range.notes.length)]!
+  const octave = range.octaves[Math.floor(Math.random() * range.octaves.length)]!
 
   // Convert to VexFlow key format: "c/4", "c#/4"
   const vexNote = note.toLowerCase().replace('#', '#')
@@ -125,6 +129,7 @@ function guess(note: string) {
     lastGuessCorrect.value = true
     flashStates.value = { [note]: 'correct' }
     answered.value = true
+    emit('scoreUpdate', { correct: correct.value, total: total.value })
     setTimeout(() => newNote(), 1000)
   } else {
     lastGuessCorrect.value = false
@@ -134,6 +139,7 @@ function guess(note: string) {
       [currentNote.value.note]: 'correct',
     }
     answered.value = true
+    emit('scoreUpdate', { correct: correct.value, total: total.value })
   }
 }
 

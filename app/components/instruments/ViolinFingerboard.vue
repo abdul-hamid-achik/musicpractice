@@ -31,7 +31,7 @@ const leftPadding = 50
 function parseNote(noteWithOctave: string): { note: string; octave: number } {
   const match = noteWithOctave.match(/^([A-G][#b]?)(\d+)$/)
   if (!match) return { note: 'C', octave: 4 }
-  return { note: match[1], octave: parseInt(match[2]) }
+  return { note: match[1]!, octave: parseInt(match[2]!) }
 }
 
 const fingerPositions = computed(() => {
@@ -47,8 +47,8 @@ const fingerPositions = computed(() => {
   const positionOffset = (props.position - 1) * 2
 
   for (let s = 0; s < openStrings.length; s++) {
-    const stringPositions: typeof positions[0] = []
-    const open = parseNote(openStrings[s])
+    const stringPositions: (typeof positions)[number] = []
+    const open = parseNote(openStrings[s]!)
     const x = leftPadding + s * stringSpacing
 
     // Open string (finger 0)
@@ -98,6 +98,8 @@ function handleClick(string: number, finger: number, note: string) {
     :viewBox="`0 0 ${svgWidth} ${svgHeight}`"
     class="w-full max-w-xs h-auto select-none mx-auto"
     xmlns="http://www.w3.org/2000/svg"
+    role="img"
+    aria-label="Violin fingerboard diagram"
   >
     <!-- Position label -->
     <text

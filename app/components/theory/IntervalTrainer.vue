@@ -22,6 +22,10 @@ const INTERVALS: Interval[] = [
   { name: 'Octave', short: 'P8', semitones: 12 },
 ]
 
+const emit = defineEmits<{
+  scoreUpdate: [payload: { correct: number; total: number }]
+}>()
+
 const { midiToNote } = useMusicTheory()
 
 const correct = ref(0)
@@ -42,7 +46,7 @@ const scorePercent = computed(() => {
 
 function pickRandomInterval() {
   const idx = Math.floor(Math.random() * INTERVALS.length)
-  return INTERVALS[idx]
+  return INTERVALS[idx]!
 }
 
 function pickRandomNote(): number {
@@ -108,6 +112,7 @@ function guess(interval: Interval) {
     lastGuessCorrect.value = true
     flashStates.value = { [interval.short]: 'correct' }
     answered.value = true
+    emit('scoreUpdate', { correct: correct.value, total: total.value })
     setTimeout(() => newQuestion(), 1000)
   } else {
     lastGuessCorrect.value = false
@@ -117,6 +122,7 @@ function guess(interval: Interval) {
       [currentInterval.value.short]: 'correct',
     }
     answered.value = true
+    emit('scoreUpdate', { correct: correct.value, total: total.value })
   }
 }
 

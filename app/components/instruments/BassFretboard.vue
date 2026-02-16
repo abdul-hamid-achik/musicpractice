@@ -27,7 +27,7 @@ const defaultTunings: Record<number, string[]> = {
   6: ['B0', 'E1', 'A1', 'D2', 'G2', 'C3'],
 }
 
-const activeTuning = computed(() => props.tuning ?? defaultTunings[props.strings])
+const activeTuning = computed(() => props.tuning ?? defaultTunings[props.strings]!)
 
 const fretMarkers = [3, 5, 7, 9, 12, 15, 17, 19, 21, 24]
 const doubleFretMarkers = [12, 24]
@@ -51,14 +51,14 @@ const stringThickness = computed(() => {
 function parseNote(noteWithOctave: string): { note: string; octave: number } {
   const match = noteWithOctave.match(/^([A-G][#b]?)(\d+)$/)
   if (!match) return { note: 'C', octave: 2 }
-  return { note: match[1], octave: parseInt(match[2]) }
+  return { note: match[1]!, octave: parseInt(match[2]!) }
 }
 
 const fretboardNotes = computed(() => {
   const notes: { string: number; fret: number; note: string; x: number; y: number }[][] = []
   for (let s = 0; s < activeTuning.value.length; s++) {
-    const stringNotes: typeof notes[0] = []
-    const open = parseNote(activeTuning.value[s])
+    const stringNotes: (typeof notes)[number] = []
+    const open = parseNote(activeTuning.value[s]!)
     for (let f = 0; f <= props.frets; f++) {
       const note = transposeNote(open.note, f)
       const x = f === 0 ? nutX / 2 : nutX + (f - 0.5) * fretSpacing
@@ -96,6 +96,8 @@ function handleNoteClick(string: number, fret: number, note: string) {
     :viewBox="`0 0 ${fretboardWidth} ${fretboardHeight}`"
     class="w-full h-auto select-none"
     xmlns="http://www.w3.org/2000/svg"
+    role="img"
+    aria-label="Bass fretboard diagram"
   >
     <!-- Nut -->
     <line

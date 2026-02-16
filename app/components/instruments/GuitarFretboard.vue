@@ -35,14 +35,14 @@ const topPadding = 30
 function parseNote(noteWithOctave: string): { note: string; octave: number } {
   const match = noteWithOctave.match(/^([A-G][#b]?)(\d+)$/)
   if (!match) return { note: 'C', octave: 3 }
-  return { note: match[1], octave: parseInt(match[2]) }
+  return { note: match[1]!, octave: parseInt(match[2]!) }
 }
 
 const fretboardNotes = computed(() => {
   const notes: { string: number; fret: number; note: string; x: number; y: number }[][] = []
   for (let s = 0; s < props.tuning.length; s++) {
     const stringNotes: typeof notes[0] = []
-    const open = parseNote(props.tuning[s])
+    const open = parseNote(props.tuning[s]!)
     for (let f = 0; f <= props.frets; f++) {
       const note = transposeNote(open.note, f)
       const x = f === 0 ? nutX / 2 : nutX + (f - 0.5) * fretSpacing
@@ -68,7 +68,6 @@ function fretX(fret: number): number {
 
 function markerY(marker: number): number {
   const totalStringHeight = (props.tuning.length - 1) * stringSpacing
-  if (doubleFretMarkers.includes(marker)) return topPadding + totalStringHeight / 2
   return topPadding + totalStringHeight / 2
 }
 
@@ -82,6 +81,8 @@ function handleNoteClick(string: number, fret: number, note: string) {
     :viewBox="`0 0 ${fretboardWidth} ${fretboardHeight + 20}`"
     class="w-full h-auto select-none"
     xmlns="http://www.w3.org/2000/svg"
+    role="img"
+    aria-label="Guitar fretboard diagram"
   >
     <!-- Nut -->
     <line
@@ -178,7 +179,7 @@ function handleNoteClick(string: number, fret: number, note: string) {
           text-anchor="middle"
           :font-size="9"
           font-weight="bold"
-          :fill="isRoot(n.note) ? '#2E3440' : '#2E3440'"
+          :fill="isRoot(n.note) ? '#2E3440' : '#ECEFF4'"
         >
           {{ n.note }}
         </text>

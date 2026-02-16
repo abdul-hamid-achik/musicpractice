@@ -9,6 +9,7 @@ export const useSettingsStore = defineStore('settings', () => {
   const defaultTempo = ref(120)
   const showNotation = ref(true)
   const showTablature = ref(true)
+  const volume = ref(80)
 
   // Load saved settings from localStorage on init
   if (import.meta.client) {
@@ -21,6 +22,7 @@ export const useSettingsStore = defineStore('settings', () => {
         if (parsed.defaultTempo) defaultTempo.value = parsed.defaultTempo
         if (parsed.showNotation !== undefined) showNotation.value = parsed.showNotation
         if (parsed.showTablature !== undefined) showTablature.value = parsed.showTablature
+        if (parsed.volume !== undefined) volume.value = parsed.volume
       }
     } catch {
       // Ignore parse errors
@@ -37,6 +39,7 @@ export const useSettingsStore = defineStore('settings', () => {
         defaultTempo: defaultTempo.value,
         showNotation: showNotation.value,
         showTablature: showTablature.value,
+        volume: volume.value,
       }),
     )
   }
@@ -48,6 +51,7 @@ export const useSettingsStore = defineStore('settings', () => {
       defaultTempo,
       showNotation,
       showTablature,
+      volume,
     }
     if (refs[key]) {
       refs[key].value = value
@@ -56,7 +60,7 @@ export const useSettingsStore = defineStore('settings', () => {
   }
 
   // Auto-persist on any change
-  watch([theme, defaultInstrument, defaultTempo, showNotation, showTablature], persist)
+  watch([theme, defaultInstrument, defaultTempo, showNotation, showTablature, volume], persist)
 
   return {
     theme,
@@ -64,6 +68,7 @@ export const useSettingsStore = defineStore('settings', () => {
     defaultTempo,
     showNotation,
     showTablature,
+    volume,
     updateSetting,
   }
 })
@@ -74,4 +79,5 @@ interface Settings {
   defaultTempo: number
   showNotation: boolean
   showTablature: boolean
+  volume: number
 }

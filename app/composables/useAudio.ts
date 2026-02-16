@@ -1,5 +1,10 @@
 import { ref } from 'vue'
 
+async function getContext() {
+  const Tone = await import('tone')
+  return Tone.getContext()
+}
+
 export function useAudio() {
   const isReady = ref(false)
 
@@ -7,11 +12,6 @@ export function useAudio() {
     const Tone = await import('tone')
     await Tone.start()
     isReady.value = true
-  }
-
-  const getContext = async () => {
-    const Tone = await import('tone')
-    return Tone.getContext()
   }
 
   return { isReady, start, getContext }

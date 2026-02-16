@@ -21,12 +21,12 @@ export function useMusicTheory() {
 
   const getScaleNotes = (root: string, intervals: number[]): string[] => {
     const rootIdx = getNoteIndex(root)
-    return intervals.map((i) => NOTE_NAMES[(rootIdx + i) % 12])
+    return intervals.map((i) => NOTE_NAMES[(rootIdx + i) % 12]!)
   }
 
   const getChordNotes = (root: string, intervals: number[]): string[] => {
     const rootIdx = getNoteIndex(root)
-    return intervals.map((i) => NOTE_NAMES[(rootIdx + i) % 12])
+    return intervals.map((i) => NOTE_NAMES[(rootIdx + i) % 12]!)
   }
 
   const getInterval = (note1: string, note2: string): number => {
@@ -37,7 +37,7 @@ export function useMusicTheory() {
 
   const transposeNote = (note: string, semitones: number): string => {
     const idx = getNoteIndex(note)
-    return NOTE_NAMES[(idx + semitones + 12) % 12]
+    return NOTE_NAMES[(idx + semitones + 12) % 12]!
   }
 
   const noteToMidi = (note: string, octave: number): number => {
@@ -46,7 +46,7 @@ export function useMusicTheory() {
 
   const midiToNote = (midi: number): { note: string; octave: number } => {
     return {
-      note: NOTE_NAMES[midi % 12],
+      note: NOTE_NAMES[midi % 12]!,
       octave: Math.floor(midi / 12) - 1,
     }
   }

@@ -9,3 +9,4 @@ dist
 coverage
 .vecgrep
 .vercel
+auto-imports.d.ts

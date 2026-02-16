@@ -1,5 +1,12 @@
 import { ref, onBeforeUnmount } from 'vue'
 
+function formatTime(seconds: number): string {
+  const h = Math.floor(seconds / 3600)
+  const m = Math.floor((seconds % 3600) / 60)
+  const s = seconds % 60
+  return [h, m, s].map((v) => v.toString().padStart(2, '0')).join(':')
+}
+
 export function usePracticeSession() {
   const isActive = ref(false)
   const startTime = ref<Date | null>(null)
@@ -28,6 +35,7 @@ export function usePracticeSession() {
   const saveSession = async (notes?: string, tags?: string[]) => {
     if (!currentSession.value || !startTime.value) return null
     const body = {
+      userId: 'demo-user-id', // TODO: get from auth
       instrumentId: currentSession.value.instrumentId,
       startedAt: startTime.value.toISOString(),
       endedAt: new Date().toISOString(),
@@ -42,13 +50,6 @@ export function usePracticeSession() {
     startTime.value = null
     elapsed.value = 0
     return result
-  }
-
-  const formatTime = (seconds: number): string => {
-    const h = Math.floor(seconds / 3600)
-    const m = Math.floor((seconds % 3600) / 60)
-    const s = seconds % 60
-    return [h, m, s].map((v) => v.toString().padStart(2, '0')).join(':')
   }
 
   onBeforeUnmount(() => {

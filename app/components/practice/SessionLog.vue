@@ -107,6 +107,7 @@ function sortIndicator(key: SortKey): string {
     <!-- Session table -->
     <div v-else class="overflow-x-auto">
       <table class="w-full text-left">
+        <caption class="sr-only">Practice session history</caption>
         <thead>
           <tr class="border-b border-border">
             <th

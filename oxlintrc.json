@@ -1,0 +1,15 @@
+{
+  "plugins": ["vue", "typescript", "import"],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn",
+    "perf": "warn"
+  },
+  "rules": {
+    "no-unused-vars": "off",
+    "no-redeclare": "off",
+    "unicorn/consistent-function-scoping": "warn",
+    "import/no-unassigned-import": "off"
+  },
+  "ignorePatterns": ["node_modules", ".nuxt", ".output", "dist", ".vercel", "*.d.ts"]
+}

@@ -20,10 +20,10 @@ export function useAlphaTab(containerRef: Ref<HTMLElement | null>) {
     settings.player.enablePlayer = true
     settings.player.enableCursor = true
     settings.player.enableUserInteraction = true
-    settings.display.resources.staffLineColor = '#4C566A'
-    settings.display.resources.barSeparatorColor = '#4C566A'
-    settings.display.resources.mainGlyphColor = '#ECEFF4'
-    settings.display.resources.secondaryGlyphColor = '#D8DEE9'
+    settings.display.resources.staffLineColor = '#4C566A' as any
+    settings.display.resources.barSeparatorColor = '#4C566A' as any
+    settings.display.resources.mainGlyphColor = '#ECEFF4' as any
+    settings.display.resources.secondaryGlyphColor = '#D8DEE9' as any
 
     api.value = new alphaTab.AlphaTabApi(containerRef.value, settings)
 

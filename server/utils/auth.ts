@@ -1,0 +1,87 @@
+import jwt from 'jsonwebtoken'
+import { eq } from 'drizzle-orm'
+import { db } from '../db'
+import { users } from '../db/schema'
+
+const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-in-production'
+const COOKIE_NAME = 'auth-token'
+
+interface JwtPayload {
+  userId: string
+}
+
+export interface AuthUser {
+  id: string
+  email: string
+  username: string
+  name: string
+  avatarUrl: string | null
+  createdAt: Date
+  updatedAt: Date
+}
+
+function stripPasswordHash(user: typeof users.$inferSelect): AuthUser {
+  const { passwordHash: _, ...safe } = user
+  return safe
+}
+
+export async function requireAuth(event: any): Promise<AuthUser> {
+  const token = getCookie(event, COOKIE_NAME)
+  if (!token) {
+    throw createError({ statusCode: 401, message: 'Authentication required' })
+  }
+
+  let payload: JwtPayload
+  try {
+    payload = jwt.verify(token, JWT_SECRET) as JwtPayload
+  } catch {
+    throw createError({ statusCode: 401, message: 'Invalid or expired token' })
+  }
+
+  const [user] = await db.select().from(users).where(eq(users.id, payload.userId)).limit(1)
+  if (!user) {
+    throw createError({ statusCode: 401, message: 'User not found' })
+  }
+
+  return stripPasswordHash(user)
+}
+
+export async function getOptionalAuth(event: any): Promise<AuthUser | null> {
+  const token = getCookie(event, COOKIE_NAME)
+  if (!token) return null
+
+  let payload: JwtPayload
+  try {
+    payload = jwt.verify(token, JWT_SECRET) as JwtPayload
+  } catch {
+    return null
+  }
+
+  const [user] = await db.select().from(users).where(eq(users.id, payload.userId)).limit(1)
+  if (!user) return null
+
+  return stripPasswordHash(user)
+}
+
+export function createAuthToken(userId: string): string {
+  return jwt.sign({ userId } satisfies JwtPayload, JWT_SECRET, { expiresIn: '7d' })
+}
+
+export function setAuthCookie(event: any, token: string) {
+  setCookie(event, COOKIE_NAME, token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 60 * 60 * 24 * 7, // 7 days
+    path: '/',
+  })
+}
+
+export function clearAuthCookie(event: any) {
+  deleteCookie(event, COOKIE_NAME, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+  })
+}

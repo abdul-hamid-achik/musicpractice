@@ -20,13 +20,9 @@ export default defineNuxtConfig({
     }
   },
 
-  nitro: {
-    experimental: { database: true }
-  },
-
   vite: {
     plugins: [
-      tailwindcss(),
+      tailwindcss() as any,
     ],
     optimizeDeps: {
       include: ['tone'],

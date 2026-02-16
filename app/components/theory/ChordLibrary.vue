@@ -1,15 +1,7 @@
 <script setup lang="ts">
 import { useMusicTheory } from '~/composables/useMusicTheory'
 import { useTheoryStore } from '~/stores/theory'
-
-interface Chord {
-  id: string
-  name: string
-  symbol: string
-  intervals: number[]
-  voicings?: Record<string, number[][]>
-  instrumentType?: string
-}
+import type { Chord } from '#shared/types/music-theory'
 
 const emit = defineEmits<{
   chordSelected: [payload: { root: string; chord: Chord; notes: string[] }]
@@ -60,16 +52,16 @@ const pianoKeys = computed(() => {
 const guitarGrid = computed(() => {
   if (!selectedChord.value) return []
   // Simple open-position chord approximation
-  const notes = chordNotes.value.map((n) => n)
+  const notes = new Set(chordNotes.value)
   const standardTuning = ['E', 'A', 'D', 'G', 'B', 'E']
-  const allNotes = getNoteNames()
+  const allNotes: string[] = getNoteNames()
   const dots: { string: number; fret: number }[] = []
 
   for (let s = 0; s < 6; s++) {
-    const openIdx = allNotes.indexOf(standardTuning[s])
+    const openIdx = allNotes.indexOf(standardTuning[s]!)
     for (let f = 0; f <= 4; f++) {
-      const noteAtFret = allNotes[(openIdx + f) % 12]
-      if (notes.includes(noteAtFret)) {
+      const noteAtFret = allNotes[(openIdx + f) % 12]!
+      if (notes.has(noteAtFret)) {
         dots.push({ string: s, fret: f })
         break
       }
@@ -112,7 +104,7 @@ async function playChord() {
     }).toDestination()
 
     const notes = chordNotes.value.map((n, i) => {
-      const allNotes = getNoteNames()
+      const allNotes: string[] = getNoteNames()
       const rootIdx = allNotes.indexOf(selectedRoot.value)
       const noteIdx = allNotes.indexOf(n)
       const octave = noteIdx >= rootIdx ? 4 : 5
@@ -134,7 +126,7 @@ onMounted(async () => {
     await theoryStore.fetchChords()
   }
   if (theoryStore.chords.length > 0) {
-    selectChord(theoryStore.chords[0] as Chord)
+    selectChord(theoryStore.chords[0]!)
   }
 })
 </script>
@@ -188,12 +180,12 @@ onMounted(async () => {
         :value="selectedChord?.id"
         @change="(e) => {
           const target = e.target as HTMLSelectElement
-          const chord = theoryStore.chords.find((c: any) => c.id === target.value) as Chord | undefined
+          const chord = theoryStore.chords.find((c) => c.id === target.value)
           if (chord) selectChord(chord)
         }"
       >
         <option
-          v-for="chord in (theoryStore.chords as Chord[])"
+          v-for="chord in theoryStore.chords"
           :key="chord.id"
           :value="chord.id"
           class="bg-surface-alt"
@@ -314,7 +306,6 @@ onMounted(async () => {
             x1="28"
             :y1="20 + f * 32"
             x2="172"
-            :y1.2="20 + f * 32"
             :y2="20 + f * 32"
             stroke="#4C566A"
             stroke-width="1.5"

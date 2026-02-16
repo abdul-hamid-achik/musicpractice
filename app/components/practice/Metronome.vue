@@ -51,7 +51,7 @@ function handleTap() {
   if (tapTimes.value.length >= 2) {
     const intervals: number[] = []
     for (let i = 1; i < tapTimes.value.length; i++) {
-      intervals.push(tapTimes.value[i] - tapTimes.value[i - 1])
+      intervals.push(tapTimes.value[i]! - tapTimes.value[i - 1]!)
     }
     const avgInterval = intervals.reduce((a, b) => a + b, 0) / intervals.length
     const tapBpm = Math.round(60000 / avgInterval)
@@ -62,7 +62,7 @@ function handleTap() {
 
   // Reset if gap > 2 seconds
   setTimeout(() => {
-    if (tapTimes.value.length > 0 && Date.now() - tapTimes.value[tapTimes.value.length - 1] > 2000) {
+    if (tapTimes.value.length > 0 && Date.now() - tapTimes.value[tapTimes.value.length - 1]! > 2000) {
       tapTimes.value = []
     }
   }, 2100)
@@ -139,7 +139,7 @@ function handleTap() {
         :class="[
           currentBeat === beat - 1 && isRunning
             ? beat === 1
-              ? 'bg-[#EBCB8B] border-[#EBCB8B] scale-110'
+              ? 'bg-warning border-warning scale-110'
               : 'bg-primary border-primary scale-110'
             : 'border-border bg-transparent',
         ]"

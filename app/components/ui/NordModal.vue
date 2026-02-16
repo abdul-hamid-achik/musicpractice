@@ -1,5 +1,5 @@
 <script setup lang="ts">
-defineProps<{
+const props = defineProps<{
   open: boolean
   title?: string
 }>()
@@ -7,6 +7,42 @@ defineProps<{
 const emit = defineEmits<{
   close: []
 }>()
+
+const dialogRef = ref<HTMLElement | null>(null)
+
+function handleKeydown(e: KeyboardEvent) {
+  if (e.key === 'Escape') {
+    emit('close')
+    return
+  }
+  // Focus trap
+  if (e.key === 'Tab' && dialogRef.value) {
+    const focusable = dialogRef.value.querySelectorAll<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+    )
+    if (focusable.length === 0) return
+    const first = focusable[0]!
+    const last = focusable[focusable.length - 1]!
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault()
+      last.focus()
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault()
+      first.focus()
+    }
+  }
+}
+
+watch(() => props.open, (isOpen) => {
+  if (isOpen) {
+    nextTick(() => {
+      const firstFocusable = dialogRef.value?.querySelector<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+      )
+      firstFocusable?.focus()
+    })
+  }
+})
 </script>
 
 <template>
@@ -23,12 +59,20 @@ const emit = defineEmits<{
         v-if="open"
         class="fixed inset-0 bg-black/50 z-50"
         @click.self="emit('close')"
+        @keydown="handleKeydown"
       >
-        <div class="bg-card border border-border rounded-xl max-w-lg mx-auto mt-20 p-6">
+        <div
+          ref="dialogRef"
+          role="dialog"
+          aria-modal="true"
+          :aria-label="title"
+          class="bg-card border border-border rounded-xl max-w-lg mx-auto mt-20 p-6"
+        >
           <div class="flex items-center justify-between mb-4">
             <h2 v-if="title" class="text-lg font-semibold text-text">{{ title }}</h2>
             <button
               class="text-text-muted hover:text-text ml-auto"
+              aria-label="Close dialog"
               @click="emit('close')"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">

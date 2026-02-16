@@ -56,7 +56,7 @@ const filteredSessions = computed(() => {
     sessions = sessions.filter((s: any) => new Date(s.startedAt) >= monthAgo)
   }
 
-  return sessions.sort(
+  return sessions.toSorted(
     (a: any, b: any) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime(),
   )
 })

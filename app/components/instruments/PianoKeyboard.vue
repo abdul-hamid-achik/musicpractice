@@ -55,7 +55,7 @@ const whiteKeys = computed<KeyData[]>(() => {
   for (let o = 0; o < props.octaves; o++) {
     const octave = props.startOctave + o
     for (let i = 0; i < whiteNotes.length; i++) {
-      const note = whiteNotes[i]
+      const note = whiteNotes[i]!
       const keyIndex = o * 7 + i
       keys.push({
         note,
@@ -128,6 +128,8 @@ function handleClick(key: KeyData) {
     :viewBox="`0 0 ${svgWidth} ${svgHeight}`"
     class="w-full h-auto select-none"
     xmlns="http://www.w3.org/2000/svg"
+    role="img"
+    aria-label="Piano keyboard diagram"
   >
     <!-- White keys -->
     <g

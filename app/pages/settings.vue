@@ -1,7 +1,5 @@
 <script setup lang="ts">
 const settingsStore = useSettingsStore()
-
-const volume = ref(80)
 </script>
 
 <template>
@@ -85,15 +83,16 @@ const volume = ref(80)
       <NordCard title="Audio">
         <div>
           <label class="block text-sm text-text-muted mb-2">
-            Volume: <span class="text-primary font-medium">{{ volume }}%</span>
+            Volume: <span class="text-primary font-medium">{{ settingsStore.volume }}%</span>
           </label>
           <input
-            v-model.number="volume"
+            :value="settingsStore.volume"
             type="range"
             min="0"
             max="100"
             step="1"
             class="w-full accent-primary"
+            @input="(e) => settingsStore.updateSetting('volume', parseInt((e.target as HTMLInputElement).value))"
           />
           <div class="flex justify-between text-xs text-text-muted mt-1">
             <span>0</span>

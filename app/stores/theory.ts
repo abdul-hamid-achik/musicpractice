@@ -1,15 +1,16 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { useMusicTheory } from '~/composables/useMusicTheory'
+import type { Scale, Chord } from '#shared/types/music-theory'
 
 export const useTheoryStore = defineStore('theory', () => {
   const { getScaleNotes, getChordNotes } = useMusicTheory()
 
   const selectedRoot = ref('C')
-  const selectedScale = ref<any | null>(null)
-  const selectedChord = ref<any | null>(null)
-  const scales = ref<any[]>([])
-  const chords = ref<any[]>([])
+  const selectedScale = ref<Scale | null>(null)
+  const selectedChord = ref<Chord | null>(null)
+  const scales = ref<Scale[]>([])
+  const chords = ref<Chord[]>([])
 
   const currentScaleNotes = computed(() => {
     if (!selectedScale.value) return []
@@ -33,11 +34,11 @@ export const useTheoryStore = defineStore('theory', () => {
     selectedRoot.value = note
   }
 
-  const setScale = (scale: any) => {
+  const setScale = (scale: Scale) => {
     selectedScale.value = scale
   }
 
-  const setChord = (chord: any) => {
+  const setChord = (chord: Chord) => {
     selectedChord.value = chord
   }
 

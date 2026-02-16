@@ -1,14 +1,7 @@
 <script setup lang="ts">
 import { useMusicTheory } from '~/composables/useMusicTheory'
 import { useTheoryStore } from '~/stores/theory'
-
-interface Scale {
-  id: string
-  name: string
-  intervals: number[]
-  category: string
-  description: string
-}
+import type { Scale } from '#shared/types/music-theory'
 
 const emit = defineEmits<{
   scaleSelected: [payload: { root: string; scale: Scale; notes: string[] }]
@@ -49,9 +42,9 @@ const scaleDegrees = computed(() => {
 
 const groupedScales = computed(() => {
   const groups: Record<string, Scale[]> = {}
-  for (const scale of theoryStore.scales as Scale[]) {
+  for (const scale of theoryStore.scales) {
     if (!groups[scale.category]) groups[scale.category] = []
-    groups[scale.category].push(scale)
+    groups[scale.category]!.push(scale)
   }
   return groups
 })
@@ -60,7 +53,7 @@ const categoryOrder = ['diatonic', 'pentatonic', 'minor', 'blues', 'jazz', 'symm
 
 const sortedCategories = computed(() => {
   const cats = Object.keys(groupedScales.value)
-  return cats.sort((a, b) => {
+  return cats.toSorted((a, b) => {
     const ai = categoryOrder.indexOf(a)
     const bi = categoryOrder.indexOf(b)
     return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi)
@@ -101,10 +94,13 @@ async function playScale() {
     }).toDestination()
 
     const notes = scaleNotes.value
+    const chromaticOrder = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
+    const rootIdx = chromaticOrder.indexOf(notes[0] ?? 'C')
     const now = Tone.now()
     for (let i = 0; i < notes.length; i++) {
-      const octave = i < notes.length && notes[i] <= (notes[0] ?? 'C') && i > 0 ? 5 : 4
-      const noteStr = `${notes[i]}${octave}`
+      const noteIdx = chromaticOrder.indexOf(notes[i] ?? 'C')
+      const octave = i > 0 && noteIdx <= rootIdx ? 5 : 4
+      const noteStr = `${notes[i]!}${octave}`
       synth.triggerAttackRelease(noteStr, '8n', now + i * 0.3)
     }
     // Play root an octave up at the end
@@ -124,7 +120,7 @@ onMounted(async () => {
     await theoryStore.fetchScales()
   }
   if (theoryStore.scales.length > 0) {
-    selectScale(theoryStore.scales[0] as Scale)
+    selectScale(theoryStore.scales[0]!)
   }
 })
 </script>
@@ -178,7 +174,7 @@ onMounted(async () => {
         :value="selectedScale?.id"
         @change="(e) => {
           const target = e.target as HTMLSelectElement
-          const scale = theoryStore.scales.find((s: any) => s.id === target.value) as Scale | undefined
+          const scale = theoryStore.scales.find((s) => s.id === target.value)
           if (scale) selectScale(scale)
         }"
       >
@@ -220,7 +216,7 @@ onMounted(async () => {
           >
             <div class="text-primary font-bold text-lg">{{ deg.note }}</div>
             <div class="text-text-muted text-xs">{{ deg.name }}</div>
-            <div class="text-border text-xs">{{ deg.interval }}st</div>
+            <div class="text-border text-xs">{{ deg.interval === 1 ? '1st' : deg.interval === 2 ? '2nd' : deg.interval === 3 ? '3rd' : `${deg.interval}th` }}</div>
           </div>
         </div>
       </div>

@@ -14,7 +14,7 @@ const navLinks = [
       <span class="text-primary text-2xl">&#9834;</span>
       <span class="font-bold text-xl text-primary">MusicPractice</span>
     </NuxtLink>
-    <nav class="flex items-center gap-6">
+    <nav aria-label="Primary navigation" class="flex items-center gap-6">
       <NuxtLink
         v-for="link in navLinks"
         :key="link.to"
