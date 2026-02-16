@@ -1,5 +1,5 @@
 <script setup lang="ts">
-definePageMeta({ layout: 'fullscreen' })
+definePageMeta({ layout: false })
 
 const auth = useAuth()
 const router = useRouter()
