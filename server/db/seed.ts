@@ -1,3 +1,4 @@
+import 'dotenv/config'
 import { db } from './index'
 import { instruments, scales, chords, songs, metronomePresets, users } from './schema'
 
