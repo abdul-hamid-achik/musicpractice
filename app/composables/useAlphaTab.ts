@@ -1,4 +1,4 @@
-import { ref, onMounted, onBeforeUnmount, type Ref } from 'vue'
+import { ref, onMounted, onBeforeUnmount, watch, type Ref } from 'vue'
 
 export function useAlphaTab(containerRef: Ref<HTMLElement | null>) {
   const api = ref<any>(null)
@@ -8,11 +8,35 @@ export function useAlphaTab(containerRef: Ref<HTMLElement | null>) {
 
   let playerStateListener: ((e: any) => void) | null = null
   let tickListener: ((e: any) => void) | null = null
+  let ColorClass: any = null
+
+  function applyThemeColors(settings: any, isDark: boolean) {
+    if (!ColorClass) return
+    if (isDark) {
+      settings.display.resources.staffLineColor = new ColorClass(76, 86, 106) // #4C566A nord3
+      settings.display.resources.barSeparatorColor = new ColorClass(76, 86, 106) // #4C566A nord3
+      settings.display.resources.barNumberColor = new ColorClass(191, 97, 106) // #BF616A nord11 (red)
+      settings.display.resources.mainGlyphColor = new ColorClass(236, 239, 244) // #ECEFF4 nord6
+      settings.display.resources.secondaryGlyphColor = new ColorClass(216, 222, 233) // #D8DEE9 nord4
+      settings.display.resources.scoreInfoColor = new ColorClass(216, 222, 233) // #D8DEE9 nord4
+    } else {
+      settings.display.resources.staffLineColor = new ColorClass(76, 86, 106) // #4C566A nord3
+      settings.display.resources.barSeparatorColor = new ColorClass(59, 66, 82) // #3B4252 nord1
+      settings.display.resources.barNumberColor = new ColorClass(191, 97, 106) // #BF616A nord11 (red)
+      settings.display.resources.mainGlyphColor = new ColorClass(46, 52, 64) // #2E3440 nord0
+      settings.display.resources.secondaryGlyphColor = new ColorClass(59, 66, 82) // #3B4252 nord1
+      settings.display.resources.scoreInfoColor = new ColorClass(59, 66, 82) // #3B4252 nord1
+    }
+  }
 
   onMounted(async () => {
     if (!containerRef.value) return
 
     const alphaTab = await import('@coderline/alphatab')
+    ColorClass = (alphaTab as any).model.Color
+
+    const settingsStore = useSettingsStore()
+    const isDark = settingsStore.theme !== 'light'
 
     const settings = new alphaTab.Settings()
     settings.core.engine = 'html5'
@@ -24,15 +48,17 @@ export function useAlphaTab(containerRef: Ref<HTMLElement | null>) {
     settings.player.enableUserInteraction = true
     settings.player.soundFont = '/soundfonts/sonivox.sf2'
 
-    // Nord theme colors
-    const Color = (alphaTab as any).model.Color
-    settings.display.resources.staffLineColor = new Color(76, 86, 106) // #4C566A
-    settings.display.resources.barSeparatorColor = new Color(76, 86, 106) // #4C566A
-    settings.display.resources.mainGlyphColor = new Color(236, 239, 244) // #ECEFF4
-    settings.display.resources.secondaryGlyphColor = new Color(216, 222, 233) // #D8DEE9
-    settings.display.resources.scoreInfoColor = new Color(216, 222, 233) // #D8DEE9
+    applyThemeColors(settings, isDark)
 
     api.value = new alphaTab.AlphaTabApi(containerRef.value, settings)
+
+    // Update colors when theme changes
+    watch(() => settingsStore.theme, (newTheme) => {
+      if (!api.value) return
+      applyThemeColors(api.value.settings, newTheme !== 'light')
+      api.value.updateSettings()
+      api.value.render()
+    })
 
     api.value.renderFinished.on(() => {
       isLoaded.value = true

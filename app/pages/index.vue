@@ -85,7 +85,7 @@ const isBlackKey = (i: number) => [1, 3, 6, 8, 10, 13].includes(i)
     <!-- ═══════ HERO SECTION ═══════ -->
     <section class="relative min-h-screen flex items-center justify-center pt-16">
       <!-- Animated background gradient -->
-      <div class="absolute inset-0 bg-gradient-to-br from-nord0 via-nord1 to-nord0" />
+      <div class="absolute inset-0 bg-gradient-to-br from-surface via-surface-alt to-surface dark:from-nord0 dark:via-nord1 dark:to-nord0" />
 
       <!-- Animated grid overlay -->
       <div class="absolute inset-0 opacity-[0.03]" style="background-image: linear-gradient(rgba(136,192,208,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(136,192,208,0.3) 1px, transparent 1px); background-size: 60px 60px;" />
