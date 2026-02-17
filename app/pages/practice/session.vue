@@ -12,9 +12,10 @@ const {
 } = usePracticeSession()
 
 const selectedInstrumentId = ref('')
+const selectedSongId = ref('')
+const songs = ref<Array<{ id: string; title: string; artist: string | null; instrumentType: string }>>([])
 const sessionNotes = ref('')
 const tagsInput = ref('')
-const showAlphaTab = ref(false)
 const sessionStarted = ref(false)
 const showEndConfirm = ref(false)
 const showRecovery = ref(false)
@@ -35,9 +36,22 @@ function removeTag(index: number) {
   tagsInput.value = arr.join(', ')
 }
 
+const filteredSongs = computed(() => {
+  if (!selectedInstrumentId.value) return songs.value
+  const inst = instrumentStore.instruments.find((i) => i.id === selectedInstrumentId.value)
+  if (!inst) return songs.value
+  return songs.value.filter((s) => s.instrumentType === inst.type)
+})
+
+const selectedSongTitle = computed(() => {
+  if (!selectedSongId.value) return null
+  const song = songs.value.find((s) => s.id === selectedSongId.value)
+  return song ? `${song.title}${song.artist ? ` - ${song.artist}` : ''}` : null
+})
+
 function handleStart() {
   if (!selectedInstrumentId.value) return
-  startSession(selectedInstrumentId.value, settingsStore.defaultTempo)
+  startSession(selectedInstrumentId.value, settingsStore.defaultTempo, selectedSongId.value || undefined)
   sessionStarted.value = true
   targetBpm.value = settingsStore.defaultTempo + 20
 }
@@ -104,12 +118,27 @@ onMounted(async () => {
   if (instrumentStore.instruments.length === 0) {
     await instrumentStore.fetchInstruments()
   }
+
+  // Fetch songs for the song selector
+  try {
+    const res = await $fetch<{ data: typeof songs.value }>('/api/songs')
+    songs.value = res.data
+  } catch {
+    songs.value = []
+  }
+
   // Read instrument type from query param and resolve to UUID
   const queryInstrument = route.query.instrument as string | undefined
   const instrumentType = queryInstrument || settingsStore.defaultInstrument
   const matched = instrumentStore.instruments.find((i) => i.type === instrumentType)
   if (matched) {
     selectedInstrumentId.value = matched.id
+  }
+
+  // Pre-select song from query param
+  const querySong = route.query.song as string | undefined
+  if (querySong) {
+    selectedSongId.value = querySong
   }
 
   // Check for recoverable session
@@ -128,6 +157,18 @@ onMounted(async () => {
       <NordCard title="Start a Practice Session">
         <div class="flex flex-col gap-4 items-center py-8">
           <InstrumentSelector v-model="selectedInstrumentId" />
+          <div class="w-full max-w-xs">
+            <label class="block text-sm text-text-muted mb-1 text-center">Song (optional)</label>
+            <select
+              v-model="selectedSongId"
+              class="w-full bg-surface-alt text-text border border-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+            >
+              <option value="">Free practice</option>
+              <option v-for="song in filteredSongs" :key="song.id" :value="song.id">
+                {{ song.title }}{{ song.artist ? ` - ${song.artist}` : '' }}
+              </option>
+            </select>
+          </div>
           <NordButton
             variant="primary"
             size="lg"
@@ -156,8 +197,11 @@ onMounted(async () => {
       </div>
 
       <!-- Instrument Selector -->
-      <div>
+      <div class="flex items-center gap-4">
         <InstrumentSelector v-model="selectedInstrumentId" />
+        <span v-if="selectedSongTitle" class="text-sm text-text-muted">
+          Practicing: <span class="text-primary font-medium">{{ selectedSongTitle }}</span>
+        </span>
       </div>
 
       <!-- Main Layout: Timer/Tempo + Metronome -->
@@ -209,18 +253,6 @@ onMounted(async () => {
         </div>
       </div>
 
-      <!-- AlphaTab Section -->
-      <NordCard>
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="text-lg font-semibold text-text">Sheet Music / Tablature</h3>
-          <NordButton variant="ghost" size="sm" @click="showAlphaTab = !showAlphaTab">
-            {{ showAlphaTab ? 'Hide' : 'Show' }}
-          </NordButton>
-        </div>
-        <div v-if="showAlphaTab">
-          <AlphaTabViewer alpha-tex=":4 0.6 2.5 2.4 0.3 | 0.6 2.5 2.4 0.3" />
-        </div>
-      </NordCard>
 
       <!-- Notes & Tags -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">

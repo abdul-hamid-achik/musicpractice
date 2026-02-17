@@ -7,6 +7,7 @@ const instrumentStore = useInstrumentStore()
 const goals = ref<PracticeGoal[]>([])
 const isLoading = ref(false)
 const showForm = ref(false)
+const editingGoalId = ref<string | null>(null)
 
 const newGoal = ref({
   title: '',
@@ -57,19 +58,54 @@ function getInstrumentName(instrumentId: string | null): string {
   return inst?.name || 'Unknown'
 }
 
+function startEdit(goal: PracticeGoal) {
+  editingGoalId.value = goal.id
+  newGoal.value = {
+    title: goal.title,
+    targetMinutesPerWeek: goal.targetMinutesPerWeek,
+    instrumentId: goal.instrumentId || '',
+  }
+  showForm.value = true
+}
+
+function cancelForm() {
+  showForm.value = false
+  editingGoalId.value = null
+  newGoal.value = { title: '', targetMinutesPerWeek: 60, instrumentId: '' }
+}
+
 async function saveGoal() {
   if (!newGoal.value.title.trim()) return
   try {
-    await $fetch('/api/goals', {
-      method: 'POST',
-      body: {
-        title: newGoal.value.title,
-        targetMinutesPerWeek: newGoal.value.targetMinutesPerWeek,
-        instrumentId: newGoal.value.instrumentId || null,
-      },
-    })
-    newGoal.value = { title: '', targetMinutesPerWeek: 60, instrumentId: '' }
-    showForm.value = false
+    if (editingGoalId.value) {
+      await $fetch(`/api/goals/${editingGoalId.value}`, {
+        method: 'PUT',
+        body: {
+          title: newGoal.value.title,
+          targetMinutesPerWeek: newGoal.value.targetMinutesPerWeek,
+          instrumentId: newGoal.value.instrumentId || null,
+        },
+      })
+    } else {
+      await $fetch('/api/goals', {
+        method: 'POST',
+        body: {
+          title: newGoal.value.title,
+          targetMinutesPerWeek: newGoal.value.targetMinutesPerWeek,
+          instrumentId: newGoal.value.instrumentId || null,
+        },
+      })
+    }
+    cancelForm()
+    await fetchGoals()
+  } catch {
+    // handle error silently
+  }
+}
+
+async function deleteGoal(goalId: string) {
+  try {
+    await $fetch(`/api/goals/${goalId}`, { method: 'DELETE' })
     await fetchGoals()
   } catch {
     // handle error silently
@@ -109,12 +145,32 @@ async function saveGoal() {
             <h4 class="font-medium text-text">{{ goal.title }}</h4>
             <p class="text-xs text-text-muted">{{ getInstrumentName(goal.instrumentId) }}</p>
           </div>
-          <span
-            class="text-sm font-medium"
-            :class="progressPercent(goal) >= 100 ? 'text-success' : 'text-primary'"
-          >
-            {{ progressPercent(goal) }}%
-          </span>
+          <div class="flex items-center gap-2">
+            <span
+              class="text-sm font-medium"
+              :class="progressPercent(goal) >= 100 ? 'text-success' : 'text-primary'"
+            >
+              {{ progressPercent(goal) }}%
+            </span>
+            <button
+              class="text-text-muted hover:text-primary transition-colors p-1"
+              title="Edit goal"
+              @click="startEdit(goal)"
+            >
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+              </svg>
+            </button>
+            <button
+              class="text-text-muted hover:text-error transition-colors p-1"
+              title="Delete goal"
+              @click="deleteGoal(goal.id)"
+            >
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 6 6 18M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
         </div>
 
         <!-- Progress bar -->
@@ -133,7 +189,7 @@ async function saveGoal() {
       </div>
     </StaggeredList>
 
-    <!-- Add goal form -->
+    <!-- Add/Edit goal form -->
     <div v-if="showForm" class="bg-card border border-border rounded-lg p-4 flex flex-col gap-3">
       <input
         v-model="newGoal.title"
@@ -169,7 +225,7 @@ async function saveGoal() {
         </div>
       </div>
       <div class="flex gap-2 justify-end">
-        <NordButton variant="ghost" size="sm" @click="showForm = false">
+        <NordButton variant="ghost" size="sm" @click="cancelForm">
           Cancel
         </NordButton>
         <NordButton
@@ -178,7 +234,7 @@ async function saveGoal() {
           :disabled="!newGoal.title.trim()"
           @click="saveGoal"
         >
-          Save Goal
+          {{ editingGoalId ? 'Update Goal' : 'Save Goal' }}
         </NordButton>
       </div>
     </div>

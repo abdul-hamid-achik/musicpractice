@@ -1,5 +1,5 @@
-import { eq } from 'drizzle-orm'
-import { practiceSessions, users } from '../../db/schema'
+import { eq, and } from 'drizzle-orm'
+import { practiceSessions, users, userProgress } from '../../db/schema'
 import { requireAuth } from '../../utils/auth'
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -16,6 +16,9 @@ export default defineEventHandler(async (event) => {
   if (!UUID_RE.test(body.instrumentId)) {
     throw createError({ statusCode: 400, message: 'Invalid instrumentId format' })
   }
+  if (body.songId != null && !UUID_RE.test(body.songId)) {
+    throw createError({ statusCode: 400, message: 'Invalid songId format' })
+  }
   if (body.durationSeconds != null && (!Number.isInteger(body.durationSeconds) || body.durationSeconds < 0)) {
     throw createError({ statusCode: 400, message: 'durationSeconds must be a non-negative integer' })
   }
@@ -27,6 +30,7 @@ export default defineEventHandler(async (event) => {
     const [session] = await db.insert(practiceSessions).values({
       userId: user.id,
       instrumentId: body.instrumentId,
+      songId: body.songId ?? null,
       startedAt: new Date(body.startedAt),
       endedAt: body.endedAt ? new Date(body.endedAt) : null,
       durationSeconds: body.durationSeconds ?? null,
@@ -84,6 +88,41 @@ export default defineEventHandler(async (event) => {
       }
     } catch {
       // Streak update is non-critical — don't fail the session save
+    }
+
+    // Update song progress if a song was practiced
+    if (body.songId) {
+      try {
+        const existing = await db
+          .select()
+          .from(userProgress)
+          .where(and(eq(userProgress.userId, user.id), eq(userProgress.songId, body.songId)))
+          .limit(1)
+
+        if (existing.length > 0) {
+          const row = existing[0]!
+          await db
+            .update(userProgress)
+            .set({
+              practiceCount: row.practiceCount + 1,
+              lastPracticedAt: new Date(),
+              maxTempoBpm: body.tempoBpm && (!row.maxTempoBpm || body.tempoBpm > row.maxTempoBpm)
+                ? body.tempoBpm
+                : row.maxTempoBpm,
+            })
+            .where(eq(userProgress.id, row.id))
+        } else {
+          await db.insert(userProgress).values({
+            userId: user.id,
+            songId: body.songId,
+            practiceCount: 1,
+            lastPracticedAt: new Date(),
+            maxTempoBpm: body.tempoBpm ?? null,
+          })
+        }
+      } catch {
+        // Song progress update is non-critical
+      }
     }
 
     return session

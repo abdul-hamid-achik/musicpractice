@@ -32,6 +32,7 @@ export const practiceSessions = pgTable('practice_sessions', {
   id: uuid('id').primaryKey().defaultRandom(),
   userId: uuid('user_id').notNull().references(() => users.id),
   instrumentId: uuid('instrument_id').notNull().references(() => instruments.id),
+  songId: uuid('song_id').references(() => songs.id),
   startedAt: timestamp('started_at', { withTimezone: true }).notNull(),
   endedAt: timestamp('ended_at', { withTimezone: true }),
   durationSeconds: integer('duration_seconds'),
@@ -89,6 +90,16 @@ export const userProgress = pgTable('user_progress', {
   maxTempoBpm: integer('max_tempo_bpm'),
   lastPracticedAt: timestamp('last_practiced_at', { withTimezone: true }),
   practiceCount: integer('practice_count').notNull().default(0),
+})
+
+export const earTrainingScores = pgTable('ear_training_scores', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id').notNull().references(() => users.id),
+  exerciseType: text('exercise_type').notNull(), // 'intervals' | 'notes'
+  correct: integer('correct').notNull(),
+  total: integer('total').notNull(),
+  settings: jsonb('settings').$type<Record<string, unknown>>(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 })
 
 export const metronomePresets = pgTable('metronome_presets', {

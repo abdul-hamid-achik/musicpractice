@@ -1,5 +1,5 @@
 import { eq, and, gte, lte, count } from 'drizzle-orm'
-import { practiceSessions, instruments } from '../../db/schema'
+import { practiceSessions, instruments, songs } from '../../db/schema'
 import { requireAuth } from '../../utils/auth'
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -42,6 +42,8 @@ export default defineEventHandler(async (event) => {
         userId: practiceSessions.userId,
         instrumentId: practiceSessions.instrumentId,
         instrumentName: instruments.name,
+        songId: practiceSessions.songId,
+        songTitle: songs.title,
         startedAt: practiceSessions.startedAt,
         endedAt: practiceSessions.endedAt,
         durationSeconds: practiceSessions.durationSeconds,
@@ -52,6 +54,7 @@ export default defineEventHandler(async (event) => {
       })
       .from(practiceSessions)
       .leftJoin(instruments, eq(practiceSessions.instrumentId, instruments.id))
+      .leftJoin(songs, eq(practiceSessions.songId, songs.id))
       .where(where)
       .limit(limit)
       .offset(offset)

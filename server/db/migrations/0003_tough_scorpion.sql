@@ -1,0 +1,2 @@
+ALTER TABLE "practice_sessions" ADD COLUMN "song_id" uuid;--> statement-breakpoint
+ALTER TABLE "practice_sessions" ADD CONSTRAINT "practice_sessions_song_id_songs_id_fk" FOREIGN KEY ("song_id") REFERENCES "public"."songs"("id") ON DELETE no action ON UPDATE no action;

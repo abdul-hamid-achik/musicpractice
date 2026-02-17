@@ -1,6 +1,7 @@
 <script setup lang="ts">
 const { bpm, isRunning, beatsPerMeasure, currentBeat, start, stop, setBpm } =
   useMetronome()
+const { userId } = useAuth()
 
 const timeSignatures = [
   { label: '2/4', beats: 2, unit: 4 },
@@ -77,7 +78,7 @@ const presetsLoading = ref(false)
 async function loadPresets() {
   try {
     presetsLoading.value = true
-    const result = await $fetch<{ data: typeof presets.value }>('/api/metronome-presets?userId=demo-user-id')
+    const result = await $fetch<{ data: typeof presets.value }>(`/api/metronome-presets?userId=${userId.value}`)
     presets.value = result.data
   } catch {
     // Auth required or other error - silently ignore
@@ -92,7 +93,7 @@ async function savePreset() {
     const preset = await $fetch('/api/metronome-presets', {
       method: 'POST',
       body: {
-        userId: 'demo-user-id',
+        userId: userId.value,
         name: presetName.value.trim(),
         tempoBpm: bpm.value,
         beatsPerMeasure: beatsPerMeasure.value,

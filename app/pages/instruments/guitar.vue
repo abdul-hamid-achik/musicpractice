@@ -207,9 +207,5 @@ onMounted(async () => {
       </div>
     </NordCard>
 
-    <!-- AlphaTab Section -->
-    <NordCard title="Exercise">
-      <AlphaTabViewer alpha-tex=":4 0.6 2.5 2.4 0.3 | 0.6 2.5 2.4 0.3 | 3.6 5.5 5.4 3.3 | 3.6 5.5 5.4 3.3" />
-    </NordCard>
   </div>
 </template>

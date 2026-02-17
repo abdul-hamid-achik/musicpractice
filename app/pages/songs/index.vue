@@ -159,7 +159,7 @@ async function submitSong() {
           >
             <option value="alphatex">AlphaTex</option>
             <option value="musicxml">MusicXML</option>
-            <option value="abc">ABC Notation</option>
+            <option value="guitar_pro">Guitar Pro</option>
           </select>
         </div>
 

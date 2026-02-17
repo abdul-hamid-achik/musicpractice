@@ -1,6 +1,12 @@
 <script setup lang="ts">
 const practiceStore = usePracticeStore()
+const instrumentStore = useInstrumentStore()
 const { formatTime } = usePracticeSession()
+
+function getInstrumentName(instrumentId: string): string {
+  const inst = instrumentStore.instruments.find((i) => i.id === instrumentId)
+  return inst?.name || instrumentId
+}
 
 const filterInstrument = ref('all')
 const filterRange = ref<'week' | 'month' | 'all'>('all')
@@ -28,15 +34,15 @@ const mostPracticedInstrument = computed(() => {
     const inst = s.instrumentId || 'unknown'
     counts[inst] = (counts[inst] || 0) + 1
   }
-  let max = ''
+  let maxId = ''
   let maxCount = 0
   for (const [k, v] of Object.entries(counts)) {
     if (v > maxCount) {
-      max = k
+      maxId = k
       maxCount = v
     }
   }
-  return max || '-'
+  return maxId ? getInstrumentName(maxId) : '-'
 })
 
 const filteredSessions = computed(() => {
@@ -66,7 +72,10 @@ const instrumentOptions = computed(() => {
   return Array.from(ids)
 })
 
-onMounted(() => {
+onMounted(async () => {
+  if (instrumentStore.instruments.length === 0) {
+    await instrumentStore.fetchInstruments()
+  }
   practiceStore.fetchSessions()
 })
 </script>
@@ -102,7 +111,7 @@ onMounted(() => {
           >
             <option value="all">All Instruments</option>
             <option v-for="inst in instrumentOptions" :key="inst" :value="inst" class="capitalize">
-              {{ inst }}
+              {{ getInstrumentName(inst) }}
             </option>
           </select>
         </div>

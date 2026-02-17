@@ -11,6 +11,7 @@ function formatTime(seconds: number): string {
 
 interface StoredSession {
   instrumentId: string
+  songId?: string
   tempoBpm?: number
   startedAt: string
   accumulatedSeconds: number
@@ -22,7 +23,7 @@ export function usePracticeSession() {
   const isPaused = ref(false)
   const startTime = ref<Date | null>(null)
   const elapsed = ref(0)
-  const currentSession = ref<{ instrumentId: string; tempoBpm?: number } | null>(null)
+  const currentSession = ref<{ instrumentId: string; songId?: string; tempoBpm?: number } | null>(null)
 
   let timer: ReturnType<typeof setInterval> | null = null
   let accumulatedSeconds = 0
@@ -32,6 +33,7 @@ export function usePracticeSession() {
     if (!import.meta.client || !currentSession.value || !startTime.value) return
     const data: StoredSession = {
       instrumentId: currentSession.value.instrumentId,
+      songId: currentSession.value.songId,
       tempoBpm: currentSession.value.tempoBpm,
       startedAt: startTime.value.toISOString(),
       accumulatedSeconds: elapsed.value,
@@ -74,9 +76,9 @@ export function usePracticeSession() {
     }
   }
 
-  const startSession = (instrumentId: string, tempoBpm?: number) => {
+  const startSession = (instrumentId: string, tempoBpm?: number, songId?: string) => {
     startTime.value = new Date()
-    currentSession.value = { instrumentId, tempoBpm }
+    currentSession.value = { instrumentId, songId, tempoBpm }
     isActive.value = true
     isPaused.value = false
     elapsed.value = 0
@@ -109,7 +111,7 @@ export function usePracticeSession() {
 
   const restoreSession = (stored: StoredSession) => {
     startTime.value = new Date(stored.startedAt)
-    currentSession.value = { instrumentId: stored.instrumentId, tempoBpm: stored.tempoBpm }
+    currentSession.value = { instrumentId: stored.instrumentId, songId: stored.songId, tempoBpm: stored.tempoBpm }
     isActive.value = true
     accumulatedSeconds = stored.accumulatedSeconds
     elapsed.value = stored.accumulatedSeconds
@@ -125,6 +127,7 @@ export function usePracticeSession() {
     if (!currentSession.value || !startTime.value) return null
     const body = {
       instrumentId: currentSession.value.instrumentId,
+      songId: currentSession.value.songId || null,
       startedAt: startTime.value.toISOString(),
       endedAt: new Date().toISOString(),
       durationSeconds: elapsed.value,

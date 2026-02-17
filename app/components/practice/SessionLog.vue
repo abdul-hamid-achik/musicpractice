@@ -8,6 +8,7 @@ interface Session {
   notes: string | null
   tags: string[]
   instrumentId: string
+  songTitle?: string | null
 }
 
 const props = withDefaults(
@@ -124,6 +125,7 @@ function sortIndicator(key: SortKey): string {
             </th>
             <th class="py-2 px-3 text-sm font-medium text-text-muted">Tempo</th>
             <th class="py-2 px-3 text-sm font-medium text-text-muted">Instrument</th>
+            <th class="py-2 px-3 text-sm font-medium text-text-muted">Song</th>
             <th class="py-2 px-3 text-sm font-medium text-text-muted">Tags</th>
           </tr>
         </thead>
@@ -145,6 +147,9 @@ function sortIndicator(key: SortKey): string {
               <td class="py-2.5 px-3 text-sm text-text-muted">
                 {{ getInstrumentName(session.instrumentId) }}
               </td>
+              <td class="py-2.5 px-3 text-sm text-text-muted">
+                {{ session.songTitle || '-' }}
+              </td>
               <td class="py-2.5 px-3">
                 <div class="flex flex-wrap gap-1">
                   <span
@@ -159,7 +164,7 @@ function sortIndicator(key: SortKey): string {
             </tr>
             <!-- Expanded notes row -->
             <tr v-if="expandedId === session.id && session.notes">
-              <td colspan="5" class="py-3 px-3 bg-surface-alt/30">
+              <td colspan="6" class="py-3 px-3 bg-surface-alt/30">
                 <p class="text-sm text-text-muted whitespace-pre-wrap">
                   {{ session.notes }}
                 </p>

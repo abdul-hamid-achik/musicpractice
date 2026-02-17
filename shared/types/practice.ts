@@ -2,6 +2,7 @@ export interface PracticeSession {
   id: string
   userId: string
   instrumentId: string
+  songId: string | null
   startedAt: Date
   endedAt: Date | null
   durationSeconds: number | null
