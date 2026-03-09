@@ -1,40 +1,37 @@
 import { eq } from 'drizzle-orm'
 import { users } from '../../db/schema'
 import { requireAuth } from '../../utils/auth'
+import { calculateStreakStatus } from '../../utils/streaks'
+import { createApiError, handleApiError } from '../../utils/errors'
 
 export default defineEventHandler(async (event) => {
-  const user = await requireAuth(event)
-  const db = useDb()
+  try {
+    const user = await requireAuth(event)
+    const db = useDb()
 
-  const [row] = await db
-    .select({
-      currentStreak: users.currentStreak,
-      longestStreak: users.longestStreak,
-      lastPracticeDate: users.lastPracticeDate,
-    })
-    .from(users)
-    .where(eq(users.id, user.id))
-    .limit(1)
+    const [row] = await db
+      .select({
+        currentStreak: users.currentStreak,
+        longestStreak: users.longestStreak,
+        lastPracticeDate: users.lastPracticeDate,
+      })
+      .from(users)
+      .where(eq(users.id, user.id))
+      .limit(1)
 
-  if (!row) {
-    throw createError({ statusCode: 404, message: 'User not found' })
-  }
+    if (!row) {
+      throw createApiError('User not found', 404)
+    }
 
-  // Check if streak is still active (last practice was today or yesterday)
-  let activeToday = false
-  if (row.lastPracticeDate) {
-    const today = new Date()
-    const todayStr = today.toISOString().split('T')[0]
-    const yesterday = new Date(today)
-    yesterday.setDate(yesterday.getDate() - 1)
-    const yesterdayStr = yesterday.toISOString().split('T')[0]
-    activeToday = row.lastPracticeDate === todayStr || row.lastPracticeDate === yesterdayStr
-  }
+    const streak = calculateStreakStatus(row.lastPracticeDate, row.currentStreak, row.longestStreak)
 
-  return {
-    currentStreak: activeToday ? row.currentStreak : 0,
-    longestStreak: row.longestStreak,
-    lastPracticeDate: row.lastPracticeDate,
-    practicedToday: row.lastPracticeDate === new Date().toISOString().split('T')[0],
+    return {
+      currentStreak: streak.currentStreak,
+      longestStreak: streak.longestStreak,
+      lastPracticeDate: streak.lastPracticeDate,
+      practicedToday: streak.practicedToday,
+    }
+  } catch (error) {
+    return handleApiError(error, { route: '/api/streaks', operation: 'get' })
   }
 })

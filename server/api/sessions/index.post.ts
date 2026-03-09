@@ -1,32 +1,30 @@
 import { eq, and } from 'drizzle-orm'
 import { practiceSessions, users, userProgress } from '../../db/schema'
 import { requireAuth } from '../../utils/auth'
-
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+import { calculateStreakUpdate } from '../../utils/streaks'
+import { createApiError, handleApiError, validateId } from '../../utils/errors'
 
 export default defineEventHandler(async (event) => {
-  const user = await requireAuth(event)
-  const db = useDb()
-  const body = await readBody(event)
-
-  if (!body.instrumentId || !body.startedAt) {
-    throw createError({ statusCode: 400, message: 'instrumentId and startedAt are required' })
-  }
-
-  if (!UUID_RE.test(body.instrumentId)) {
-    throw createError({ statusCode: 400, message: 'Invalid instrumentId format' })
-  }
-  if (body.songId != null && !UUID_RE.test(body.songId)) {
-    throw createError({ statusCode: 400, message: 'Invalid songId format' })
-  }
-  if (body.durationSeconds != null && (!Number.isInteger(body.durationSeconds) || body.durationSeconds < 0)) {
-    throw createError({ statusCode: 400, message: 'durationSeconds must be a non-negative integer' })
-  }
-  if (body.tempoBpm != null && (!Number.isInteger(body.tempoBpm) || body.tempoBpm < 1)) {
-    throw createError({ statusCode: 400, message: 'tempoBpm must be a positive integer' })
-  }
-
   try {
+    const user = await requireAuth(event)
+    const db = useDb()
+    const body = await readBody(event)
+
+    if (!body.instrumentId || !body.startedAt) {
+      throw createApiError('instrumentId and startedAt are required', 400)
+    }
+
+    validateId(body.instrumentId, 'instrumentId')
+    if (body.songId != null) {
+      validateId(body.songId, 'songId')
+    }
+    if (body.durationSeconds != null && (!Number.isInteger(body.durationSeconds) || body.durationSeconds < 0)) {
+      throw createApiError('durationSeconds must be a non-negative integer', 400)
+    }
+    if (body.tempoBpm != null && (!Number.isInteger(body.tempoBpm) || body.tempoBpm < 1)) {
+      throw createApiError('tempoBpm must be a positive integer', 400)
+    }
+
     const [session] = await db.insert(practiceSessions).values({
       userId: user.id,
       instrumentId: body.instrumentId,
@@ -39,7 +37,9 @@ export default defineEventHandler(async (event) => {
       tags: body.tags ?? [],
     }).returning()
 
-    if (!session) throw createError({ statusCode: 500, message: 'Failed to create session' })
+    if (!session) {
+      throw createApiError('Failed to create session', 500)
+    }
 
     // Update streak
     try {
@@ -54,28 +54,11 @@ export default defineEventHandler(async (event) => {
         .limit(1)
 
       if (userRow) {
-        const today = new Date().toISOString().split('T')[0]!
-        const lastDate = userRow.lastPracticeDate
-
-        let newStreak = userRow.currentStreak
-
-        if (lastDate === today) {
-          // Already practiced today — keep streak as-is
-        } else {
-          const yesterday = new Date()
-          yesterday.setDate(yesterday.getDate() - 1)
-          const yesterdayStr = yesterday.toISOString().split('T')[0]
-
-          if (lastDate === yesterdayStr) {
-            // Practiced yesterday — continue streak
-            newStreak = userRow.currentStreak + 1
-          } else {
-            // Missed a day or first session ever — reset to 1
-            newStreak = 1
-          }
-        }
-
-        const newLongest = Math.max(userRow.longestStreak, newStreak)
+        const { currentStreak: newStreak, longestStreak: newLongest, today } = calculateStreakUpdate(
+          userRow.lastPracticeDate,
+          userRow.currentStreak,
+          userRow.longestStreak
+        )
 
         await db
           .update(users)
@@ -99,8 +82,17 @@ export default defineEventHandler(async (event) => {
           .where(and(eq(userProgress.userId, user.id), eq(userProgress.songId, body.songId)))
           .limit(1)
 
+        // Calculate completion percent based on session duration (5% per 5 minutes, capped at 100%)
+        let completionIncrement = 0
+        if (body.durationSeconds != null && body.durationSeconds > 0) {
+          const durationMinutes = body.durationSeconds / 60
+          completionIncrement = Math.min(100, Math.floor(durationMinutes / 5) * 5)
+        }
+
         if (existing.length > 0) {
           const row = existing[0]!
+          const newCompletionPercent = Math.min(100, (row.completionPercent ?? 0) + completionIncrement)
+
           await db
             .update(userProgress)
             .set({
@@ -109,6 +101,7 @@ export default defineEventHandler(async (event) => {
               maxTempoBpm: body.tempoBpm && (!row.maxTempoBpm || body.tempoBpm > row.maxTempoBpm)
                 ? body.tempoBpm
                 : row.maxTempoBpm,
+              completionPercent: newCompletionPercent,
             })
             .where(eq(userProgress.id, row.id))
         } else {
@@ -118,6 +111,7 @@ export default defineEventHandler(async (event) => {
             practiceCount: 1,
             lastPracticedAt: new Date(),
             maxTempoBpm: body.tempoBpm ?? null,
+            completionPercent: completionIncrement,
           })
         }
       } catch {
@@ -126,8 +120,7 @@ export default defineEventHandler(async (event) => {
     }
 
     return session
-  } catch (err: unknown) {
-    if (err && typeof err === 'object' && 'statusCode' in err) throw err
-    throw createError({ statusCode: 500, message: 'Failed to create session' })
+  } catch (error) {
+    return handleApiError(error, { route: '/api/sessions', operation: 'create' })
   }
 })

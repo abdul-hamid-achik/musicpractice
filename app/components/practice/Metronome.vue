@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import { apiGet, apiPost } from '~/utils/api'
+
 const { bpm, isRunning, beatsPerMeasure, currentBeat, start, stop, setBpm } =
   useMetronome()
-const { userId } = useAuth()
+const { showError, showSuccess } = useToast()
 
 const timeSignatures = [
   { label: '2/4', beats: 2, unit: 4 },
@@ -78,10 +80,11 @@ const presetsLoading = ref(false)
 async function loadPresets() {
   try {
     presetsLoading.value = true
-    const result = await $fetch<{ data: typeof presets.value }>(`/api/metronome-presets?userId=${userId.value}`)
+    const result = await apiGet<{ data: typeof presets.value }>('/api/metronome-presets', { suppressError: true })
     presets.value = result.data
-  } catch {
-    // Auth required or other error - silently ignore
+  } catch (error) {
+    showError('Failed to load metronome presets')
+    console.error('Error loading presets:', error)
   } finally {
     presetsLoading.value = false
   }
@@ -90,21 +93,22 @@ async function loadPresets() {
 async function savePreset() {
   if (!presetName.value.trim()) return
   try {
-    const preset = await $fetch('/api/metronome-presets', {
-      method: 'POST',
-      body: {
-        userId: userId.value,
+    const preset = await apiPost<{ id: string; name: string; tempoBpm: number; beatsPerMeasure: number; beatUnit: number }>(
+      '/api/metronome-presets',
+      {
         name: presetName.value.trim(),
         tempoBpm: bpm.value,
         beatsPerMeasure: beatsPerMeasure.value,
         beatUnit: 4,
       },
-    })
-    presets.value.push(preset as any)
+      { successMessage: 'Preset saved successfully' }
+    )
+    presets.value.push(preset)
     presetName.value = ''
     showSavePreset.value = false
-  } catch {
-    // Handle error silently
+  } catch (error) {
+    showError('Failed to save preset')
+    console.error('Error saving preset:', error)
   }
 }
 
@@ -129,29 +133,33 @@ defineExpose({ setBpm, adjustBpm, togglePlayback, bpm, isRunning })
     <!-- BPM Display -->
     <div class="flex items-center justify-center gap-4">
       <button
-        class="w-10 h-10 rounded-lg bg-surface-alt text-text-muted hover:bg-border transition-colors text-lg font-bold"
+        class="w-10 h-10 rounded-lg bg-surface-alt text-text-muted hover:bg-border transition-colors text-lg font-bold focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-card"
+        aria-label="Decrease tempo by 5 BPM"
         @click="adjustBpm(-5)"
       >
         -5
       </button>
       <button
-        class="w-8 h-8 rounded-lg bg-surface-alt text-text-muted hover:bg-border transition-colors font-bold"
+        class="w-8 h-8 rounded-lg bg-surface-alt text-text-muted hover:bg-border transition-colors font-bold focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-card"
+        aria-label="Decrease tempo by 1 BPM"
         @click="adjustBpm(-1)"
       >
         -
       </button>
-      <div class="text-center min-w-[100px]">
+      <div class="text-center min-w-[100px]" aria-live="polite">
         <div class="text-5xl font-bold font-mono text-text">{{ bpm }}</div>
         <div class="text-sm text-text-muted mt-1">BPM</div>
       </div>
       <button
-        class="w-8 h-8 rounded-lg bg-surface-alt text-text-muted hover:bg-border transition-colors font-bold"
+        class="w-8 h-8 rounded-lg bg-surface-alt text-text-muted hover:bg-border transition-colors font-bold focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-card"
+        aria-label="Increase tempo by 1 BPM"
         @click="adjustBpm(1)"
       >
         +
       </button>
       <button
-        class="w-10 h-10 rounded-lg bg-surface-alt text-text-muted hover:bg-border transition-colors text-lg font-bold"
+        class="w-10 h-10 rounded-lg bg-surface-alt text-text-muted hover:bg-border transition-colors text-lg font-bold focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-card"
+        aria-label="Increase tempo by 5 BPM"
         @click="adjustBpm(5)"
       >
         +5
@@ -164,17 +172,22 @@ defineExpose({ setBpm, adjustBpm, togglePlayback, bpm, isRunning })
       type="range"
       min="30"
       max="300"
-      class="w-full accent-primary"
+      class="w-full accent-primary focus:outline-none focus:ring-2 focus:ring-primary"
+      aria-label="Tempo slider"
+      aria-valuemin="30"
+      aria-valuemax="300"
+      aria-valuenow="bpm"
       @input="handleSliderInput"
     />
 
     <!-- Time Signature -->
-    <div class="flex flex-wrap gap-2 justify-center">
+    <div class="flex flex-wrap gap-2 justify-center" role="group" aria-label="Time signature selection">
       <NordButton
         v-for="sig in timeSignatures"
         :key="sig.label"
         :variant="selectedTimeSig === sig.label ? 'primary' : 'ghost'"
         size="sm"
+        :aria-pressed="selectedTimeSig === sig.label"
         @click="setTimeSignature(sig)"
       >
         {{ sig.label }}
@@ -182,7 +195,7 @@ defineExpose({ setBpm, adjustBpm, togglePlayback, bpm, isRunning })
     </div>
 
     <!-- Visual Beat Indicator -->
-    <div class="flex justify-center gap-3">
+    <div class="flex justify-center gap-3" role="group" aria-label="Beat indicator" aria-live="polite">
       <div
         v-for="beat in beatsPerMeasure"
         :key="beat"
@@ -194,6 +207,7 @@ defineExpose({ setBpm, adjustBpm, togglePlayback, bpm, isRunning })
               : 'bg-primary border-primary scale-110 beat-ripple'
             : 'border-border bg-transparent',
         ]"
+        :aria-label="`Beat ${beat}${currentBeat === beat - 1 && isRunning ? ' (current)' : ''}`"
       />
     </div>
 
@@ -202,12 +216,14 @@ defineExpose({ setBpm, adjustBpm, togglePlayback, bpm, isRunning })
       <NordButton
         :variant="isRunning ? 'danger' : 'success'"
         size="lg"
+        :aria-pressed="isRunning"
+        :aria-label="isRunning ? 'Stop metronome' : 'Start metronome'"
         @click="togglePlayback"
       >
         {{ isRunning ? 'Stop' : 'Start' }}
       </NordButton>
 
-      <NordButton variant="ghost" size="lg" @click="handleTap">
+      <NordButton variant="ghost" size="lg" aria-label="Tap tempo" @click="handleTap">
         Tap Tempo
       </NordButton>
     </div>

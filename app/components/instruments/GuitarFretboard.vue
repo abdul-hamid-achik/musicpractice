@@ -35,6 +35,10 @@ const fretSpacing = (fretboardWidth - nutX) / 24
 const stringSpacing = 28
 const topPadding = 30
 
+// Keyboard navigation state
+const focusedNote = ref<{ string: number; fret: number } | null>(null)
+const fretboardRef = ref<SVGSVGElement | null>(null)
+
 function parseNote(noteWithOctave: string): { note: string; octave: number } {
   const match = noteWithOctave.match(/^([A-G][#b]?)(\d+)$/)
   if (!match) return { note: 'C', octave: 3 }
@@ -86,15 +90,69 @@ function handleNoteClick(string: number, fret: number, note: string) {
   playNote(note, octave, props.instrument)
   emit('noteClick', { string, fret, note, octave })
 }
+
+// Keyboard navigation handlers
+function handleKeydown(event: KeyboardEvent) {
+  if (!focusedNote.value) {
+    // Start from first string, open fret
+    focusedNote.value = { string: 0, fret: 0 }
+    return
+  }
+
+  const { string, fret } = focusedNote.value
+  let newString = string
+  let newFret = fret
+
+  switch (event.key) {
+    case 'ArrowRight':
+      newFret = Math.min(fret + 1, props.frets)
+      break
+    case 'ArrowLeft':
+      newFret = Math.max(fret - 1, 0)
+      break
+    case 'ArrowDown':
+      newString = Math.min(string + 1, props.tuning.length - 1)
+      break
+    case 'ArrowUp':
+      newString = Math.max(string - 1, 0)
+      break
+    case 'Enter':
+    case ' ':
+      event.preventDefault()
+      const note = fretboardNotes.value[string]?.[fret]?.note
+      if (note) {
+        handleNoteClick(string, fret, note)
+      }
+      return
+    default:
+      return
+  }
+
+  event.preventDefault()
+  focusedNote.value = { string: newString, fret: newFret }
+}
+
+function isFocused(string: number, fret: number): boolean {
+  return focusedNote.value?.string === string && focusedNote.value?.fret === fret
+}
+
+function getNoteLabel(string: number, fret: number): string {
+  const note = fretboardNotes.value[string]?.[fret]?.note
+  const octave = getActualOctave(string, fret)
+  return `${note}${octave}`
+}
 </script>
 
 <template>
   <svg
+    ref="fretboardRef"
     :viewBox="`0 0 ${fretboardWidth} ${fretboardHeight + 20}`"
     class="w-full h-auto select-none"
     xmlns="http://www.w3.org/2000/svg"
-    role="img"
-    aria-label="Guitar fretboard diagram"
+    role="application"
+    aria-label="Guitar fretboard diagram. Use arrow keys to navigate between notes, Enter or Space to play."
+    tabindex="0"
+    @keydown="handleKeydown"
   >
     <!-- Nut -->
     <line
@@ -163,7 +221,12 @@ function handleNoteClick(string: number, fret: number, note: string) {
         v-for="n in stringNotes"
         :key="`note-${s}-${n.fret}`"
         class="cursor-pointer"
+        role="button"
+        :aria-label="`${getNoteLabel(n.string, n.fret)} - String ${n.string + 1}, Fret ${n.fret}`"
+        :aria-pressed="isHighlighted(n.note)"
+        :tabindex="isFocused(n.string, n.fret) ? 0 : -1"
         @click="handleNoteClick(n.string, n.fret, n.note)"
+        @focus="focusedNote = { string: n.string, fret: n.fret }"
       >
         <!-- Highlighted note circle -->
         <circle
@@ -181,6 +244,18 @@ function handleNoteClick(string: number, fret: number, note: string) {
           r="4"
           fill="transparent"
           class="hover-dot"
+        />
+        <!-- Focus indicator -->
+        <circle
+          v-if="isFocused(n.string, n.fret)"
+          :cx="n.x"
+          :cy="n.y"
+          r="14"
+          fill="none"
+          stroke="var(--color-primary)"
+          stroke-width="2"
+          stroke-dasharray="4,2"
+          class="focus-indicator"
         />
 
         <!-- Note label for highlighted -->
@@ -235,5 +310,20 @@ g:active circle {
 }
 g:hover .hover-label {
   opacity: 1;
+}
+
+/* Focus indicator animation */
+.focus-indicator {
+  animation: focus-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes focus-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Ensure focused elements are visible */
+g[tabindex="0"]:focus {
+  outline: none;
 }
 </style>

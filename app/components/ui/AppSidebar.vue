@@ -1,6 +1,7 @@
 <script setup lang="ts">
 const auth = useAuth()
 const { mobileOpen, close } = useSidebar()
+const route = useRoute()
 
 const sections = [
   {
@@ -33,7 +34,12 @@ const sections = [
 const standaloneLinks = [
   { label: 'Songs', to: '/songs' },
   { label: 'Settings', to: '/settings' },
+  { label: 'Account', to: '/account' },
 ]
+
+function isActiveLink(to: string): boolean {
+  return route.path === to || route.path.startsWith(to + '/')
+}
 </script>
 
 <template>
@@ -43,48 +49,56 @@ const standaloneLinks = [
       'fixed left-0 top-16 w-64 h-[calc(100vh-4rem)] bg-surface-alt border-r border-border overflow-y-auto transition-transform duration-200 z-30 flex flex-col',
       mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
     ]"
+    aria-label="Sidebar navigation"
+    role="complementary"
   >
-    <nav aria-label="Main navigation" class="p-4 space-y-6 flex-1">
+    <nav aria-label="Main navigation" class="p-4 space-y-6 flex-1" role="navigation">
       <div v-for="section in sections" :key="section.label">
-        <h4 class="uppercase text-xs text-text-muted tracking-wider mb-2 px-4">
+        <h4 class="uppercase text-xs text-text-muted tracking-wider mb-2 px-4" :id="`section-${section.label.toLowerCase().replace(/\s+/g, '-')}`">
           {{ section.label }}
         </h4>
-        <NuxtLink
-          v-for="link in section.links"
-          :key="link.to"
-          :to="link.to"
-          class="block py-2 px-4 rounded-md text-text-muted hover:bg-card hover:text-text transition-colors duration-150"
-          active-class="!bg-card !text-primary"
-          @click="close()"
-        >
-          {{ link.label }}
-        </NuxtLink>
+        <ul :aria-labelledby="`section-${section.label.toLowerCase().replace(/\s+/g, '-')}`" class="space-y-1">
+          <li v-for="link in section.links" :key="link.to">
+            <NuxtLink
+              :to="link.to"
+              class="block py-2 px-4 rounded-md text-text-muted hover:bg-card hover:text-text transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-inset"
+              :class="{ '!bg-card !text-primary': isActiveLink(link.to) }"
+              :aria-current="isActiveLink(link.to) ? 'page' : undefined"
+              @click="close()"
+            >
+              {{ link.label }}
+            </NuxtLink>
+          </li>
+        </ul>
       </div>
 
       <div class="border-t border-border pt-4">
-        <NuxtLink
-          v-for="link in standaloneLinks"
-          :key="link.to"
-          :to="link.to"
-          class="block py-2 px-4 rounded-md text-text-muted hover:bg-card hover:text-text transition-colors duration-150"
-          active-class="!bg-card !text-primary"
-          @click="close()"
-        >
-          {{ link.label }}
-        </NuxtLink>
+        <ul class="space-y-1">
+          <li v-for="link in standaloneLinks" :key="link.to">
+            <NuxtLink
+              :to="link.to"
+              class="block py-2 px-4 rounded-md text-text-muted hover:bg-card hover:text-text transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-inset"
+              :class="{ '!bg-card !text-primary': isActiveLink(link.to) }"
+              :aria-current="isActiveLink(link.to) ? 'page' : undefined"
+              @click="close()"
+            >
+              {{ link.label }}
+            </NuxtLink>
+          </li>
+        </ul>
       </div>
     </nav>
 
     <!-- User section at bottom -->
     <div v-if="auth.isAuthenticated.value" class="p-4 border-t border-border">
       <div class="flex items-center gap-3 px-2">
-        <div class="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center text-sm font-bold shrink-0">
+        <div class="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center text-sm font-bold shrink-0" aria-hidden="true">
           {{ auth.userName.value?.charAt(0)?.toUpperCase() }}
         </div>
         <div class="min-w-0 flex-1">
           <p class="text-sm font-medium text-text truncate">{{ auth.userName.value }}</p>
           <button
-            class="text-xs text-text-muted hover:text-text transition-colors"
+            class="text-xs text-text-muted hover:text-text transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-inset rounded-md px-1 py-0.5"
             @click="auth.logout"
           >
             Sign out

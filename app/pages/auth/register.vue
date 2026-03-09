@@ -11,6 +11,7 @@ const form = ref({
   name: '',
 })
 const error = ref('')
+const errorRef = ref<HTMLElement | null>(null)
 
 const validation = computed(() => {
   const errors: string[] = []
@@ -35,8 +36,12 @@ async function handleRegister() {
   try {
     await auth.register(form.value.email, form.value.username, form.value.password, form.value.name)
     router.push('/dashboard')
-  } catch (e: any) {
-    error.value = e?.data?.message || 'Registration failed'
+  } catch (e: unknown) {
+    const errorObj = e as { data?: { message?: string } }
+    error.value = errorObj?.data?.message || 'Registration failed'
+    nextTick(() => {
+      errorRef.value?.focus()
+    })
   }
 }
 </script>
@@ -44,8 +49,8 @@ async function handleRegister() {
 <template>
   <div class="min-h-screen bg-surface flex flex-col">
     <nav class="w-full bg-surface/80 backdrop-blur-md border-b border-border/50 h-14 flex items-center justify-between px-6">
-      <NuxtLink to="/" class="flex items-center gap-2 group">
-        <span class="text-primary text-2xl transition-transform duration-300 group-hover:scale-110">&#9834;</span>
+      <NuxtLink to="/" class="flex items-center gap-2 group focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-surface rounded-md">
+        <span class="text-primary text-2xl transition-transform duration-300 group-hover:scale-110" aria-hidden="true">&#9834;</span>
         <span class="font-bold text-xl text-text">Music<span class="text-primary">Practice</span></span>
       </NuxtLink>
       <ThemeToggle />
@@ -54,8 +59,16 @@ async function handleRegister() {
       <div class="w-full max-w-sm">
         <p class="text-text-muted text-center mb-8">Create your account</p>
 
-        <form class="bg-card border border-border rounded-xl p-6 space-y-4" @submit.prevent="handleRegister">
-          <div v-if="error" class="bg-red-500/10 border border-red-500/30 text-red-400 text-sm rounded-lg px-4 py-3">
+        <form class="bg-card border border-border rounded-xl p-6 space-y-4" @submit.prevent="handleRegister" novalidate>
+          <!-- Error message with role="alert" for screen readers -->
+          <div
+            v-if="error"
+            ref="errorRef"
+            class="bg-red-500/10 border border-red-500/30 text-red-400 text-sm rounded-lg px-4 py-3"
+            role="alert"
+            aria-live="assertive"
+            tabindex="-1"
+          >
             {{ error }}
           </div>
 
@@ -67,7 +80,8 @@ async function handleRegister() {
               type="text"
               autocomplete="name"
               required
-              class="w-full bg-surface-alt border border-border rounded-lg px-3.5 py-2.5 text-text placeholder:text-text-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors"
+              aria-required="true"
+              class="w-full bg-surface-alt border border-border rounded-lg px-3.5 py-2.5 text-text placeholder:text-text-muted/50 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
               placeholder="Jane Doe"
             />
           </div>
@@ -80,7 +94,9 @@ async function handleRegister() {
               type="email"
               autocomplete="email"
               required
-              class="w-full bg-surface-alt border border-border rounded-lg px-3.5 py-2.5 text-text placeholder:text-text-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors"
+              aria-required="true"
+              :aria-invalid="validation.some(e => e.includes('email'))"
+              class="w-full bg-surface-alt border border-border rounded-lg px-3.5 py-2.5 text-text placeholder:text-text-muted/50 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
               placeholder="you@example.com"
             />
           </div>
@@ -93,9 +109,11 @@ async function handleRegister() {
               type="text"
               autocomplete="username"
               required
+              aria-required="true"
               minlength="3"
               maxlength="30"
-              class="w-full bg-surface-alt border border-border rounded-lg px-3.5 py-2.5 text-text placeholder:text-text-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors"
+              :aria-invalid="validation.some(e => e.includes('Username'))"
+              class="w-full bg-surface-alt border border-border rounded-lg px-3.5 py-2.5 text-text placeholder:text-text-muted/50 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
               placeholder="janedoe"
             />
           </div>
@@ -108,20 +126,31 @@ async function handleRegister() {
               type="password"
               autocomplete="new-password"
               required
+              aria-required="true"
               minlength="8"
-              class="w-full bg-surface-alt border border-border rounded-lg px-3.5 py-2.5 text-text placeholder:text-text-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors"
+              :aria-invalid="validation.some(e => e.includes('Password'))"
+              aria-describedby="password-help"
+              class="w-full bg-surface-alt border border-border rounded-lg px-3.5 py-2.5 text-text placeholder:text-text-muted/50 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
               placeholder="8+ characters"
             />
+            <p id="password-help" class="text-xs text-text-muted mt-1">Password must be at least 8 characters</p>
           </div>
 
-          <ul v-if="validation.length > 0" class="text-sm text-amber-400 space-y-1 list-disc list-inside">
+          <!-- Validation errors with role="alert" -->
+          <ul
+            v-if="validation.length > 0"
+            class="text-sm text-amber-400 space-y-1 list-disc list-inside"
+            role="alert"
+            aria-live="polite"
+          >
             <li v-for="msg in validation" :key="msg">{{ msg }}</li>
           </ul>
 
           <button
             type="submit"
             :disabled="!canSubmit || auth.loading.value"
-            class="w-full bg-primary text-on-primary font-medium py-2.5 rounded-lg hover:brightness-110 transition-all disabled:opacity-50"
+            class="w-full bg-primary text-on-primary font-medium py-2.5 rounded-lg hover:brightness-110 transition-all disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-card"
+            :aria-busy="auth.loading.value"
           >
             {{ auth.loading.value ? 'Creating account...' : 'Create account' }}
           </button>
@@ -129,7 +158,7 @@ async function handleRegister() {
 
         <p class="text-center text-text-muted text-sm mt-6">
           Already have an account?
-          <NuxtLink to="/auth/login" class="text-primary hover:underline font-medium">Sign in</NuxtLink>
+          <NuxtLink to="/auth/login" class="text-primary hover:underline font-medium focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-surface rounded-md px-1">Sign in</NuxtLink>
         </p>
       </div>
     </div>

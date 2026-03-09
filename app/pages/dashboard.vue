@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { PracticeSession } from '#shared/types/practice'
+
 definePageMeta({ middleware: 'auth' })
 
 const practiceStore = usePracticeStore()
@@ -6,7 +8,7 @@ const { formatTime } = usePracticeSession()
 
 const weeklyMinutes = computed(() => {
   const totalSeconds = practiceStore.sessionsThisWeek.reduce(
-    (sum: number, s: any) => sum + (s.durationSeconds || 0),
+    (sum: number, s: PracticeSession) => sum + (s.durationSeconds || 0),
     0,
   )
   return Math.floor(totalSeconds / 60)
@@ -31,7 +33,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div>
+  <div aria-live="polite">
     <div class="mb-8">
       <h1 class="text-3xl font-bold text-text">Dashboard</h1>
       <p class="text-text-muted mt-1">Welcome back. Here's your practice overview.</p>
@@ -42,7 +44,7 @@ onMounted(() => {
       <StreakCounter />
     </div>
 
-    <StaggeredList tag="div" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+    <StaggeredList v-if="!practiceStore.isLoading" tag="div" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
       <!-- This Week's Practice -->
       <NordCard title="This Week's Practice">
         <div class="text-center py-4">
@@ -88,6 +90,24 @@ onMounted(() => {
         </div>
       </NordCard>
     </StaggeredList>
+
+    <!-- Loading Skeletons -->
+    <div v-else class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+      <!-- Skeleton for "This Week's Practice" -->
+      <SkeletonCard variant="card" height="140px" />
+
+      <!-- Skeleton for Goals -->
+      <SkeletonCard variant="card" height="200px" />
+
+      <!-- Skeleton for Recent Sessions -->
+      <SkeletonCard variant="card" height="180px" />
+
+      <!-- Skeleton for Daily Activity chart (spans 2 columns) -->
+      <SkeletonCard variant="card" height="200px" class="md:col-span-2" />
+
+      <!-- Skeleton for Quick Start -->
+      <SkeletonCard variant="card" height="180px" />
+    </div>
 
     <!-- Practice Heatmap — full width -->
     <div class="mt-6">

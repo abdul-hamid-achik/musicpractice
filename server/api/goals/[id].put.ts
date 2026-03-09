@@ -1,28 +1,25 @@
 import { eq } from 'drizzle-orm'
 import { practiceGoals } from '../../db/schema'
 import { requireAuth } from '../../utils/auth'
-
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+import { createApiError, handleApiError, validateId } from '../../utils/errors'
 
 export default defineEventHandler(async (event) => {
-  await requireAuth(event)
-  const db = useDb()
-  const id = getRouterParam(event, 'id')
-
-  if (!id || !UUID_RE.test(id)) {
-    throw createError({ statusCode: 400, message: 'Valid goal id is required' })
-  }
-
-  const body = await readBody(event)
-
-  if (body.instrumentId !== undefined && body.instrumentId !== null && !UUID_RE.test(body.instrumentId)) {
-    throw createError({ statusCode: 400, message: 'Invalid instrumentId format' })
-  }
-  if (body.targetMinutesPerWeek !== undefined && (!Number.isInteger(body.targetMinutesPerWeek) || body.targetMinutesPerWeek < 1)) {
-    throw createError({ statusCode: 400, message: 'targetMinutesPerWeek must be a positive integer' })
-  }
-
   try {
+    await requireAuth(event)
+    const db = useDb()
+    const id = getRouterParam(event, 'id')
+
+    const validId = validateId(id, 'goal id')
+
+    const body = await readBody(event)
+
+    if (body.instrumentId !== undefined && body.instrumentId !== null) {
+      validateId(body.instrumentId, 'instrumentId')
+    }
+    if (body.targetMinutesPerWeek !== undefined && (!Number.isInteger(body.targetMinutesPerWeek) || body.targetMinutesPerWeek < 1)) {
+      throw createApiError('targetMinutesPerWeek must be a positive integer', 400)
+    }
+
     const updates: Record<string, unknown> = {}
     if (body.title !== undefined) updates.title = body.title
     if (body.description !== undefined) updates.description = body.description
@@ -31,18 +28,17 @@ export default defineEventHandler(async (event) => {
     if (body.isActive !== undefined) updates.isActive = body.isActive
 
     if (Object.keys(updates).length === 0) {
-      throw createError({ statusCode: 400, message: 'No valid fields to update' })
+      throw createApiError('No valid fields to update', 400)
     }
 
-    const [goal] = await db.update(practiceGoals).set(updates).where(eq(practiceGoals.id, id)).returning()
+    const [goal] = await db.update(practiceGoals).set(updates).where(eq(practiceGoals.id, validId)).returning()
 
     if (!goal) {
-      throw createError({ statusCode: 404, message: 'Goal not found' })
+      throw createApiError('Goal not found', 404)
     }
 
     return goal
-  } catch (err: unknown) {
-    if (err && typeof err === 'object' && 'statusCode' in err) throw err
-    throw createError({ statusCode: 500, message: 'Failed to update goal' })
+  } catch (error) {
+    return handleApiError(error, { route: '/api/goals/[id]', operation: 'update' })
   }
 })

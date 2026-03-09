@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
+import { ref } from 'vue'
 
 // Mock the useMusicTheory composable (auto-imported by the component)
 const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
@@ -11,6 +12,18 @@ vi.mock('~/composables/useMusicTheory', () => ({
     },
   }),
 }))
+
+// Mock the useSettingsStore (auto-imported by Nuxt, used by useInstrumentSound composable)
+const mockSettingsStore = {
+  theme: ref('dark'),
+  defaultInstrument: ref('guitar'),
+  defaultTempo: ref(120),
+  showNotation: ref(true),
+  showTablature: ref(true),
+  volume: ref(80),
+  updateSetting: vi.fn(),
+}
+vi.stubGlobal('useSettingsStore', () => mockSettingsStore)
 
 import PianoKeyboard from '~/components/instruments/PianoKeyboard.vue'
 
@@ -58,13 +71,15 @@ describe('PianoKeyboard', () => {
         rootNote: 'C',
       },
     })
-    // Root note C gets #88C0D0 fill, highlighted E and G get #81A1C1 fill
+    // Root note C gets primary color, highlighted E and G get secondary color
+    // The component uses CSS variables for colors
     const whiteKeys = wrapper.findAll('rect.white-key')
-    const highlightedKeys = whiteKeys.filter((key) => {
+    // Check that at least some keys have fill attributes set (indicating highlighting)
+    const keysWithFill = whiteKeys.filter((key) => {
       const fill = key.attributes('fill')
-      return fill === '#88C0D0' || fill === '#81A1C1'
+      return fill && (fill.includes('var(--color-primary)') || fill.includes('var(--color-secondary)'))
     })
-    expect(highlightedKeys.length).toBeGreaterThan(0)
+    expect(keysWithFill.length).toBeGreaterThan(0)
   })
 
   it('renders correct number of black keys for 1 octave', () => {

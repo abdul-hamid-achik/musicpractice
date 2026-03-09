@@ -49,6 +49,8 @@ const groupedScales = computed(() => {
   return groups
 })
 
+const isLoaded = computed(() => theoryStore.scales.length > 0)
+
 const categoryOrder = ['diatonic', 'pentatonic', 'minor', 'blues', 'jazz', 'symmetric', 'exotic', 'chromatic']
 
 const sortedCategories = computed(() => {
@@ -127,7 +129,27 @@ onMounted(async () => {
 
 <template>
   <div class="bg-card border border-border rounded-lg p-6 space-y-6">
-    <div class="flex items-center justify-between">
+    <!-- Loading Skeleton -->
+    <div v-if="!isLoaded" class="space-y-4" aria-busy="true" aria-label="Loading scales...">
+      <div class="flex justify-between">
+        <NordSkeleton height="1.5rem" width="150px" />
+        <NordSkeleton height="2.5rem" width="100px" />
+      </div>
+      <div class="space-y-2">
+        <NordSkeleton height="0.875rem" width="100px" />
+        <div class="flex flex-wrap gap-1">
+          <NordSkeleton v-for="i in 12" :key="i" variant="circle" width="40px" height="40px" />
+        </div>
+      </div>
+      <div class="space-y-2">
+        <NordSkeleton height="0.875rem" width="100px" />
+        <NordSkeleton height="2.5rem" width="100%" />
+      </div>
+    </div>
+
+    <!-- Loaded Content -->
+    <template v-else>
+      <div class="flex items-center justify-between">
       <h2 class="text-xl font-semibold text-text">Scale Explorer</h2>
       <button
         class="inline-flex items-center gap-2 px-4 py-2 rounded-md font-medium transition-all duration-200"
@@ -235,5 +257,6 @@ onMounted(async () => {
         </div>
       </div>
     </div>
+    </template>
   </div>
 </template>

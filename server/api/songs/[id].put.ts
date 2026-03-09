@@ -1,32 +1,30 @@
 import { eq } from 'drizzle-orm'
 import { songs } from '../../db/schema'
+import { createApiError, handleApiError, validateId } from '../../utils/errors'
 
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const INSTRUMENT_TYPES = ['guitar', 'bass', 'piano', 'violin'] as const
 const DIFFICULTIES = ['beginner', 'intermediate', 'advanced', 'expert'] as const
 const NOTATION_FORMATS = ['alphatex', 'musicxml', 'guitar_pro', 'vexflow_json'] as const
 
 export default defineEventHandler(async (event) => {
-  const db = useDb()
-  const id = getRouterParam(event, 'id')
-
-  if (!id || !UUID_RE.test(id)) {
-    throw createError({ statusCode: 400, message: 'Valid song id is required' })
-  }
-
-  const body = await readBody(event)
-
-  if (body.difficulty !== undefined && !DIFFICULTIES.includes(body.difficulty)) {
-    throw createError({ statusCode: 400, message: `difficulty must be one of: ${DIFFICULTIES.join(', ')}` })
-  }
-  if (body.instrumentType !== undefined && !INSTRUMENT_TYPES.includes(body.instrumentType)) {
-    throw createError({ statusCode: 400, message: `instrumentType must be one of: ${INSTRUMENT_TYPES.join(', ')}` })
-  }
-  if (body.format !== undefined && !NOTATION_FORMATS.includes(body.format)) {
-    throw createError({ statusCode: 400, message: `format must be one of: ${NOTATION_FORMATS.join(', ')}` })
-  }
-
   try {
+    const db = useDb()
+    const id = getRouterParam(event, 'id')
+
+    const validId = validateId(id, 'song id')
+
+    const body = await readBody(event)
+
+    if (body.difficulty !== undefined && !DIFFICULTIES.includes(body.difficulty)) {
+      throw createApiError(`difficulty must be one of: ${DIFFICULTIES.join(', ')}`, 400)
+    }
+    if (body.instrumentType !== undefined && !INSTRUMENT_TYPES.includes(body.instrumentType)) {
+      throw createApiError(`instrumentType must be one of: ${INSTRUMENT_TYPES.join(', ')}`, 400)
+    }
+    if (body.format !== undefined && !NOTATION_FORMATS.includes(body.format)) {
+      throw createApiError(`format must be one of: ${NOTATION_FORMATS.join(', ')}`, 400)
+    }
+
     const updates: Record<string, unknown> = {}
     if (body.title !== undefined) updates.title = body.title
     if (body.artist !== undefined) updates.artist = body.artist
@@ -37,18 +35,17 @@ export default defineEventHandler(async (event) => {
     if (body.metadata !== undefined) updates.metadata = body.metadata
 
     if (Object.keys(updates).length === 0) {
-      throw createError({ statusCode: 400, message: 'No valid fields to update' })
+      throw createApiError('No valid fields to update', 400)
     }
 
-    const [song] = await db.update(songs).set(updates).where(eq(songs.id, id)).returning()
+    const [song] = await db.update(songs).set(updates).where(eq(songs.id, validId)).returning()
 
     if (!song) {
-      throw createError({ statusCode: 404, message: 'Song not found' })
+      throw createApiError('Song not found', 404)
     }
 
     return song
-  } catch (err: unknown) {
-    if (err && typeof err === 'object' && 'statusCode' in err) throw err
-    throw createError({ statusCode: 500, message: 'Failed to update song' })
+  } catch (error) {
+    return handleApiError(error, { route: '/api/songs/[id]', operation: 'update' })
   }
 })

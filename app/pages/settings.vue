@@ -1,12 +1,40 @@
 <script setup lang="ts">
 const settingsStore = useSettingsStore()
+
+// Simulate loading state for settings (they load from localStorage)
+const isLoading = ref(true)
+
+onMounted(() => {
+  // Settings are loaded synchronously from localStorage, but we show a brief skeleton
+  setTimeout(() => {
+    isLoading.value = false
+  }, 300)
+})
 </script>
 
 <template>
   <div>
-    <h1 class="text-3xl font-bold text-text mb-8">Settings</h1>
+    <div class="flex items-center justify-between mb-8">
+      <h1 class="text-3xl font-bold text-text">App Settings</h1>
+      <NuxtLink
+        to="/account"
+        class="text-primary hover:text-primary/80 text-sm font-medium transition-colors"
+      >
+        Account Settings →
+      </NuxtLink>
+    </div>
 
-    <div class="max-w-2xl space-y-6">
+    <!-- Loading Skeletons -->
+    <div v-if="isLoading" class="max-w-2xl space-y-6" aria-busy="true" aria-label="Loading settings...">
+      <SkeletonCard variant="card" height="100px" />
+      <SkeletonCard variant="card" height="120px" />
+      <SkeletonCard variant="card" height="100px" />
+      <SkeletonCard variant="card" height="140px" />
+      <SkeletonCard variant="card" height="100px" />
+    </div>
+
+    <!-- Loaded Settings -->
+    <div v-else class="max-w-2xl space-y-6">
       <!-- Theme -->
       <NordCard title="Theme">
         <label class="flex items-center justify-between cursor-pointer">

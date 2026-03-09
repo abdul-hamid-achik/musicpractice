@@ -1,16 +1,17 @@
 import { eq, and, desc } from 'drizzle-orm'
 import { earTrainingScores } from '../../db/schema'
 import { requireAuth } from '../../utils/auth'
+import { handleApiError } from '../../utils/errors'
 
 export default defineEventHandler(async (event) => {
-  const user = await requireAuth(event)
-  const db = useDb()
-  const query = getQuery(event)
-
-  const exerciseType = query.type as string | undefined
-  const limit = Math.min(50, Math.max(1, parseInt(query.limit as string) || 20))
-
   try {
+    const user = await requireAuth(event)
+    const db = useDb()
+    const query = getQuery(event)
+
+    const exerciseType = query.type as string | undefined
+    const limit = Math.min(50, Math.max(1, parseInt(query.limit as string) || 20))
+
     const conditions = [eq(earTrainingScores.userId, user.id)]
     if (exerciseType && ['intervals', 'notes'].includes(exerciseType)) {
       conditions.push(eq(earTrainingScores.exerciseType, exerciseType))
@@ -24,8 +25,7 @@ export default defineEventHandler(async (event) => {
       .limit(limit)
 
     return { data }
-  } catch (err: unknown) {
-    if (err && typeof err === 'object' && 'statusCode' in err) throw err
-    throw createError({ statusCode: 500, message: 'Failed to fetch scores' })
+  } catch (error) {
+    return handleApiError(error, { route: '/api/ear-training', operation: 'list' })
   }
 })

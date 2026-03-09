@@ -1,24 +1,25 @@
 import { eq, and, gte, lte, count } from 'drizzle-orm'
 import { practiceSessions, instruments, songs } from '../../db/schema'
 import { requireAuth } from '../../utils/auth'
+import { createApiError, handleApiError } from '../../utils/errors'
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 export default defineEventHandler(async (event) => {
-  const user = await requireAuth(event)
-  const db = useDb()
-  const query = getQuery(event)
-
-  const page = Math.max(1, parseInt(query.page as string) || 1)
-  const limit = Math.min(100, Math.max(1, parseInt(query.limit as string) || 20))
-  const offset = (page - 1) * limit
-
   try {
+    const user = await requireAuth(event)
+    const db = useDb()
+    const query = getQuery(event)
+
+    const page = Math.max(1, parseInt(query.page as string) || 1)
+    const limit = Math.min(100, Math.max(1, parseInt(query.limit as string) || 20))
+    const offset = (page - 1) * limit
+
     const conditions = [eq(practiceSessions.userId, user.id)]
 
     if (query.instrumentId) {
       if (!UUID_RE.test(query.instrumentId as string)) {
-        throw createError({ statusCode: 400, message: 'Invalid instrumentId format' })
+        throw createApiError('Invalid instrumentId format', 400)
       }
       conditions.push(eq(practiceSessions.instrumentId, query.instrumentId as string))
     }
@@ -60,8 +61,7 @@ export default defineEventHandler(async (event) => {
       .offset(offset)
 
     return { data, total, page, limit }
-  } catch (err: unknown) {
-    if (err && typeof err === 'object' && 'statusCode' in err) throw err
-    throw createError({ statusCode: 500, message: 'Failed to fetch sessions' })
+  } catch (error) {
+    return handleApiError(error, { route: '/api/sessions', operation: 'list', userId: event.context.params?.id })
   }
 })

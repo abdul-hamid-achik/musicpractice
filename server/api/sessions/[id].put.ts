@@ -1,28 +1,25 @@
 import { eq } from 'drizzle-orm'
 import { practiceSessions } from '../../db/schema'
 import { requireAuth } from '../../utils/auth'
-
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+import { createApiError, handleApiError, validateId } from '../../utils/errors'
 
 export default defineEventHandler(async (event) => {
-  await requireAuth(event)
-  const db = useDb()
-  const id = getRouterParam(event, 'id')
-
-  if (!id || !UUID_RE.test(id)) {
-    throw createError({ statusCode: 400, message: 'Valid session id is required' })
-  }
-
-  const body = await readBody(event)
-
-  if (body.durationSeconds != null && (!Number.isInteger(body.durationSeconds) || body.durationSeconds < 0)) {
-    throw createError({ statusCode: 400, message: 'durationSeconds must be a non-negative integer' })
-  }
-  if (body.tempoBpm != null && (!Number.isInteger(body.tempoBpm) || body.tempoBpm < 1)) {
-    throw createError({ statusCode: 400, message: 'tempoBpm must be a positive integer' })
-  }
-
   try {
+    await requireAuth(event)
+    const db = useDb()
+    const id = getRouterParam(event, 'id')
+
+    const validId = validateId(id, 'session id')
+
+    const body = await readBody(event)
+
+    if (body.durationSeconds != null && (!Number.isInteger(body.durationSeconds) || body.durationSeconds < 0)) {
+      throw createApiError('durationSeconds must be a non-negative integer', 400)
+    }
+    if (body.tempoBpm != null && (!Number.isInteger(body.tempoBpm) || body.tempoBpm < 1)) {
+      throw createApiError('tempoBpm must be a positive integer', 400)
+    }
+
     const updates: Record<string, unknown> = {}
     if (body.endedAt !== undefined) updates.endedAt = body.endedAt ? new Date(body.endedAt) : null
     if (body.durationSeconds !== undefined) updates.durationSeconds = body.durationSeconds
@@ -31,18 +28,17 @@ export default defineEventHandler(async (event) => {
     if (body.tags !== undefined) updates.tags = body.tags
 
     if (Object.keys(updates).length === 0) {
-      throw createError({ statusCode: 400, message: 'No valid fields to update' })
+      throw createApiError('No valid fields to update', 400)
     }
 
-    const [session] = await db.update(practiceSessions).set(updates).where(eq(practiceSessions.id, id)).returning()
+    const [session] = await db.update(practiceSessions).set(updates).where(eq(practiceSessions.id, validId)).returning()
 
     if (!session) {
-      throw createError({ statusCode: 404, message: 'Session not found' })
+      throw createApiError('Session not found', 404)
     }
 
     return session
-  } catch (err: unknown) {
-    if (err && typeof err === 'object' && 'statusCode' in err) throw err
-    throw createError({ statusCode: 500, message: 'Failed to update session' })
+  } catch (error) {
+    return handleApiError(error, { route: '/api/sessions/[id]', operation: 'update' })
   }
 })

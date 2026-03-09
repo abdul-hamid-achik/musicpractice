@@ -8,7 +8,7 @@ const instrumentStore = useInstrumentStore()
 const {
   isActive, isPaused, elapsed,
   startSession, pauseSession, resumeSession, stopSession, saveSession,
-  restoreSession, getStoredSession, clearStorage, formatTime,
+  restoreSession, getStoredSession, getSessionRecoveryInfo, clearStaleSessions, clearStorage, formatTime, formatDuration,
 } = usePracticeSession()
 
 const selectedInstrumentId = ref('')
@@ -19,7 +19,8 @@ const tagsInput = ref('')
 const sessionStarted = ref(false)
 const showEndConfirm = ref(false)
 const showRecovery = ref(false)
-const recoveredSession = ref<any>(null)
+const recoveredSession = ref<Awaited<ReturnType<typeof getStoredSession>>>(null)
+const sessionRecoveryInfo = ref<Awaited<ReturnType<typeof getSessionRecoveryInfo>>>(null)
 const targetBpm = ref(140)
 const metronomeRef = ref<{ setBpm: (bpm: number) => void; adjustBpm: (delta: number) => void; togglePlayback: () => void } | null>(null)
 
@@ -141,10 +142,11 @@ onMounted(async () => {
     selectedSongId.value = querySong
   }
 
-  // Check for recoverable session
-  const stored = getStoredSession()
-  if (stored) {
-    recoveredSession.value = stored
+  // Check for recoverable session with age information
+  const recoveryInfo = getSessionRecoveryInfo()
+  if (recoveryInfo) {
+    recoveredSession.value = recoveryInfo.session
+    sessionRecoveryInfo.value = recoveryInfo
     showRecovery.value = true
   }
 })
@@ -306,12 +308,64 @@ onMounted(async () => {
 
     <!-- Session Recovery Modal -->
     <NordModal :open="showRecovery" title="Resume Previous Session?" @close="handleRecoveryDiscard">
-      <p class="text-text-muted mb-4">
-        You have an unfinished practice session. Would you like to resume where you left off?
-      </p>
-      <div class="flex justify-end gap-3">
-        <NordButton variant="ghost" @click="handleRecoveryDiscard">Discard</NordButton>
-        <NordButton variant="primary" @click="handleRecoveryResume">Resume</NordButton>
+      <div class="space-y-4">
+        <p class="text-text-muted">
+          You have an unfinished practice session. Would you like to resume where you left off?
+        </p>
+        
+        <!-- Session age display -->
+        <div v-if="sessionRecoveryInfo" class="bg-surface-alt border border-border rounded-md p-4">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-sm font-medium text-text">Session Details:</span>
+            <span 
+              class="text-xs px-2 py-1 rounded-full"
+              :class="sessionRecoveryInfo.isStale ? 'bg-warning/20 text-warning' : 'bg-success/20 text-success'"
+            >
+              {{ sessionRecoveryInfo.isStale ? 'Stale Session' : 'Recent Session' }}
+            </span>
+          </div>
+          <div class="space-y-1 text-sm">
+            <div class="flex justify-between">
+              <span class="text-text-muted">Last active:</span>
+              <span class="text-text">{{ sessionRecoveryInfo.age }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-text-muted">Instrument:</span>
+              <span class="text-text">{{ sessionRecoveryInfo.session.instrumentId }}</span>
+            </div>
+            <div v-if="sessionRecoveryInfo.session.songId" class="flex justify-between">
+              <span class="text-text-muted">Song:</span>
+              <span class="text-text">{{ sessionRecoveryInfo.session.songId }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-text-muted">Time elapsed:</span>
+              <span class="text-text font-mono">{{ formatTime(sessionRecoveryInfo.session.accumulatedSeconds) }}</span>
+            </div>
+            <div v-if="sessionRecoveryInfo.session.isPaused" class="flex justify-between">
+              <span class="text-text-muted">Status:</span>
+              <span class="text-text">Paused</span>
+            </div>
+          </div>
+          
+          <!-- Warning for stale sessions -->
+          <div v-if="sessionRecoveryInfo.isStale" class="mt-3 p-3 bg-warning/10 border border-warning rounded-md">
+            <p class="text-sm text-warning">
+              This session is over 24 hours old. Consider discarding and starting fresh.
+            </p>
+          </div>
+        </div>
+        
+        <div class="flex justify-end gap-3">
+          <NordButton 
+            v-if="sessionRecoveryInfo?.isStale" 
+            variant="ghost" 
+            @click="handleRecoveryDiscard"
+          >
+            Discard Old Session
+          </NordButton>
+          <NordButton v-else variant="ghost" @click="handleRecoveryDiscard">Discard</NordButton>
+          <NordButton variant="primary" @click="handleRecoveryResume">Resume Session</NordButton>
+        </div>
       </div>
     </NordModal>
   </div>

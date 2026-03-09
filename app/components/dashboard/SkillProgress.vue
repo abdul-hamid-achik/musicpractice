@@ -8,15 +8,29 @@ interface ProgressEntry {
   practiceCount: number
 }
 
-const { data: progressData } = useFetch<{ data: ProgressEntry[] }>('/api/progress')
+const { data: progressData, status } = useFetch<{ data: ProgressEntry[] }>('/api/progress?limit=100')
 
+const isLoading = computed(() => status.value === 'pending')
 const skills = computed(() => progressData.value?.data ?? [])
 const hasSkills = computed(() => skills.value.length > 0)
 </script>
 
 <template>
   <div class="skill-progress">
-    <div v-if="!hasSkills" class="empty-state">
+    <!-- Loading Skeleton -->
+    <div v-if="isLoading" class="space-y-4" aria-busy="true" aria-label="Loading progress...">
+      <div v-for="i in 3" :key="i" class="space-y-2">
+        <NordSkeleton height="0.875rem" width="60%" />
+        <NordSkeleton height="6px" rounded="rounded-full" />
+        <div class="flex gap-4">
+          <NordSkeleton height="0.625rem" width="50px" />
+          <NordSkeleton height="0.625rem" width="60px" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty state -->
+    <div v-else-if="!hasSkills" class="empty-state">
       <p class="text-text-muted text-sm">No song progress tracked yet. Start practicing a song to see your progress here.</p>
     </div>
 

@@ -1,14 +1,37 @@
 <script setup lang="ts">
-const { data: streak, status } = useFetch('/api/streaks')
+interface StreakData {
+  currentStreak: number
+  longestStreak: number
+  practicedToday: boolean
+}
+
+const { data: streak, status } = await useFetch<StreakData>('/api/streaks')
 
 const isLoaded = computed(() => status.value === 'success')
+const isLoading = computed(() => status.value === 'pending')
 const currentStreak = computed(() => streak.value?.currentStreak ?? 0)
 const longestStreak = computed(() => streak.value?.longestStreak ?? 0)
 const practicedToday = computed(() => streak.value?.practicedToday ?? false)
 </script>
 
 <template>
-  <div class="streak-counter" :class="{ 'streak-active': practicedToday && isLoaded }">
+  <!-- Loading Skeleton -->
+  <div v-if="isLoading" class="bg-card border border-border rounded-lg p-4 animate-pulse" aria-busy="true" aria-label="Loading streak...">
+    <div class="flex items-center gap-4">
+      <NordSkeleton variant="circle" width="48px" height="48px" />
+      <div class="flex-1">
+        <NordSkeleton height="2.5rem" width="60px" />
+        <NordSkeleton height="0.875rem" width="80px" class="mt-1" />
+      </div>
+      <div class="text-right">
+        <NordSkeleton height="1.25rem" width="40px" />
+        <NordSkeleton height="0.75rem" width="30px" class="mt-1" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Actual Streak Counter -->
+  <div v-else class="streak-counter" :class="{ 'streak-active': practicedToday && isLoaded }">
     <div class="streak-flame" :class="{ 'flame-lit': currentStreak > 0 && isLoaded }">
       <!-- CSS flame icon -->
       <svg viewBox="0 0 24 32" class="flame-svg" aria-hidden="true">

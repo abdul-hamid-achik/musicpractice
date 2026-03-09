@@ -1,10 +1,24 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
+import { ref } from 'vue'
 import { usePracticeStore } from '~/stores/practice'
 
 // Mock $fetch globally (Nuxt's fetch utility)
 const mockFetch = vi.fn()
 vi.stubGlobal('$fetch', mockFetch)
+
+// Mock useToastStore for toast notifications
+const mockToastStore = {
+  toasts: ref([]),
+  showToast: vi.fn(),
+  removeToast: vi.fn(),
+  showSuccess: vi.fn(),
+  showError: vi.fn(),
+  showInfo: vi.fn(),
+  showWarning: vi.fn(),
+  clearAll: vi.fn(),
+}
+vi.stubGlobal('useToastStore', () => mockToastStore)
 
 describe('practice store', () => {
   beforeEach(() => {
@@ -24,7 +38,8 @@ describe('practice store', () => {
       { id: '1', startedAt: new Date().toISOString(), durationSeconds: 1800 },
       { id: '2', startedAt: new Date().toISOString(), durationSeconds: 3600 },
     ]
-    mockFetch.mockResolvedValueOnce(mockSessions)
+    // Mock returns { data: sessions[], total: number } as expected by the store
+    mockFetch.mockResolvedValueOnce({ data: mockSessions, total: 2 })
 
     const store = usePracticeStore()
     await store.fetchSessions()
@@ -38,7 +53,8 @@ describe('practice store', () => {
       { id: '1', startedAt: new Date().toISOString(), durationSeconds: 1800 },
       { id: '2', startedAt: new Date().toISOString(), durationSeconds: 3600 },
     ]
-    mockFetch.mockResolvedValueOnce(mockSessions)
+    // Mock returns { data: sessions[], total: number } as expected by the store
+    mockFetch.mockResolvedValueOnce({ data: mockSessions, total: 2 })
 
     const store = usePracticeStore()
     await store.fetchSessions()
@@ -55,7 +71,8 @@ describe('practice store', () => {
       { id: '1', startedAt: now.toISOString(), durationSeconds: 1800 },
       { id: '2', startedAt: twoWeeksAgo.toISOString(), durationSeconds: 3600 },
     ]
-    mockFetch.mockResolvedValueOnce(mockSessions)
+    // Mock returns { data: sessions[], total: number } as expected by the store
+    mockFetch.mockResolvedValueOnce({ data: mockSessions, total: 2 })
 
     const store = usePracticeStore()
     await store.fetchSessions()
@@ -72,7 +89,8 @@ describe('practice store', () => {
       { id: '1', startedAt: older.toISOString(), durationSeconds: 1800 },
       { id: '2', startedAt: newer.toISOString(), durationSeconds: 3600 },
     ]
-    mockFetch.mockResolvedValueOnce(mockSessions)
+    // Mock returns { data: sessions[], total: number } as expected by the store
+    mockFetch.mockResolvedValueOnce({ data: mockSessions, total: 2 })
 
     const store = usePracticeStore()
     await store.fetchSessions()

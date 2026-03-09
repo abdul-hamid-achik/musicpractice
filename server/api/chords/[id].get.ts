@@ -1,26 +1,22 @@
 import { eq } from 'drizzle-orm'
 import { chords } from '../../db/schema'
-
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+import { createApiError, handleApiError, validateId } from '../../utils/errors'
 
 export default defineEventHandler(async (event) => {
-  const db = useDb()
-  const id = getRouterParam(event, 'id')
-
-  if (!id || !UUID_RE.test(id)) {
-    throw createError({ statusCode: 400, message: 'Valid chord id is required' })
-  }
-
   try {
-    const [chord] = await db.select().from(chords).where(eq(chords.id, id))
+    const db = useDb()
+    const id = getRouterParam(event, 'id')
+
+    const validId = validateId(id, 'chord id')
+
+    const [chord] = await db.select().from(chords).where(eq(chords.id, validId))
 
     if (!chord) {
-      throw createError({ statusCode: 404, message: 'Chord not found' })
+      throw createApiError('Chord not found', 404)
     }
 
     return chord
-  } catch (err: unknown) {
-    if (err && typeof err === 'object' && 'statusCode' in err) throw err
-    throw createError({ statusCode: 500, message: 'Failed to fetch chord' })
+  } catch (error) {
+    return handleApiError(error, { route: '/api/chords/[id]', operation: 'get' })
   }
 })

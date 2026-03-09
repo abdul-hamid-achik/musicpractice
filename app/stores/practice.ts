@@ -6,6 +6,7 @@ export const usePracticeStore = defineStore('practice', () => {
   const sessions = ref<PracticeSession[]>([])
   const currentSession = ref<PracticeSession | null>(null)
   const isLoading = ref(false)
+  const { showError } = useToast()
 
   const totalPracticeTime = computed(() =>
     sessions.value.reduce((sum, s) => sum + (s.durationSeconds || 0), 0),
@@ -28,6 +29,9 @@ export const usePracticeStore = defineStore('practice', () => {
     try {
       const res = await $fetch<{ data: PracticeSession[]; total: number }>('/api/sessions')
       sessions.value = res.data
+    } catch (error) {
+      showError('Failed to load practice sessions')
+      console.error('Error fetching sessions:', error)
     } finally {
       isLoading.value = false
     }

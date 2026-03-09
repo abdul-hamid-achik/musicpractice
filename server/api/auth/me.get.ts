@@ -1,5 +1,10 @@
 import { requireAuth } from '../../utils/auth'
+import { handleApiError } from '../../utils/errors'
 
 export default defineEventHandler(async (event) => {
-  return await requireAuth(event)
+  try {
+    return await requireAuth(event)
+  } catch (error) {
+    return handleApiError(error, { route: '/api/auth/me' })
+  }
 })

@@ -4,6 +4,9 @@ defineProps<{
   size?: 'sm' | 'md' | 'lg'
   disabled?: boolean
   loading?: boolean
+  ariaLabel?: string
+  ariaPressed?: boolean
+  type?: 'button' | 'submit' | 'reset'
 }>()
 
 const emit = defineEmits<{
@@ -27,13 +30,17 @@ const sizeClasses: Record<string, string> = {
 
 <template>
   <button
+    :type="type || 'button'"
     :class="[
-      'inline-flex items-center justify-center rounded-md font-medium transition-all duration-200',
+      'inline-flex items-center justify-center rounded-md font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-card',
       variantClasses[variant || 'primary'],
       sizeClasses[size || 'md'],
       (disabled || loading) && 'opacity-50 cursor-not-allowed',
     ]"
     :disabled="disabled || loading"
+    :aria-label="ariaLabel"
+    :aria-pressed="ariaPressed"
+    :aria-busy="loading"
     @click="emit('click', $event)"
   >
     <svg
@@ -42,6 +49,7 @@ const sizeClasses: Record<string, string> = {
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
       viewBox="0 0 24 24"
+      aria-hidden="true"
     >
       <circle
         class="opacity-25"

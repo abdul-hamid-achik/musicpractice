@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { PracticeSession } from '#shared/types/practice'
+
 const practiceStore = usePracticeStore()
 const instrumentStore = useInstrumentStore()
 const { formatTime } = usePracticeSession()
@@ -49,26 +51,26 @@ const filteredSessions = computed(() => {
   let sessions = [...practiceStore.sessions]
 
   if (filterInstrument.value !== 'all') {
-    sessions = sessions.filter((s: any) => s.instrumentId === filterInstrument.value)
+    sessions = sessions.filter((s: PracticeSession) => s.instrumentId === filterInstrument.value)
   }
 
   if (filterRange.value === 'week') {
     const weekAgo = new Date()
     weekAgo.setDate(weekAgo.getDate() - 7)
-    sessions = sessions.filter((s: any) => new Date(s.startedAt) >= weekAgo)
+    sessions = sessions.filter((s: PracticeSession) => new Date(s.startedAt) >= weekAgo)
   } else if (filterRange.value === 'month') {
     const monthAgo = new Date()
     monthAgo.setMonth(monthAgo.getMonth() - 1)
-    sessions = sessions.filter((s: any) => new Date(s.startedAt) >= monthAgo)
+    sessions = sessions.filter((s: PracticeSession) => new Date(s.startedAt) >= monthAgo)
   }
 
   return sessions.toSorted(
-    (a: any, b: any) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime(),
+    (a: PracticeSession, b: PracticeSession) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime(),
   )
 })
 
 const instrumentOptions = computed(() => {
-  const ids = new Set(practiceStore.sessions.map((s: any) => s.instrumentId).filter(Boolean))
+  const ids = new Set(practiceStore.sessions.map((s: PracticeSession) => s.instrumentId).filter(Boolean))
   return Array.from(ids)
 })
 

@@ -1,31 +1,36 @@
 import { ref, onMounted, onBeforeUnmount, watch, type Ref } from 'vue'
+import type { AlphaTabApi } from '@coderline/alphatab'
 
 export function useAlphaTab(containerRef: Ref<HTMLElement | null>) {
-  const api = ref<any>(null)
+  const api = ref<AlphaTabApi | null>(null)
   const isLoaded = ref(false)
   const isPlaying = ref(false)
   const currentTick = ref(0)
 
-  let playerStateListener: ((e: any) => void) | null = null
-  let tickListener: ((e: any) => void) | null = null
-  let ColorClass: any = null
+  let playerStateListener: ((e: unknown) => void) | null = null
+  let tickListener: ((e: unknown) => void) | null = null
+  let ColorClass: unknown = null
 
-  function applyThemeColors(settings: any, isDark: boolean) {
+  function applyThemeColors(settings: unknown, isDark: boolean) {
     if (!ColorClass) return
+    const s = settings as { display?: { resources?: Record<string, unknown> } }
+    if (!s.display?.resources) return
+    
+    const Color = ColorClass as new (r: number, g: number, b: number) => unknown
     if (isDark) {
-      settings.display.resources.staffLineColor = new ColorClass(76, 86, 106) // #4C566A nord3
-      settings.display.resources.barSeparatorColor = new ColorClass(76, 86, 106) // #4C566A nord3
-      settings.display.resources.barNumberColor = new ColorClass(191, 97, 106) // #BF616A nord11 (red)
-      settings.display.resources.mainGlyphColor = new ColorClass(236, 239, 244) // #ECEFF4 nord6
-      settings.display.resources.secondaryGlyphColor = new ColorClass(216, 222, 233) // #D8DEE9 nord4
-      settings.display.resources.scoreInfoColor = new ColorClass(216, 222, 233) // #D8DEE9 nord4
+      s.display.resources.staffLineColor = new Color(76, 86, 106) // #4C566A nord3
+      s.display.resources.barSeparatorColor = new Color(76, 86, 106) // #4C566A nord3
+      s.display.resources.barNumberColor = new Color(191, 97, 106) // #BF616A nord11 (red)
+      s.display.resources.mainGlyphColor = new Color(236, 239, 244) // #ECEFF4 nord6
+      s.display.resources.secondaryGlyphColor = new Color(216, 222, 233) // #D8DEE9 nord4
+      s.display.resources.scoreInfoColor = new Color(216, 222, 233) // #D8DEE9 nord4
     } else {
-      settings.display.resources.staffLineColor = new ColorClass(76, 86, 106) // #4C566A nord3
-      settings.display.resources.barSeparatorColor = new ColorClass(59, 66, 82) // #3B4252 nord1
-      settings.display.resources.barNumberColor = new ColorClass(191, 97, 106) // #BF616A nord11 (red)
-      settings.display.resources.mainGlyphColor = new ColorClass(46, 52, 64) // #2E3440 nord0
-      settings.display.resources.secondaryGlyphColor = new ColorClass(59, 66, 82) // #3B4252 nord1
-      settings.display.resources.scoreInfoColor = new ColorClass(59, 66, 82) // #3B4252 nord1
+      s.display.resources.staffLineColor = new Color(76, 86, 106) // #4C566A nord3
+      s.display.resources.barSeparatorColor = new Color(59, 66, 82) // #3B4252 nord1
+      s.display.resources.barNumberColor = new Color(191, 97, 106) // #BF616A nord11 (red)
+      s.display.resources.mainGlyphColor = new Color(46, 52, 64) // #2E3440 nord0
+      s.display.resources.secondaryGlyphColor = new Color(59, 66, 82) // #3B4252 nord1
+      s.display.resources.scoreInfoColor = new Color(59, 66, 82) // #3B4252 nord1
     }
   }
 
@@ -33,7 +38,7 @@ export function useAlphaTab(containerRef: Ref<HTMLElement | null>) {
     if (!containerRef.value) return
 
     const alphaTab = await import('@coderline/alphatab')
-    ColorClass = (alphaTab as any).model.Color
+    ColorClass = alphaTab.model.Color
 
     const settingsStore = useSettingsStore()
     const isDark = settingsStore.theme !== 'light'
@@ -63,13 +68,15 @@ export function useAlphaTab(containerRef: Ref<HTMLElement | null>) {
       isLoaded.value = true
     })
 
-    playerStateListener = (e: any) => {
-      isPlaying.value = e.state === 1
+    playerStateListener = (e: unknown) => {
+      const event = e as { state?: number }
+      isPlaying.value = event.state === 1
     }
     api.value.playerStateChanged.on(playerStateListener)
 
-    tickListener = (e: any) => {
-      currentTick.value = e.currentTick
+    tickListener = (e: unknown) => {
+      const event = e as { currentTick?: number }
+      currentTick.value = event.currentTick ?? 0
     }
     api.value.playerPositionChanged.on(tickListener)
   })
@@ -86,9 +93,9 @@ export function useAlphaTab(containerRef: Ref<HTMLElement | null>) {
     api.value.tex(tex)
   }
 
-  const loadFile = (url: string) => {
+  const loadFile = (data: string | ArrayBuffer) => {
     if (!api.value) return
-    api.value.load(url)
+    api.value.load(data)
   }
 
   const play = () => {

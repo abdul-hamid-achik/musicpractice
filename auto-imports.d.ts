@@ -16,8 +16,10 @@ declare global {
   const getCurrentInstance: typeof import('vue').getCurrentInstance
   const getCurrentScope: typeof import('vue').getCurrentScope
   const getCurrentWatcher: typeof import('vue').getCurrentWatcher
+  const getFocusableElements: typeof import('./app/composables/useAccessibility').getFocusableElements
   const h: typeof import('vue').h
   const inject: typeof import('vue').inject
+  const isElementFocused: typeof import('./app/composables/useAccessibility').isElementFocused
   const isProxy: typeof import('vue').isProxy
   const isReactive: typeof import('vue').isReactive
   const isReadonly: typeof import('vue').isReadonly
@@ -54,18 +56,30 @@ declare global {
   const triggerRef: typeof import('vue').triggerRef
   const unref: typeof import('vue').unref
   const useAlphaTab: typeof import('./app/composables/useAlphaTab').useAlphaTab
+  const useAnnouncer: typeof import('./app/composables/useAccessibility').useAnnouncer
   const useAttrs: typeof import('vue').useAttrs
   const useAudio: typeof import('./app/composables/useAudio').useAudio
+  const useAuth: typeof import('./app/composables/useAuth').useAuth
   const useCssModule: typeof import('vue').useCssModule
   const useCssVars: typeof import('vue').useCssVars
+  const useDebounce: typeof import('./app/composables/useDebounce').useDebounce
+  const useDebounceSearch: typeof import('./app/composables/useDebounce').useDebounceSearch
+  const useEscapeKey: typeof import('./app/composables/useAccessibility').useEscapeKey
+  const useFocusRestore: typeof import('./app/composables/useAccessibility').useFocusRestore
+  const useFocusTrap: typeof import('./app/composables/useAccessibility').useFocusTrap
   const useId: typeof import('vue').useId
   const useInstrument: typeof import('./app/composables/useInstrument').useInstrument
+  const useInstrumentSound: typeof import('./app/composables/useInstrumentSound').useInstrumentSound
+  const useKeyboardNavigation: typeof import('./app/composables/useAccessibility').useKeyboardNavigation
+  const useKeyboardShortcuts: typeof import('./app/composables/useKeyboardShortcuts').useKeyboardShortcuts
   const useMetronome: typeof import('./app/composables/useMetronome').useMetronome
   const useModel: typeof import('vue').useModel
   const useMusicTheory: typeof import('./app/composables/useMusicTheory').useMusicTheory
   const usePracticeSession: typeof import('./app/composables/usePracticeSession').usePracticeSession
+  const useSidebar: typeof import('./app/composables/useSidebar').useSidebar
   const useSlots: typeof import('vue').useSlots
   const useTemplateRef: typeof import('vue').useTemplateRef
+  const useToast: typeof import('./app/composables/useToast').useToast
   const useVexFlow: typeof import('./app/composables/useVexFlow').useVexFlow
   const watch: typeof import('vue').watch
   const watchEffect: typeof import('vue').watchEffect
@@ -77,4 +91,7 @@ declare global {
   // @ts-ignore
   export type { Component, Slot, Slots, ComponentPublicInstance, ComputedRef, DirectiveBinding, ExtractDefaultPropTypes, ExtractPropTypes, ExtractPublicPropTypes, InjectionKey, PropType, Ref, ShallowRef, MaybeRef, MaybeRefOrGetter, VNode, WritableComputedRef } from 'vue'
   import('vue')
+  // @ts-ignore
+  export type { FocusTrapOptions, UseFocusTrapReturn, UseEscapeKeyReturn, UseFocusRestoreReturn } from './app/composables/useAccessibility'
+  import('./app/composables/useAccessibility')
 }

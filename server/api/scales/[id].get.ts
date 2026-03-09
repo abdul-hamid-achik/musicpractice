@@ -1,26 +1,22 @@
 import { eq } from 'drizzle-orm'
 import { scales } from '../../db/schema'
-
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+import { createApiError, handleApiError, validateId } from '../../utils/errors'
 
 export default defineEventHandler(async (event) => {
-  const db = useDb()
-  const id = getRouterParam(event, 'id')
-
-  if (!id || !UUID_RE.test(id)) {
-    throw createError({ statusCode: 400, message: 'Valid scale id is required' })
-  }
-
   try {
-    const [scale] = await db.select().from(scales).where(eq(scales.id, id))
+    const db = useDb()
+    const id = getRouterParam(event, 'id')
+
+    const validId = validateId(id, 'scale id')
+
+    const [scale] = await db.select().from(scales).where(eq(scales.id, validId))
 
     if (!scale) {
-      throw createError({ statusCode: 404, message: 'Scale not found' })
+      throw createApiError('Scale not found', 404)
     }
 
     return scale
-  } catch (err: unknown) {
-    if (err && typeof err === 'object' && 'statusCode' in err) throw err
-    throw createError({ statusCode: 500, message: 'Failed to fetch scale' })
+  } catch (error) {
+    return handleApiError(error, { route: '/api/scales/[id]', operation: 'get' })
   }
 })

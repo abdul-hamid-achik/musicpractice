@@ -36,6 +36,20 @@
       "when": 1771295975003,
       "tag": "0004_tough_justice",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1773044647335,
+      "tag": "0005_uneven_rockslide",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1773044740658,
+      "tag": "0006_fantastic_kat_farrell",
+      "breakpoints": true
     }
   ]
 }

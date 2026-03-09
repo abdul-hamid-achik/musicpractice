@@ -12,6 +12,8 @@ const activeTab = ref<'intervals' | 'notes'>('intervals')
 const score = ref({ correct: 0, total: 0 })
 const recentScores = ref<EarTrainingScore[]>([])
 const isSaving = ref(false)
+const isLoading = ref(true)
+const { showSuccess, showError } = useToast()
 
 const accuracy = computed(() => {
   if (!score.value.total) return 0
@@ -39,8 +41,10 @@ async function saveScore() {
       },
     })
     await fetchScores()
-  } catch {
-    // silently handle
+    showSuccess('Score saved successfully')
+  } catch (error) {
+    showError('Failed to save score')
+    console.error('Error saving score:', error)
   } finally {
     isSaving.value = false
   }
@@ -50,8 +54,11 @@ async function fetchScores() {
   try {
     const res = await $fetch<{ data: EarTrainingScore[] }>('/api/ear-training')
     recentScores.value = res.data
-  } catch {
+  } catch (error) {
     recentScores.value = []
+    console.error('Error fetching scores:', error)
+  } finally {
+    isLoading.value = false
   }
 }
 
@@ -104,11 +111,20 @@ onMounted(() => {
     </div>
 
     <!-- Content -->
-    <IntervalTrainer v-if="activeTab === 'intervals'" @score-update="handleScoreUpdate" />
-    <NoteIdentifier v-else @score-update="handleScoreUpdate" />
+    <div v-if="isLoading" class="space-y-6" aria-busy="true" aria-label="Loading ear training...">
+      <!-- Skeleton for Trainer -->
+      <SkeletonCard variant="card" height="300px" />
 
-    <!-- Recent Scores -->
-    <NordCard v-if="tabScores.length > 0" title="Recent Scores" class="mt-6">
+      <!-- Skeleton for Recent Scores -->
+      <SkeletonCard variant="card" height="200px" />
+    </div>
+
+    <template v-else>
+      <IntervalTrainer v-if="activeTab === 'intervals'" @score-update="handleScoreUpdate" />
+      <NoteIdentifier v-else @score-update="handleScoreUpdate" />
+
+      <!-- Recent Scores -->
+      <NordCard v-if="tabScores.length > 0" title="Recent Scores" class="mt-6">
       <div class="space-y-2">
         <div
           v-for="entry in tabScores.slice(0, 10)"
@@ -128,5 +144,6 @@ onMounted(() => {
         </div>
       </div>
     </NordCard>
+    </template>
   </div>
 </template>

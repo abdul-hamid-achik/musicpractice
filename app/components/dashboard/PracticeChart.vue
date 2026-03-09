@@ -5,7 +5,9 @@ interface DayData {
   sessionCount: number
 }
 
-const { data: chartData } = useFetch<DayData[]>('/api/stats/weekly')
+const { data: chartData, status } = useFetch<DayData[]>('/api/stats/weekly')
+
+const isLoading = computed(() => status.value === 'pending')
 
 const maxMinutes = computed(() => {
   if (!chartData.value?.length) return 60
@@ -28,7 +30,17 @@ const bars = computed(() => {
 </script>
 
 <template>
-  <div class="chart-container">
+  <!-- Loading Skeleton -->
+  <div v-if="isLoading" class="h-40 flex items-end gap-1" aria-busy="true" aria-label="Loading chart...">
+    <div v-for="i in 7" :key="i" class="flex-1 flex flex-col items-center">
+      <NordSkeleton height="0.75rem" width="30px" class="mb-1" />
+      <NordSkeleton height="80px" width="20px" class="flex-1" />
+      <NordSkeleton height="0.625rem" width="25px" class="mt-1" />
+    </div>
+  </div>
+
+  <!-- Chart -->
+  <div v-else class="chart-container">
     <div class="chart-bars">
       <div v-for="bar in bars" :key="bar.date" class="bar-group">
         <div class="bar-value" :class="{ 'bar-zero': bar.minutes === 0 }">
@@ -46,7 +58,6 @@ const bars = computed(() => {
     </div>
   </div>
 </template>
-
 <style scoped>
 .chart-container {
   width: 100%;

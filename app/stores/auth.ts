@@ -14,6 +14,7 @@ interface AuthUser {
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<AuthUser | null>(null)
   const loading = ref(false)
+  const { showError } = useToast()
 
   const isAuthenticated = computed(() => !!user.value)
   const userName = computed(() => user.value?.name ?? '')
@@ -34,6 +35,10 @@ export const useAuthStore = defineStore('auth', () => {
         method: 'POST',
         body: { identifier, password },
       })
+    } catch (error) {
+      showError('Login failed. Please check your credentials.')
+      console.error('Login error:', error)
+      throw error
     } finally {
       loading.value = false
     }
@@ -46,6 +51,10 @@ export const useAuthStore = defineStore('auth', () => {
         method: 'POST',
         body: { email, username, password, name },
       })
+    } catch (error) {
+      showError('Registration failed. Please try again.')
+      console.error('Registration error:', error)
+      throw error
     } finally {
       loading.value = false
     }

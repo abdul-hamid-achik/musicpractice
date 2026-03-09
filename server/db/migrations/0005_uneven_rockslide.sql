@@ -1,0 +1,16 @@
+CREATE INDEX "ear_training_scores_user_id_idx" ON "ear_training_scores" USING btree ("user_id");--> statement-breakpoint
+CREATE INDEX "ear_training_scores_exercise_type_idx" ON "ear_training_scores" USING btree ("exercise_type");--> statement-breakpoint
+CREATE INDEX "ear_training_scores_created_at_idx" ON "ear_training_scores" USING btree ("created_at");--> statement-breakpoint
+CREATE INDEX "metronome_presets_user_id_idx" ON "metronome_presets" USING btree ("user_id");--> statement-breakpoint
+CREATE INDEX "practice_goals_user_id_idx" ON "practice_goals" USING btree ("user_id");--> statement-breakpoint
+CREATE INDEX "practice_goals_instrument_id_idx" ON "practice_goals" USING btree ("instrument_id");--> statement-breakpoint
+CREATE INDEX "practice_sessions_user_id_idx" ON "practice_sessions" USING btree ("user_id");--> statement-breakpoint
+CREATE INDEX "practice_sessions_started_at_idx" ON "practice_sessions" USING btree ("started_at");--> statement-breakpoint
+CREATE INDEX "practice_sessions_instrument_id_idx" ON "practice_sessions" USING btree ("instrument_id");--> statement-breakpoint
+CREATE INDEX "practice_sessions_song_id_idx" ON "practice_sessions" USING btree ("song_id");--> statement-breakpoint
+CREATE INDEX "practice_sessions_user_id_started_at_idx" ON "practice_sessions" USING btree ("user_id","started_at");--> statement-breakpoint
+CREATE INDEX "songs_instrument_type_idx" ON "songs" USING btree ("instrument_type");--> statement-breakpoint
+CREATE INDEX "songs_difficulty_idx" ON "songs" USING btree ("difficulty");--> statement-breakpoint
+CREATE INDEX "user_progress_user_id_idx" ON "user_progress" USING btree ("user_id");--> statement-breakpoint
+CREATE INDEX "user_progress_song_id_idx" ON "user_progress" USING btree ("song_id");--> statement-breakpoint
+CREATE UNIQUE INDEX "user_progress_user_id_song_id_idx" ON "user_progress" USING btree ("user_id","song_id");

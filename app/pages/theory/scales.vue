@@ -1,10 +1,14 @@
 <script setup lang="ts">
+import type { Scale } from '#shared/types/music-theory'
+
 const theoryStore = useTheoryStore()
 
 const previewNotes = ref<string[]>([])
 const previewRoot = ref('C')
 
-function handleScaleSelected(payload: { root: string; scale: any; notes: string[] }) {
+const isTheoryLoading = computed(() => !theoryStore.scales.length)
+
+function handleScaleSelected(payload: { root: string; scale: Scale; notes: string[] }) {
   previewRoot.value = payload.root
   previewNotes.value = payload.notes
 }
@@ -18,7 +22,20 @@ onMounted(async () => {
   <div>
     <h1 class="text-3xl font-bold text-text mb-6">Scale Explorer</h1>
 
-    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+    <!-- Loading State -->
+    <div v-if="isTheoryLoading" class="grid grid-cols-1 xl:grid-cols-3 gap-6" aria-busy="true" aria-label="Loading scales...">
+      <!-- Skeleton for Scale Explorer -->
+      <SkeletonCard variant="card" height="400px" class="xl:col-span-2" />
+
+      <!-- Skeleton for Preview Panels -->
+      <div class="space-y-4">
+        <SkeletonCard variant="card" height="180px" />
+        <SkeletonCard variant="card" height="180px" />
+      </div>
+    </div>
+
+    <!-- Loaded Content -->
+    <div v-else class="grid grid-cols-1 xl:grid-cols-3 gap-6">
       <!-- Main Scale Explorer -->
       <div class="xl:col-span-2">
         <ScaleExplorer @scale-selected="handleScaleSelected" />

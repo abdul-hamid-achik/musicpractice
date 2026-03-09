@@ -2,7 +2,7 @@ type InstrumentType = 'guitar' | 'bass' | 'piano' | 'violin'
 
 let toneModule: typeof import('tone') | null = null
 let audioStarted = false
-const synths = new Map<InstrumentType, any>()
+const synths = new Map<InstrumentType, unknown>()
 
 async function getTone() {
   if (!toneModule) {
@@ -22,7 +22,7 @@ async function getSynth(instrument: InstrumentType) {
   if (synths.has(instrument)) return synths.get(instrument)
 
   const Tone = await getTone()
-  let synth: any
+  let synth: unknown
 
   switch (instrument) {
     case 'guitar':
@@ -81,15 +81,20 @@ export function useInstrumentSound() {
     // Volume: settings.volume is 0–100, map to dB (–40 to 0)
     const vol = settings.volume / 100
     const db = vol > 0 ? -40 + vol * 40 : -Infinity
-    synth.volume.value = db
-
-    const noteStr = `${note}${octave}`
 
     if (instrument === 'guitar') {
+      const pluckSynth = synth as import('tone').PluckSynth
+      pluckSynth.volume.value = db
       // PluckSynth uses triggerAttack only
-      synth.triggerAttack(noteStr, Tone.now())
+      pluckSynth.triggerAttack(`${note}${octave}`, Tone.now())
+    } else if (instrument === 'piano') {
+      const polySynth = synth as import('tone').PolySynth
+      polySynth.volume.value = db
+      polySynth.triggerAttackRelease(`${note}${octave}`, duration, Tone.now())
     } else {
-      synth.triggerAttackRelease(noteStr, duration, Tone.now())
+      const monoSynth = synth as import('tone').MonoSynth | import('tone').FMSynth
+      monoSynth.volume.value = db
+      ;(monoSynth as import('tone').MonoSynth).triggerAttackRelease?.(`${note}${octave}`, duration, Tone.now())
     }
   }
 

@@ -30,7 +30,7 @@ watch(
 watch(
   [api, () => props.fileData],
   ([apiVal, data]) => {
-    if (apiVal && data) loadFile(data as any)
+    if (apiVal && data) loadFile(data)
   },
   { immediate: true },
 )

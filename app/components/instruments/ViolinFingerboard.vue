@@ -29,6 +29,10 @@ const fingerSpacing = 55
 const topPadding = 50
 const leftPadding = 50
 
+// Keyboard navigation state
+const focusedPosition = ref<{ string: number; finger: number } | null>(null)
+const fingerboardRef = ref<SVGSVGElement | null>(null)
+
 function parseNote(noteWithOctave: string): { note: string; octave: number } {
   const match = noteWithOctave.match(/^([A-G][#b]?)(\d+)$/)
   if (!match) return { note: 'C', octave: 4 }
@@ -101,15 +105,71 @@ function handleClick(string: number, finger: number, note: string) {
   playNote(note, octave, 'violin')
   emit('noteClick', { note, string, finger, octave })
 }
+
+// Keyboard navigation handlers
+function handleKeydown(event: KeyboardEvent) {
+  if (!focusedPosition.value) {
+    focusedPosition.value = { string: 0, finger: 0 }
+    return
+  }
+
+  const { string, finger } = focusedPosition.value
+  let newString = string
+  let newFinger = finger
+
+  switch (event.key) {
+    case 'ArrowRight':
+      newString = Math.min(string + 1, openStrings.length - 1)
+      break
+    case 'ArrowLeft':
+      newString = Math.max(string - 1, 0)
+      break
+    case 'ArrowDown':
+      newFinger = Math.min(finger + 1, 4)
+      break
+    case 'ArrowUp':
+      newFinger = Math.max(finger - 1, 0)
+      break
+    case 'Enter':
+    case ' ':
+      event.preventDefault()
+      const note = fingerPositions.value[string]?.find((fp: { finger: number }) => fp.finger === finger)?.note
+      if (note) {
+        handleClick(string, finger, note)
+      }
+      return
+    default:
+      return
+  }
+
+  event.preventDefault()
+  focusedPosition.value = { string: newString, finger: newFinger }
+}
+
+function isFocused(string: number, finger: number): boolean {
+  return focusedPosition.value?.string === string && focusedPosition.value?.finger === finger
+}
+
+function getPositionLabel(string: number, finger: number): string {
+  const fp = fingerPositions.value[string]?.find((p: { finger: number }) => p.finger === finger)
+  if (!fp) return ''
+  const octave = getActualOctave(string, finger)
+  const stringName = stringLabels[string]
+  const fingerLabel = finger === 0 ? 'open' : `finger ${finger}`
+  return `${fp.note}${octave} - ${stringName} string, ${fingerLabel}`
+}
 </script>
 
 <template>
   <svg
+    ref="fingerboardRef"
     :viewBox="`0 0 ${svgWidth} ${svgHeight}`"
     class="w-full max-w-xs h-auto select-none mx-auto"
     xmlns="http://www.w3.org/2000/svg"
-    role="img"
-    aria-label="Violin fingerboard diagram"
+    role="application"
+    aria-label="Violin fingerboard diagram. Use arrow keys to navigate between notes, Enter or Space to play."
+    tabindex="0"
+    @keydown="handleKeydown"
   >
     <!-- Position label -->
     <text
@@ -180,7 +240,12 @@ function handleClick(string: number, finger: number, note: string) {
         v-for="fp in stringPositions"
         :key="`fp-${s}-${fp.finger}`"
         class="cursor-pointer"
+        role="button"
+        :aria-label="getPositionLabel(fp.string, fp.finger)"
+        :aria-pressed="isHighlighted(fp.note) || isRoot(fp.note)"
+        :tabindex="isFocused(fp.string, fp.finger) ? 0 : -1"
         @click="handleClick(fp.string, fp.finger, fp.note)"
+        @focus="focusedPosition = { string: fp.string, finger: fp.finger }"
       >
         <circle
           :cx="fp.x"
@@ -196,6 +261,18 @@ function handleClick(string: number, finger: number, note: string) {
           :stroke="isHighlighted(fp.note) || isRoot(fp.note) ? 'none' : 'var(--color-nord3)'"
           :stroke-width="isHighlighted(fp.note) || isRoot(fp.note) ? 0 : 1"
           class="hover-circle"
+        />
+        <!-- Focus indicator -->
+        <circle
+          v-if="isFocused(fp.string, fp.finger)"
+          :cx="fp.x"
+          :cy="fp.y"
+          :r="fp.finger === 0 ? 14 : 16"
+          fill="none"
+          stroke="var(--color-primary)"
+          stroke-width="2"
+          stroke-dasharray="4,2"
+          class="focus-indicator"
         />
         <text
           :x="fp.x"
@@ -228,5 +305,20 @@ g:hover .hover-circle {
 }
 g:hover .hover-text {
   opacity: 1;
+}
+
+/* Focus indicator animation */
+.focus-indicator {
+  animation: focus-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes focus-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Ensure focused elements are visible */
+g[tabindex="0"]:focus {
+  outline: none;
 }
 </style>

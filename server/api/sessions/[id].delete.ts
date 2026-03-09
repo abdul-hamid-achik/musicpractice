@@ -1,28 +1,24 @@
 import { eq } from 'drizzle-orm'
 import { practiceSessions } from '../../db/schema'
 import { requireAuth } from '../../utils/auth'
-
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+import { createApiError, handleApiError, validateId } from '../../utils/errors'
 
 export default defineEventHandler(async (event) => {
-  await requireAuth(event)
-  const db = useDb()
-  const id = getRouterParam(event, 'id')
-
-  if (!id || !UUID_RE.test(id)) {
-    throw createError({ statusCode: 400, message: 'Valid session id is required' })
-  }
-
   try {
-    const [deleted] = await db.delete(practiceSessions).where(eq(practiceSessions.id, id)).returning()
+    await requireAuth(event)
+    const db = useDb()
+    const id = getRouterParam(event, 'id')
+
+    const validId = validateId(id, 'session id')
+
+    const [deleted] = await db.delete(practiceSessions).where(eq(practiceSessions.id, validId)).returning()
 
     if (!deleted) {
-      throw createError({ statusCode: 404, message: 'Session not found' })
+      throw createApiError('Session not found', 404)
     }
 
     return { message: 'Session deleted', id: deleted.id }
-  } catch (err: unknown) {
-    if (err && typeof err === 'object' && 'statusCode' in err) throw err
-    throw createError({ statusCode: 500, message: 'Failed to delete session' })
+  } catch (error) {
+    return handleApiError(error, { route: '/api/sessions/[id]', operation: 'delete' })
   }
 })

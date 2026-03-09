@@ -1,19 +1,16 @@
 import { eq } from 'drizzle-orm'
 import { practiceSessions, instruments } from '../../db/schema'
 import { requireAuth } from '../../utils/auth'
-
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+import { createApiError, handleApiError, validateId } from '../../utils/errors'
 
 export default defineEventHandler(async (event) => {
-  await requireAuth(event)
-  const db = useDb()
-  const id = getRouterParam(event, 'id')
-
-  if (!id || !UUID_RE.test(id)) {
-    throw createError({ statusCode: 400, message: 'Valid session id is required' })
-  }
-
   try {
+    await requireAuth(event)
+    const db = useDb()
+    const id = getRouterParam(event, 'id')
+
+    const validId = validateId(id, 'session id')
+
     const [session] = await db
       .select({
         id: practiceSessions.id,
@@ -30,15 +27,14 @@ export default defineEventHandler(async (event) => {
       })
       .from(practiceSessions)
       .leftJoin(instruments, eq(practiceSessions.instrumentId, instruments.id))
-      .where(eq(practiceSessions.id, id))
+      .where(eq(practiceSessions.id, validId))
 
     if (!session) {
-      throw createError({ statusCode: 404, message: 'Session not found' })
+      throw createApiError('Session not found', 404)
     }
 
     return session
-  } catch (err: unknown) {
-    if (err && typeof err === 'object' && 'statusCode' in err) throw err
-    throw createError({ statusCode: 500, message: 'Failed to fetch session' })
+  } catch (error) {
+    return handleApiError(error, { route: '/api/sessions/[id]', operation: 'get' })
   }
 })

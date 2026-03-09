@@ -49,10 +49,12 @@ interface KeyData {
   w: number
   h: number
   isBlack: boolean
+  index: number
 }
 
 const whiteKeys = computed<KeyData[]>(() => {
   const keys: KeyData[] = []
+  let globalIndex = 0
   for (let o = 0; o < props.octaves; o++) {
     const octave = props.startOctave + o
     for (let i = 0; i < whiteNotes.length; i++) {
@@ -67,6 +69,7 @@ const whiteKeys = computed<KeyData[]>(() => {
         w: whiteKeyWidth - 1,
         h: whiteKeyHeight,
         isBlack: false,
+        index: globalIndex++,
       })
     }
   }
@@ -75,9 +78,11 @@ const whiteKeys = computed<KeyData[]>(() => {
 
 const blackKeys = computed<KeyData[]>(() => {
   const keys: KeyData[] = []
+  let globalIndex = whiteKeys.value.length
   for (let o = 0; o < props.octaves; o++) {
     const octave = props.startOctave + o
     for (const [note, offset] of Object.entries(blackKeyOffsets)) {
+      if (!note) continue
       const x = (o * 7 + offset) * whiteKeyWidth - blackKeyWidth / 2 + whiteKeyWidth / 2
       keys.push({
         note,
@@ -88,11 +93,21 @@ const blackKeys = computed<KeyData[]>(() => {
         w: blackKeyWidth,
         h: blackKeyHeight,
         isBlack: true,
+        index: globalIndex++,
       })
     }
   }
   return keys
 })
+
+// All keys combined for keyboard navigation
+const allKeys = computed(() => {
+  return [...whiteKeys.value, ...blackKeys.value].sort((a, b) => a.x - b.x)
+})
+
+// Keyboard navigation state
+const focusedKeyIndex = ref<number | null>(null)
+const keyboardRef = ref<SVGSVGElement | null>(null)
 
 function isHighlighted(note: string): boolean {
   return props.highlightedNotes.includes(note)
@@ -140,15 +155,57 @@ function handleClick(key: KeyData) {
   playNote(key.note, key.octave, 'piano')
   emit('noteClick', { note: key.note, octave: key.octave, midi: key.midi })
 }
+
+// Keyboard navigation
+function handleKeydown(event: KeyboardEvent) {
+  if (focusedKeyIndex.value === null) {
+    focusedKeyIndex.value = 0
+    return
+  }
+
+  switch (event.key) {
+    case 'ArrowRight':
+      event.preventDefault()
+      focusedKeyIndex.value = Math.min(focusedKeyIndex.value + 1, allKeys.value.length - 1)
+      break
+    case 'ArrowLeft':
+      event.preventDefault()
+      focusedKeyIndex.value = Math.max(focusedKeyIndex.value - 1, 0)
+      break
+    case 'Enter':
+    case ' ':
+      event.preventDefault()
+      const currentKey = allKeys.value[focusedKeyIndex.value]
+      if (currentKey) {
+        handleClick(currentKey)
+      }
+      break
+    default:
+      return
+  }
+}
+
+function isFocused(key: KeyData): boolean {
+  return focusedKeyIndex.value !== null && allKeys.value[focusedKeyIndex.value]?.index === key.index
+}
+
+function getKeyLabel(key: KeyData): string {
+  const state = isHighlighted(key.note) ? ' (highlighted)' : ''
+  const rootState = isRoot(key.note) ? ' (root note)' : ''
+  return `${key.note}${key.octave}${key.isBlack ? ' sharp' : ''}${state}${rootState}`
+}
 </script>
 
 <template>
   <svg
+    ref="keyboardRef"
     :viewBox="`0 0 ${svgWidth} ${svgHeight}`"
     class="w-full h-auto select-none"
     xmlns="http://www.w3.org/2000/svg"
-    role="img"
-    aria-label="Piano keyboard diagram"
+    role="application"
+    aria-label="Piano keyboard. Use arrow keys to navigate between keys, Enter or Space to play."
+    tabindex="0"
+    @keydown="handleKeydown"
   >
     <!-- White keys -->
     <g
@@ -156,10 +213,15 @@ function handleClick(key: KeyData) {
       :key="`white-${key.note}-${key.octave}`"
       class="cursor-pointer"
       :class="{ 'note-tapped': tappedKey === keyId(key) }"
+      role="button"
+      :aria-label="getKeyLabel(key)"
+      :aria-pressed="isHighlighted(key.note) || isRoot(key.note)"
+      :tabindex="isFocused(key) ? 0 : -1"
       @click="handleClick(key)"
       @mousedown="handleMouseDown(key)"
       @mouseup="handleMouseUp"
       @mouseleave="handleMouseUp"
+      @focus="focusedKeyIndex = allKeys.findIndex(k => k.index === key.index)"
     >
       <rect
         :x="key.x"
@@ -172,6 +234,19 @@ function handleClick(key: KeyData) {
         rx="0"
         ry="0"
         class="white-key"
+      />
+      <!-- Focus indicator -->
+      <rect
+        v-if="isFocused(key)"
+        :x="key.x + 2"
+        :y="key.y + 2"
+        :width="key.w - 4"
+        :height="key.h - 4"
+        fill="none"
+        stroke="var(--color-primary)"
+        stroke-width="3"
+        stroke-dasharray="4,2"
+        class="focus-indicator"
       />
       <text
         :x="key.x + key.w / 2"
@@ -190,10 +265,15 @@ function handleClick(key: KeyData) {
       :key="`black-${key.note}-${key.octave}`"
       class="cursor-pointer"
       :class="{ 'note-tapped': tappedKey === keyId(key) }"
+      role="button"
+      :aria-label="getKeyLabel(key)"
+      :aria-pressed="isHighlighted(key.note) || isRoot(key.note)"
+      :tabindex="isFocused(key) ? 0 : -1"
       @click="handleClick(key)"
       @mousedown="handleMouseDown(key)"
       @mouseup="handleMouseUp"
       @mouseleave="handleMouseUp"
+      @focus="focusedKeyIndex = allKeys.findIndex(k => k.index === key.index)"
     >
       <rect
         :x="key.x"
@@ -206,6 +286,19 @@ function handleClick(key: KeyData) {
         rx="0"
         ry="0"
         class="black-key"
+      />
+      <!-- Focus indicator -->
+      <rect
+        v-if="isFocused(key)"
+        :x="key.x + 2"
+        :y="key.y + 2"
+        :width="key.w - 4"
+        :height="key.h - 4"
+        fill="none"
+        stroke="var(--color-primary)"
+        stroke-width="3"
+        stroke-dasharray="4,2"
+        class="focus-indicator"
       />
     </g>
   </svg>
@@ -234,5 +327,20 @@ function handleClick(key: KeyData) {
 .note-tapped {
   animation: note-glow 250ms ease-out;
   transform-origin: center;
+}
+
+/* Focus indicator animation */
+.focus-indicator {
+  animation: focus-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes focus-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Ensure focused elements are visible */
+g[tabindex="0"]:focus {
+  outline: none;
 }
 </style>

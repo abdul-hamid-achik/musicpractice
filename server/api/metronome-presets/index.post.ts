@@ -1,36 +1,32 @@
 import { metronomePresets } from '../../db/schema'
 import { requireAuth } from '../../utils/auth'
-
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+import { createApiError, handleApiError } from '../../utils/errors'
 
 export default defineEventHandler(async (event) => {
-  await requireAuth(event)
-  const db = useDb()
-  const body = await readBody(event)
-
-  if (!body.userId || !body.name || !body.tempoBpm) {
-    throw createError({ statusCode: 400, message: 'userId, name, and tempoBpm are required' })
-  }
-
-  if (!UUID_RE.test(body.userId)) {
-    throw createError({ statusCode: 400, message: 'Invalid userId format' })
-  }
-  if (!Number.isInteger(body.tempoBpm) || body.tempoBpm < 1) {
-    throw createError({ statusCode: 400, message: 'tempoBpm must be a positive integer' })
-  }
-  if (body.beatsPerMeasure != null && (!Number.isInteger(body.beatsPerMeasure) || body.beatsPerMeasure < 1)) {
-    throw createError({ statusCode: 400, message: 'beatsPerMeasure must be a positive integer' })
-  }
-  if (body.beatUnit != null && (!Number.isInteger(body.beatUnit) || body.beatUnit < 1)) {
-    throw createError({ statusCode: 400, message: 'beatUnit must be a positive integer' })
-  }
-  if (body.subdivision != null && (!Number.isInteger(body.subdivision) || body.subdivision < 1)) {
-    throw createError({ statusCode: 400, message: 'subdivision must be a positive integer' })
-  }
-
   try {
+    const user = await requireAuth(event)
+    const db = useDb()
+    const body = await readBody(event)
+
+    if (!body.name || !body.tempoBpm) {
+      throw createApiError('name and tempoBpm are required', 400)
+    }
+
+    if (!Number.isInteger(body.tempoBpm) || body.tempoBpm < 1) {
+      throw createApiError('tempoBpm must be a positive integer', 400)
+    }
+    if (body.beatsPerMeasure != null && (!Number.isInteger(body.beatsPerMeasure) || body.beatsPerMeasure < 1)) {
+      throw createApiError('beatsPerMeasure must be a positive integer', 400)
+    }
+    if (body.beatUnit != null && (!Number.isInteger(body.beatUnit) || body.beatUnit < 1)) {
+      throw createApiError('beatUnit must be a positive integer', 400)
+    }
+    if (body.subdivision != null && (!Number.isInteger(body.subdivision) || body.subdivision < 1)) {
+      throw createApiError('subdivision must be a positive integer', 400)
+    }
+
     const [preset] = await db.insert(metronomePresets).values({
-      userId: body.userId,
+      userId: user.id,
       name: body.name,
       tempoBpm: body.tempoBpm,
       beatsPerMeasure: body.beatsPerMeasure ?? 4,
@@ -40,8 +36,7 @@ export default defineEventHandler(async (event) => {
     }).returning()
 
     return preset
-  } catch (err: unknown) {
-    if (err && typeof err === 'object' && 'statusCode' in err) throw err
-    throw createError({ statusCode: 500, message: 'Failed to create metronome preset' })
+  } catch (error) {
+    return handleApiError(error, { route: '/api/metronome-presets', operation: 'create' })
   }
 })

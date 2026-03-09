@@ -5,7 +5,9 @@ interface HeatmapDay {
   sessionCount: number
 }
 
-const { data: rawData } = useFetch<HeatmapDay[]>('/api/stats/heatmap')
+const { data: rawData, status } = useFetch<HeatmapDay[]>('/api/stats/heatmap')
+
+const isLoading = computed(() => status.value === 'pending')
 
 // Build full 90-day grid
 const days = computed(() => {
@@ -85,7 +87,20 @@ function formatDate(dateStr: string) {
 </script>
 
 <template>
-  <div class="heatmap-container">
+  <!-- Loading Skeleton -->
+  <div v-if="isLoading" class="space-y-2" aria-busy="true" aria-label="Loading heatmap...">
+    <div class="flex gap-1">
+      <NordSkeleton v-for="i in 13" :key="i" height="0.625rem" width="40px" />
+    </div>
+    <div class="flex gap-1">
+      <div class="flex flex-col gap-1" v-for="i in 13" :key="i">
+        <NordSkeleton v-for="j in 7" :key="j" variant="circle" width="14px" height="14px" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Heatmap -->
+  <div v-else class="heatmap-container">
     <div class="heatmap-months">
       <span
         v-for="m in monthLabels"

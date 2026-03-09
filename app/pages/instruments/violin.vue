@@ -8,6 +8,9 @@ const position = ref(1)
 const selectedScaleId = ref('')
 const lastClickedNote = ref('')
 
+// Track loading state
+const isTheoryLoading = computed(() => !theoryStore.scales.length)
+
 const highlightedNotes = computed(() => {
   if (selectedScaleId.value) {
     const scale = theoryStore.scales.find((s) => s.id === selectedScaleId.value)
@@ -43,8 +46,19 @@ onMounted(async () => {
     </div>
     <p class="text-text-muted mb-6">Fingerboard with position guides — visualize scales and finger placements.</p>
 
-    <!-- Controls -->
-    <NordCard class="mb-6">
+    <!-- Loading State for Fingerboard and Controls -->
+    <div v-if="isTheoryLoading" class="space-y-4" aria-busy="true" aria-label="Loading violin fingerboard...">
+      <!-- Skeleton for Controls -->
+      <SkeletonCard variant="card" height="100px" />
+
+      <!-- Skeleton for Fingerboard -->
+      <SkeletonCard variant="card" height="200px" />
+    </div>
+
+    <!-- Loaded Content -->
+    <template v-else>
+      <!-- Controls -->
+      <NordCard class="mb-6">
       <div class="flex flex-wrap items-end gap-4">
         <!-- Root Note -->
         <div>
@@ -100,5 +114,6 @@ onMounted(async () => {
         <span class="text-2xl font-bold text-primary">{{ lastClickedNote }}</span>
       </div>
     </NordCard>
+    </template>
   </div>
 </template>

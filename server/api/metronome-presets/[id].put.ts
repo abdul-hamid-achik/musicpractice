@@ -1,34 +1,31 @@
-import { eq } from 'drizzle-orm'
+import { eq, and } from 'drizzle-orm'
 import { metronomePresets } from '../../db/schema'
 import { requireAuth } from '../../utils/auth'
-
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+import { createApiError, handleApiError, validateId } from '../../utils/errors'
 
 export default defineEventHandler(async (event) => {
-  await requireAuth(event)
-  const db = useDb()
-  const id = getRouterParam(event, 'id')
-
-  if (!id || !UUID_RE.test(id)) {
-    throw createError({ statusCode: 400, message: 'Valid preset id is required' })
-  }
-
-  const body = await readBody(event)
-
-  if (body.tempoBpm != null && (!Number.isInteger(body.tempoBpm) || body.tempoBpm < 1)) {
-    throw createError({ statusCode: 400, message: 'tempoBpm must be a positive integer' })
-  }
-  if (body.beatsPerMeasure != null && (!Number.isInteger(body.beatsPerMeasure) || body.beatsPerMeasure < 1)) {
-    throw createError({ statusCode: 400, message: 'beatsPerMeasure must be a positive integer' })
-  }
-  if (body.beatUnit != null && (!Number.isInteger(body.beatUnit) || body.beatUnit < 1)) {
-    throw createError({ statusCode: 400, message: 'beatUnit must be a positive integer' })
-  }
-  if (body.subdivision != null && (!Number.isInteger(body.subdivision) || body.subdivision < 1)) {
-    throw createError({ statusCode: 400, message: 'subdivision must be a positive integer' })
-  }
-
   try {
+    const user = await requireAuth(event)
+    const db = useDb()
+    const id = getRouterParam(event, 'id')
+
+    const validId = validateId(id, 'preset id')
+
+    const body = await readBody(event)
+
+    if (body.tempoBpm != null && (!Number.isInteger(body.tempoBpm) || body.tempoBpm < 1)) {
+      throw createApiError('tempoBpm must be a positive integer', 400)
+    }
+    if (body.beatsPerMeasure != null && (!Number.isInteger(body.beatsPerMeasure) || body.beatsPerMeasure < 1)) {
+      throw createApiError('beatsPerMeasure must be a positive integer', 400)
+    }
+    if (body.beatUnit != null && (!Number.isInteger(body.beatUnit) || body.beatUnit < 1)) {
+      throw createApiError('beatUnit must be a positive integer', 400)
+    }
+    if (body.subdivision != null && (!Number.isInteger(body.subdivision) || body.subdivision < 1)) {
+      throw createApiError('subdivision must be a positive integer', 400)
+    }
+
     const updates: Record<string, unknown> = {}
     if (body.name !== undefined) updates.name = body.name
     if (body.tempoBpm !== undefined) updates.tempoBpm = body.tempoBpm
@@ -38,18 +35,20 @@ export default defineEventHandler(async (event) => {
     if (body.subdivision !== undefined) updates.subdivision = body.subdivision
 
     if (Object.keys(updates).length === 0) {
-      throw createError({ statusCode: 400, message: 'No valid fields to update' })
+      throw createApiError('No valid fields to update', 400)
     }
 
-    const [preset] = await db.update(metronomePresets).set(updates).where(eq(metronomePresets.id, id)).returning()
+    const [preset] = await db.update(metronomePresets)
+      .set(updates)
+      .where(and(eq(metronomePresets.id, validId), eq(metronomePresets.userId, user.id)))
+      .returning()
 
     if (!preset) {
-      throw createError({ statusCode: 404, message: 'Preset not found' })
+      throw createApiError('Preset not found', 404)
     }
 
     return preset
-  } catch (err: unknown) {
-    if (err && typeof err === 'object' && 'statusCode' in err) throw err
-    throw createError({ statusCode: 500, message: 'Failed to update metronome preset' })
+  } catch (error) {
+    return handleApiError(error, { route: '/api/metronome-presets/[id]', operation: 'update' })
   }
 })

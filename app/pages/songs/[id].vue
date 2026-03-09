@@ -1,14 +1,28 @@
 <script setup lang="ts">
+import type { Song, UserProgress } from '#shared/types/notation'
+
 const route = useRoute()
 const router = useRouter()
 const songId = route.params.id as string
+const { showSuccess, showError } = useToast()
 
 const { data: song, refresh } = await useAsyncData(`song-${songId}`, () =>
-  $fetch<any>(`/api/songs/${songId}`),
+  $fetch<Song>(`/api/songs/${songId}`),
 )
+
+// Fetch user progress for this song
+const { data: progress, refresh: refreshProgress } = await useAsyncData(`progress-${songId}`, async () => {
+  try {
+    const result = await $fetch<{ data: UserProgress[] }>(`/api/progress?songId=${songId}`)
+    return result.data?.[0] ?? null
+  } catch {
+    return null
+  }
+})
 
 const showEditModal = ref(false)
 const showDeleteConfirm = ref(false)
+const showProgressEditModal = ref(false)
 
 const editForm = ref({
   title: '',
@@ -17,6 +31,13 @@ const editForm = ref({
   difficulty: 'beginner',
   format: 'alphatex',
   notationData: '',
+})
+
+const progressEditForm = ref({
+  completionPercent: 0,
+  maxTempoBpm: null as number | null,
+  practiceCount: 0,
+  lastPracticedAt: '',
 })
 
 function openEdit() {
@@ -33,17 +54,70 @@ function openEdit() {
 }
 
 async function saveEdit() {
-  await $fetch(`/api/songs/${songId}`, {
-    method: 'PUT',
-    body: editForm.value,
-  })
-  showEditModal.value = false
-  refresh()
+  try {
+    await $fetch(`/api/songs/${songId}`, {
+      method: 'PUT',
+      body: editForm.value,
+    })
+    showSuccess('Song updated successfully')
+    showEditModal.value = false
+    refresh()
+  } catch (error) {
+    showError('Failed to update song')
+    console.error('Error updating song:', error)
+  }
 }
 
 async function deleteSong() {
-  await $fetch(`/api/songs/${songId}`, { method: 'DELETE' })
-  router.push('/songs')
+  try {
+    await $fetch(`/api/songs/${songId}`, { method: 'DELETE' })
+    showSuccess('Song deleted successfully')
+    router.push('/songs')
+  } catch (error) {
+    showError('Failed to delete song')
+    console.error('Error deleting song:', error)
+  }
+}
+
+function openProgressEdit() {
+  if (!progress.value) {
+    progressEditForm.value = {
+      completionPercent: 0,
+      maxTempoBpm: null,
+      practiceCount: 0,
+      lastPracticedAt: '',
+    }
+  } else {
+    progressEditForm.value = {
+      completionPercent: progress.value.completionPercent ?? 0,
+      maxTempoBpm: progress.value.maxTempoBpm ?? null,
+      practiceCount: progress.value.practiceCount ?? 0,
+      lastPracticedAt: progress.value.lastPracticedAt
+        ? new Date(progress.value.lastPracticedAt).toISOString().slice(0, 16)
+        : new Date().toISOString().slice(0, 16),
+    }
+  }
+  showProgressEditModal.value = true
+}
+
+async function saveProgressEdit() {
+  try {
+    await $fetch(`/api/progress/${songId}`, {
+      method: 'PUT',
+      body: {
+        completionPercent: progressEditForm.value.completionPercent,
+        maxTempoBpm: progressEditForm.value.maxTempoBpm || null,
+        practiceCount: progressEditForm.value.practiceCount,
+        lastPracticedAt: progressEditForm.value.lastPracticedAt || null,
+      },
+    })
+    showSuccess('Progress updated successfully')
+    showProgressEditModal.value = false
+    refreshProgress()
+  } catch (error) {
+    showError('Failed to update progress')
+    console.error('Error updating progress:', error)
+  }
 }
 
 const difficultyColors: Record<string, string> = {
@@ -51,6 +125,16 @@ const difficultyColors: Record<string, string> = {
   intermediate: 'bg-nord13/20 text-nord13',
   advanced: 'bg-nord12/20 text-nord12',
   expert: 'bg-nord11/20 text-nord11',
+}
+
+function formatDate(dateString: string | Date | null): string {
+  if (!dateString) return 'Never'
+  const date = typeof dateString === 'string' ? new Date(dateString) : dateString
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  })
 }
 </script>
 
@@ -106,6 +190,53 @@ const difficultyColors: Record<string, string> = {
                 {{ song.difficulty }}
               </span>
             </div>
+          </div>
+        </NordCard>
+
+        <!-- Progress Card -->
+        <NordCard title="Your Progress">
+          <div v-if="progress" class="space-y-4">
+            <!-- Completion Progress Bar -->
+            <div>
+              <div class="flex justify-between items-center mb-2">
+                <span class="text-sm text-text-muted">Completion</span>
+                <span class="text-sm font-semibold text-text">{{ Math.round(progress.completionPercent) }}%</span>
+              </div>
+              <div class="h-2 bg-border rounded-full overflow-hidden">
+                <div
+                  class="h-full bg-primary transition-all duration-500"
+                  :style="{ width: progress.completionPercent + '%' }"
+                />
+              </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="grid grid-cols-2 gap-3">
+              <div class="bg-surface-alt rounded-md p-2">
+                <span class="text-xs text-text-muted block">Practice Sessions</span>
+                <span class="text-lg font-bold text-text">{{ progress.practiceCount }}</span>
+              </div>
+              <div class="bg-surface-alt rounded-md p-2">
+                <span class="text-xs text-text-muted block">Max Tempo</span>
+                <span class="text-lg font-bold text-text">{{ progress.maxTempoBpm ?? '--' }} <span class="text-xs font-normal">BPM</span></span>
+              </div>
+            </div>
+
+            <!-- Last Practiced -->
+            <div class="bg-surface-alt rounded-md p-2">
+              <span class="text-xs text-text-muted block">Last Practiced</span>
+              <span class="text-sm font-medium text-text">{{ formatDate(progress.lastPracticedAt) }}</span>
+            </div>
+
+            <NordButton variant="secondary" size="sm" class="w-full" @click="openProgressEdit">
+              Edit Progress
+            </NordButton>
+          </div>
+          <div v-else class="text-center py-4">
+            <p class="text-text-muted text-sm mb-3">No progress tracked yet</p>
+            <NordButton variant="secondary" size="sm" @click="openProgressEdit">
+              Add Progress
+            </NordButton>
           </div>
         </NordCard>
 
@@ -202,6 +333,64 @@ const difficultyColors: Record<string, string> = {
         <NordButton variant="ghost" @click="showDeleteConfirm = false">Cancel</NordButton>
         <NordButton variant="danger" @click="deleteSong">Delete Song</NordButton>
       </div>
+    </NordModal>
+
+    <!-- Progress Edit Modal -->
+    <NordModal :open="showProgressEditModal" title="Edit Progress" @close="showProgressEditModal = false">
+      <form class="space-y-4" @submit.prevent="saveProgressEdit">
+        <div>
+          <label class="block text-sm text-text-muted mb-1">Completion (%)</label>
+          <input
+            v-model.number="progressEditForm.completionPercent"
+            type="number"
+            min="0"
+            max="100"
+            class="w-full bg-surface-alt text-text border border-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+          <input
+            type="range"
+            v-model.number="progressEditForm.completionPercent"
+            min="0"
+            max="100"
+            class="w-full mt-2"
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm text-text-muted mb-1">Max Tempo (BPM)</label>
+          <input
+            v-model.number="progressEditForm.maxTempoBpm"
+            type="number"
+            min="1"
+            placeholder="e.g., 120"
+            class="w-full bg-surface-alt text-text border border-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm text-text-muted mb-1">Practice Sessions</label>
+          <input
+            v-model.number="progressEditForm.practiceCount"
+            type="number"
+            min="0"
+            class="w-full bg-surface-alt text-text border border-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm text-text-muted mb-1">Last Practiced</label>
+          <input
+            v-model="progressEditForm.lastPracticedAt"
+            type="datetime-local"
+            class="w-full bg-surface-alt text-text border border-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+        </div>
+
+        <div class="flex justify-end gap-3 pt-2">
+          <NordButton variant="ghost" type="button" @click="showProgressEditModal = false">Cancel</NordButton>
+          <NordButton variant="primary" type="submit">Save Progress</NordButton>
+        </div>
+      </form>
     </NordModal>
   </div>
 

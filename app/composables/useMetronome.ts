@@ -1,4 +1,5 @@
 import { ref, onBeforeUnmount } from 'vue'
+import type * as Tone from 'tone'
 
 export function useMetronome() {
   const bpm = ref(120)
@@ -6,9 +7,9 @@ export function useMetronome() {
   const beatsPerMeasure = ref(4)
   const currentBeat = ref(0)
 
-  let synth: any = null
-  let accentSynth: any = null
-  let loop: any = null
+  let synth: Tone.MembraneSynth | null = null
+  let accentSynth: Tone.MembraneSynth | null = null
+  let loop: Tone.Loop | null = null
 
   const start = async () => {
     const Tone = await import('tone')
@@ -35,9 +36,9 @@ export function useMetronome() {
     loop = new Tone.Loop((time: number) => {
       const beat = currentBeat.value
       if (beat === 0) {
-        accentSynth.triggerAttackRelease('C2', '8n', time)
+        accentSynth?.triggerAttackRelease('C2', '8n', time)
       } else {
-        synth.triggerAttackRelease('C3', '8n', time)
+        synth?.triggerAttackRelease('C3', '8n', time)
       }
       currentBeat.value = (beat + 1) % beatsPerMeasure.value
     }, '4n')
