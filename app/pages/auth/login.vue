@@ -1,36 +1,47 @@
 <script setup lang="ts">
-definePageMeta({ layout: false })
+definePageMeta({ layout: false });
 
-const auth = useAuth()
-const router = useRouter()
+const auth = useAuth();
+const router = useRouter();
 
-const identifier = ref('')
-const password = ref('')
-const error = ref('')
-const errorRef = ref<HTMLElement | null>(null)
+const identifier = ref('');
+const password = ref('');
+const error = ref('');
+const errorRef = ref<HTMLElement | null>(null);
 
 async function handleLogin() {
-  error.value = ''
+  error.value = '';
   try {
-    await auth.login(identifier.value, password.value)
-    router.push('/dashboard')
+    await auth.login(identifier.value, password.value);
+    router.push('/dashboard');
   } catch (e: unknown) {
-    const errorObj = e as { data?: { message?: string } }
-    error.value = errorObj?.data?.message || 'Invalid credentials'
+    const errorObj = e as { data?: { message?: string } };
+    error.value = errorObj?.data?.message || 'Invalid credentials';
     // Focus error message for screen readers
     nextTick(() => {
-      errorRef.value?.focus()
-    })
+      errorRef.value?.focus();
+    });
   }
 }
 </script>
 
 <template>
   <div class="min-h-screen bg-surface flex flex-col">
-    <nav class="w-full bg-surface/80 backdrop-blur-md border-b border-border/50 h-14 flex items-center justify-between px-6">
-      <NuxtLink to="/" class="flex items-center gap-2 group focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-surface rounded-md">
-        <span class="text-primary text-2xl transition-transform duration-300 group-hover:scale-110" aria-hidden="true">&#9834;</span>
-        <span class="font-bold text-xl text-text">Music<span class="text-primary">Practice</span></span>
+    <nav
+      class="w-full bg-surface/80 backdrop-blur-md border-b border-border/50 h-14 flex items-center justify-between px-6"
+    >
+      <NuxtLink
+        to="/"
+        class="flex items-center gap-2 group focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-surface rounded-md"
+      >
+        <span
+          class="text-primary text-2xl transition-transform duration-300 group-hover:scale-110"
+          aria-hidden="true"
+          >&#9834;</span
+        >
+        <span class="font-bold text-xl text-text"
+          >Music<span class="text-primary">Practice</span></span
+        >
       </NuxtLink>
       <ThemeToggle />
     </nav>
@@ -38,7 +49,11 @@ async function handleLogin() {
       <div class="w-full max-w-sm">
         <p class="text-text-muted text-center mb-8">Sign in to your account</p>
 
-        <form class="bg-card border border-border rounded-xl p-6 space-y-4" @submit.prevent="handleLogin" novalidate>
+        <form
+          class="bg-card border border-border rounded-xl p-6 space-y-4"
+          @submit.prevent="handleLogin"
+          novalidate
+        >
           <!-- Error message with role="alert" for screen readers -->
           <div
             v-if="error"
@@ -52,7 +67,9 @@ async function handleLogin() {
           </div>
 
           <div>
-            <label for="identifier" class="block text-sm font-medium text-text mb-1.5">Email or username</label>
+            <label for="identifier" class="block text-sm font-medium text-text mb-1.5"
+              >Email or username</label
+            >
             <input
               id="identifier"
               v-model="identifier"
@@ -66,7 +83,9 @@ async function handleLogin() {
           </div>
 
           <div>
-            <label for="password" class="block text-sm font-medium text-text mb-1.5">Password</label>
+            <label for="password" class="block text-sm font-medium text-text mb-1.5"
+              >Password</label
+            >
             <input
               id="password"
               v-model="password"
@@ -91,7 +110,11 @@ async function handleLogin() {
 
         <p class="text-center text-text-muted text-sm mt-6">
           Don't have an account?
-          <NuxtLink to="/auth/register" class="text-primary hover:underline font-medium focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-surface rounded-md px-1">Sign up</NuxtLink>
+          <NuxtLink
+            to="/auth/register"
+            class="text-primary hover:underline font-medium focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-surface rounded-md px-1"
+            >Sign up</NuxtLink
+          >
         </p>
       </div>
     </div>

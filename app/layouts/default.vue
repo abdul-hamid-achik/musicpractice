@@ -10,11 +10,7 @@
 
     <AppHeader />
     <AppSidebar />
-    <main
-      id="main-content"
-      class="ml-0 lg:ml-64 mt-16 p-6 pb-8 flex-1"
-      tabindex="-1"
-    >
+    <main id="main-content" class="ml-0 lg:ml-64 mt-16 p-6 pb-8 flex-1" tabindex="-1">
       <slot />
     </main>
     <AppFooter />

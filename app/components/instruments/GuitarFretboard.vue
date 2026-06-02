@@ -1,14 +1,14 @@
 <script setup lang="ts">
-const { transposeNote, noteToMidi, midiToNote } = useMusicTheory()
-const { playNote } = useInstrumentSound()
+const { transposeNote, noteToMidi, midiToNote } = useMusicTheory();
+const { playNote } = useInstrumentSound();
 
 const props = withDefaults(
   defineProps<{
-    tuning?: string[]
-    frets?: number
-    highlightedNotes?: string[]
-    rootNote?: string
-    instrument?: 'guitar' | 'bass'
+    tuning?: string[];
+    frets?: number;
+    highlightedNotes?: string[];
+    rootNote?: string;
+    instrument?: 'guitar' | 'bass';
   }>(),
   {
     tuning: () => ['E2', 'A2', 'D3', 'G3', 'B3', 'E4'],
@@ -17,129 +17,129 @@ const props = withDefaults(
     rootNote: '',
     instrument: 'guitar',
   },
-)
+);
 
 const emit = defineEmits<{
-  noteClick: [payload: { string: number; fret: number; note: string; octave: number }]
-}>()
+  noteClick: [payload: { string: number; fret: number; note: string; octave: number }];
+}>();
 
-const fretMarkers = [3, 5, 7, 9, 12, 15, 17, 19, 21, 24]
-const doubleFretMarkers = [12, 24]
+const fretMarkers = [3, 5, 7, 9, 12, 15, 17, 19, 21, 24];
+const doubleFretMarkers = [12, 24];
 
-const stringThickness = [2.5, 2.1, 1.7, 1.3, 1.0, 0.8]
+const stringThickness = [2.5, 2.1, 1.7, 1.3, 1.0, 0.8];
 
-const fretboardWidth = 1200
-const fretboardHeight = 180
-const nutX = 50
-const fretSpacing = (fretboardWidth - nutX) / 24
-const stringSpacing = 28
-const topPadding = 30
+const fretboardWidth = 1200;
+const fretboardHeight = 180;
+const nutX = 50;
+const fretSpacing = (fretboardWidth - nutX) / 24;
+const stringSpacing = 28;
+const topPadding = 30;
 
 // Keyboard navigation state
-const focusedNote = ref<{ string: number; fret: number } | null>(null)
-const fretboardRef = ref<SVGSVGElement | null>(null)
+const focusedNote = ref<{ string: number; fret: number } | null>(null);
+const fretboardRef = ref<SVGSVGElement | null>(null);
 
 function parseNote(noteWithOctave: string): { note: string; octave: number } {
-  const match = noteWithOctave.match(/^([A-G][#b]?)(\d+)$/)
-  if (!match) return { note: 'C', octave: 3 }
-  return { note: match[1]!, octave: parseInt(match[2]!) }
+  const match = noteWithOctave.match(/^([A-G][#b]?)(\d+)$/);
+  if (!match) return { note: 'C', octave: 3 };
+  return { note: match[1]!, octave: parseInt(match[2]!) };
 }
 
 const fretboardNotes = computed(() => {
-  const notes: { string: number; fret: number; note: string; x: number; y: number }[][] = []
+  const notes: { string: number; fret: number; note: string; x: number; y: number }[][] = [];
   for (let s = 0; s < props.tuning.length; s++) {
-    const stringNotes: typeof notes[0] = []
-    const open = parseNote(props.tuning[s]!)
+    const stringNotes: (typeof notes)[0] = [];
+    const open = parseNote(props.tuning[s]!);
     for (let f = 0; f <= props.frets; f++) {
-      const note = transposeNote(open.note, f)
-      const x = f === 0 ? nutX / 2 : nutX + (f - 0.5) * fretSpacing
-      const y = topPadding + (props.tuning.length - 1 - s) * stringSpacing
-      stringNotes.push({ string: s, fret: f, note, x, y })
+      const note = transposeNote(open.note, f);
+      const x = f === 0 ? nutX / 2 : nutX + (f - 0.5) * fretSpacing;
+      const y = topPadding + (props.tuning.length - 1 - s) * stringSpacing;
+      stringNotes.push({ string: s, fret: f, note, x, y });
     }
-    notes.push(stringNotes)
+    notes.push(stringNotes);
   }
-  return notes
-})
+  return notes;
+});
 
 function isHighlighted(note: string): boolean {
-  return props.highlightedNotes.includes(note)
+  return props.highlightedNotes.includes(note);
 }
 
 function isRoot(note: string): boolean {
-  return props.rootNote === note
+  return props.rootNote === note;
 }
 
 function fretX(fret: number): number {
-  return nutX + fret * fretSpacing
+  return nutX + fret * fretSpacing;
 }
 
 function markerY(marker: number): number {
-  const totalStringHeight = (props.tuning.length - 1) * stringSpacing
-  return topPadding + totalStringHeight / 2
+  const totalStringHeight = (props.tuning.length - 1) * stringSpacing;
+  return topPadding + totalStringHeight / 2;
 }
 
 function getActualOctave(stringIndex: number, fret: number): number {
-  const open = parseNote(props.tuning[stringIndex]!)
-  const openMidi = noteToMidi(open.note, open.octave)
-  const frettedMidi = openMidi + fret
-  return midiToNote(frettedMidi).octave
+  const open = parseNote(props.tuning[stringIndex]!);
+  const openMidi = noteToMidi(open.note, open.octave);
+  const frettedMidi = openMidi + fret;
+  return midiToNote(frettedMidi).octave;
 }
 
 function handleNoteClick(string: number, fret: number, note: string) {
-  const octave = getActualOctave(string, fret)
-  playNote(note, octave, props.instrument)
-  emit('noteClick', { string, fret, note, octave })
+  const octave = getActualOctave(string, fret);
+  playNote(note, octave, props.instrument);
+  emit('noteClick', { string, fret, note, octave });
 }
 
 // Keyboard navigation handlers
 function handleKeydown(event: KeyboardEvent) {
   if (!focusedNote.value) {
     // Start from first string, open fret
-    focusedNote.value = { string: 0, fret: 0 }
-    return
+    focusedNote.value = { string: 0, fret: 0 };
+    return;
   }
 
-  const { string, fret } = focusedNote.value
-  let newString = string
-  let newFret = fret
+  const { string, fret } = focusedNote.value;
+  let newString = string;
+  let newFret = fret;
 
   switch (event.key) {
     case 'ArrowRight':
-      newFret = Math.min(fret + 1, props.frets)
-      break
+      newFret = Math.min(fret + 1, props.frets);
+      break;
     case 'ArrowLeft':
-      newFret = Math.max(fret - 1, 0)
-      break
+      newFret = Math.max(fret - 1, 0);
+      break;
     case 'ArrowDown':
-      newString = Math.min(string + 1, props.tuning.length - 1)
-      break
+      newString = Math.min(string + 1, props.tuning.length - 1);
+      break;
     case 'ArrowUp':
-      newString = Math.max(string - 1, 0)
-      break
+      newString = Math.max(string - 1, 0);
+      break;
     case 'Enter':
     case ' ':
-      event.preventDefault()
-      const note = fretboardNotes.value[string]?.[fret]?.note
+      event.preventDefault();
+      const note = fretboardNotes.value[string]?.[fret]?.note;
       if (note) {
-        handleNoteClick(string, fret, note)
+        handleNoteClick(string, fret, note);
       }
-      return
+      return;
     default:
-      return
+      return;
   }
 
-  event.preventDefault()
-  focusedNote.value = { string: newString, fret: newFret }
+  event.preventDefault();
+  focusedNote.value = { string: newString, fret: newFret };
 }
 
 function isFocused(string: number, fret: number): boolean {
-  return focusedNote.value?.string === string && focusedNote.value?.fret === fret
+  return focusedNote.value?.string === string && focusedNote.value?.fret === fret;
 }
 
 function getNoteLabel(string: number, fret: number): string {
-  const note = fretboardNotes.value[string]?.[fret]?.note
-  const octave = getActualOctave(string, fret)
-  return `${note}${octave}`
+  const note = fretboardNotes.value[string]?.[fret]?.note;
+  const octave = getActualOctave(string, fret);
+  return `${note}${octave}`;
 }
 </script>
 
@@ -237,14 +237,7 @@ function getNoteLabel(string: number, fret: number): string {
           :fill="isRoot(n.note) ? 'var(--color-primary)' : 'var(--color-secondary)'"
         />
         <!-- Non-highlighted: small dot visible on hover -->
-        <circle
-          v-else
-          :cx="n.x"
-          :cy="n.y"
-          r="4"
-          fill="transparent"
-          class="hover-dot"
-        />
+        <circle v-else :cx="n.x" :cy="n.y" r="4" fill="transparent" class="hover-dot" />
         <!-- Focus indicator -->
         <circle
           v-if="isFocused(n.string, n.fret)"
@@ -296,9 +289,17 @@ g:hover .hover-dot {
 }
 
 @keyframes note-glow {
-  0%   { transform: scale(1); }
-  50%  { transform: scale(1.2); filter: drop-shadow(0 0 3px rgba(136, 192, 208, 0.5)); }
-  100% { transform: scale(1); filter: none; }
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+    filter: drop-shadow(0 0 3px rgba(136, 192, 208, 0.5));
+  }
+  100% {
+    transform: scale(1);
+    filter: none;
+  }
 }
 
 g:active circle {
@@ -318,12 +319,17 @@ g:hover .hover-label {
 }
 
 @keyframes focus-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 /* Ensure focused elements are visible */
-g[tabindex="0"]:focus {
+g[tabindex='0']:focus {
   outline: none;
 }
 </style>

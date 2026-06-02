@@ -1,52 +1,50 @@
-import bcrypt from 'bcrypt'
-import { eq } from 'drizzle-orm'
-import { users } from '../../db/schema'
-import { requireAuth } from '../../utils/auth'
-import { createApiError, createValidationError, handleApiError } from '../../utils/errors'
+import bcrypt from 'bcrypt';
+import { eq } from 'drizzle-orm';
+import { users } from '../../db/schema';
+import { requireAuth } from '../../utils/auth';
+import { applyRateLimit } from '../../utils/rate-limit';
+import { createApiError, createValidationError, handleApiError } from '../../utils/errors';
 
 export default defineEventHandler(async (event) => {
   try {
-    const db = useDb()
-    const currentUser = await requireAuth(event)
-    const body = await readBody(event)
+    await applyRateLimit(event, 'account:change-password', 3);
+    const db = useDb();
+    const currentUser = await requireAuth(event);
+    const body = await readBody(event);
 
-    const { currentPassword, newPassword } = body || {}
+    const { currentPassword, newPassword } = body || {};
 
     // Validate input
     if (!currentPassword || !newPassword) {
-      throw createApiError('Current password and new password are required', 400)
+      throw createApiError('Current password and new password are required', 400);
     }
 
-    const errors: Record<string, string[]> = {}
+    const errors: Record<string, string[]> = {};
 
     // Validate new password length
     if (newPassword.length < 8) {
-      errors.newPassword = ['New password must be at least 8 characters long']
+      errors.newPassword = ['New password must be at least 8 characters long'];
     }
 
     if (Object.keys(errors).length > 0) {
-      throw createValidationError('Validation failed', errors)
+      throw createValidationError('Validation failed', errors);
     }
 
     // Get current user with password hash
-    const [user] = await db
-      .select()
-      .from(users)
-      .where(eq(users.id, currentUser.id))
-      .limit(1)
+    const [user] = await db.select().from(users).where(eq(users.id, currentUser.id)).limit(1);
 
     if (!user) {
-      throw createApiError('User not found', 404)
+      throw createApiError('User not found', 404);
     }
 
     // Verify current password
-    const validPassword = await bcrypt.compare(currentPassword, user.passwordHash)
+    const validPassword = await bcrypt.compare(currentPassword, user.passwordHash);
     if (!validPassword) {
-      throw createApiError('Current password is incorrect', 401)
+      throw createApiError('Current password is incorrect', 401);
     }
 
     // Hash new password
-    const newPasswordHash = await bcrypt.hash(newPassword, 10)
+    const newPasswordHash = await bcrypt.hash(newPassword, 10);
 
     // Update password
     const [updatedUser] = await db
@@ -56,14 +54,17 @@ export default defineEventHandler(async (event) => {
         updatedAt: new Date(),
       })
       .where(eq(users.id, currentUser.id))
-      .returning()
+      .returning();
 
     if (!updatedUser) {
-      throw createApiError('Failed to change password', 500)
+      throw createApiError('Failed to change password', 500);
     }
 
-    return { success: true, message: 'Password changed successfully' }
+    return { success: true, message: 'Password changed successfully' };
   } catch (error) {
-    return handleApiError(error, { route: '/api/account/change-password', operation: 'change_password' })
+    return handleApiError(error, {
+      route: '/api/account/change-password',
+      operation: 'change_password',
+    });
   }
-})
+});

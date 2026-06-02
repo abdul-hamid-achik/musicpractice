@@ -1,7 +1,7 @@
 export interface TuningPreset {
-  name: string
-  notes: string[]
-  category: 'standard' | 'drop' | 'open' | 'alternate' | 'special'
+  name: string;
+  notes: string[];
+  category: 'standard' | 'drop' | 'open' | 'alternate' | 'special';
 }
 
 export const GUITAR_TUNINGS: TuningPreset[] = [
@@ -39,20 +39,32 @@ export const GUITAR_TUNINGS: TuningPreset[] = [
   { name: 'DADGAD', notes: ['D2', 'A2', 'D3', 'G3', 'A3', 'D4'], category: 'special' },
   { name: 'FACGCE', notes: ['F2', 'A2', 'C3', 'G3', 'C4', 'E4'], category: 'special' },
   { name: 'All Fourths', notes: ['E2', 'A2', 'D3', 'G3', 'C4', 'F4'], category: 'special' },
-  { name: 'New Standard (Fripp)', notes: ['C2', 'G2', 'D3', 'A3', 'E4', 'G4'], category: 'special' },
+  {
+    name: 'New Standard (Fripp)',
+    notes: ['C2', 'G2', 'D3', 'A3', 'E4', 'G4'],
+    category: 'special',
+  },
   { name: 'CGCGCE', notes: ['C2', 'G2', 'C3', 'G3', 'C4', 'E4'], category: 'special' },
   { name: 'CGDGBD', notes: ['C2', 'G2', 'D3', 'G3', 'B3', 'D4'], category: 'special' },
   { name: 'CGDGBE', notes: ['C2', 'G2', 'D3', 'G3', 'B3', 'E4'], category: 'special' },
   { name: 'G6 (DGDGBE)', notes: ['D2', 'G2', 'D3', 'G3', 'B3', 'E4'], category: 'special' },
   { name: 'DADEAE', notes: ['D2', 'A2', 'D3', 'E3', 'A3', 'E4'], category: 'special' },
   { name: 'DADEAD', notes: ['D2', 'A2', 'D3', 'E3', 'A3', 'D4'], category: 'special' },
-]
+];
 
 export const SEVEN_STRING_TUNINGS: TuningPreset[] = [
-  { name: '7-String Standard', notes: ['B1', 'E2', 'A2', 'D3', 'G3', 'B3', 'E4'], category: 'standard' },
+  {
+    name: '7-String Standard',
+    notes: ['B1', 'E2', 'A2', 'D3', 'G3', 'B3', 'E4'],
+    category: 'standard',
+  },
   { name: '7-String Drop A', notes: ['A1', 'E2', 'A2', 'D3', 'G3', 'B3', 'E4'], category: 'drop' },
-  { name: '7-String A Standard', notes: ['A1', 'D2', 'G2', 'C3', 'F3', 'A3', 'D4'], category: 'alternate' },
-]
+  {
+    name: '7-String A Standard',
+    notes: ['A1', 'D2', 'G2', 'C3', 'F3', 'A3', 'D4'],
+    category: 'alternate',
+  },
+];
 
 export const BASS_TUNINGS: Record<number, TuningPreset[]> = {
   4: [
@@ -68,12 +80,20 @@ export const BASS_TUNINGS: Record<number, TuningPreset[]> = {
     { name: '5-String Standard', notes: ['B0', 'E1', 'A1', 'D2', 'G2'], category: 'standard' },
     { name: '5-String High C', notes: ['E1', 'A1', 'D2', 'G2', 'C3'], category: 'standard' },
     { name: '5-String Drop A', notes: ['A0', 'E1', 'A1', 'D2', 'G2'], category: 'drop' },
-    { name: '5-String Eb Standard', notes: ['Bb0', 'Eb1', 'Ab1', 'Db2', 'Gb2'], category: 'alternate' },
+    {
+      name: '5-String Eb Standard',
+      notes: ['Bb0', 'Eb1', 'Ab1', 'Db2', 'Gb2'],
+      category: 'alternate',
+    },
   ],
   6: [
-    { name: '6-String Standard', notes: ['B0', 'E1', 'A1', 'D2', 'G2', 'C3'], category: 'standard' },
+    {
+      name: '6-String Standard',
+      notes: ['B0', 'E1', 'A1', 'D2', 'G2', 'C3'],
+      category: 'standard',
+    },
   ],
-}
+};
 
 // Keep legacy export for backwards compatibility
 export const TUNINGS = {
@@ -94,4 +114,4 @@ export const TUNINGS = {
     standard: ['G3', 'D4', 'A4', 'E5'],
   },
   piano: null,
-} as const
+} as const;

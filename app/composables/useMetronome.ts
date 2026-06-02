@@ -1,26 +1,26 @@
-import { ref, onBeforeUnmount } from 'vue'
-import type * as Tone from 'tone'
+import { ref, onBeforeUnmount } from 'vue';
+import type * as Tone from 'tone';
 
 export function useMetronome() {
-  const bpm = ref(120)
-  const isRunning = ref(false)
-  const beatsPerMeasure = ref(4)
-  const currentBeat = ref(0)
+  const bpm = ref(120);
+  const isRunning = ref(false);
+  const beatsPerMeasure = ref(4);
+  const currentBeat = ref(0);
 
-  let synth: Tone.MembraneSynth | null = null
-  let accentSynth: Tone.MembraneSynth | null = null
-  let loop: Tone.Loop | null = null
+  let synth: Tone.MembraneSynth | null = null;
+  let accentSynth: Tone.MembraneSynth | null = null;
+  let loop: Tone.Loop | null = null;
 
   const start = async () => {
-    const Tone = await import('tone')
-    await Tone.start()
+    const Tone = await import('tone');
+    await Tone.start();
 
     if (!synth) {
       synth = new Tone.MembraneSynth({
         pitchDecay: 0.008,
         octaves: 2,
         envelope: { attack: 0.001, decay: 0.1, sustain: 0, release: 0.05 },
-      }).toDestination()
+      }).toDestination();
     }
 
     if (!accentSynth) {
@@ -28,57 +28,57 @@ export function useMetronome() {
         pitchDecay: 0.008,
         octaves: 2,
         envelope: { attack: 0.001, decay: 0.15, sustain: 0, release: 0.05 },
-      }).toDestination()
+      }).toDestination();
     }
 
-    Tone.getTransport().bpm.value = bpm.value
+    Tone.getTransport().bpm.value = bpm.value;
 
     loop = new Tone.Loop((time: number) => {
-      const beat = currentBeat.value
+      const beat = currentBeat.value;
       if (beat === 0) {
-        accentSynth?.triggerAttackRelease('C2', '8n', time)
+        accentSynth?.triggerAttackRelease('C2', '8n', time);
       } else {
-        synth?.triggerAttackRelease('C3', '8n', time)
+        synth?.triggerAttackRelease('C3', '8n', time);
       }
-      currentBeat.value = (beat + 1) % beatsPerMeasure.value
-    }, '4n')
+      currentBeat.value = (beat + 1) % beatsPerMeasure.value;
+    }, '4n');
 
-    loop.start(0)
-    Tone.getTransport().start()
-    isRunning.value = true
-  }
+    loop.start(0);
+    Tone.getTransport().start();
+    isRunning.value = true;
+  };
 
   const stop = async () => {
-    const Tone = await import('tone')
-    Tone.getTransport().stop()
+    const Tone = await import('tone');
+    Tone.getTransport().stop();
     if (loop) {
-      loop.stop()
-      loop.dispose()
-      loop = null
+      loop.stop();
+      loop.dispose();
+      loop = null;
     }
-    currentBeat.value = 0
-    isRunning.value = false
-  }
+    currentBeat.value = 0;
+    isRunning.value = false;
+  };
 
   const setBpm = async (newBpm: number) => {
-    bpm.value = newBpm
-    const Tone = await import('tone')
-    Tone.getTransport().bpm.value = newBpm
-  }
+    bpm.value = newBpm;
+    const Tone = await import('tone');
+    Tone.getTransport().bpm.value = newBpm;
+  };
 
   onBeforeUnmount(async () => {
     if (isRunning.value) {
-      await stop()
+      await stop();
     }
     if (synth) {
-      synth.dispose()
-      synth = null
+      synth.dispose();
+      synth = null;
     }
     if (accentSynth) {
-      accentSynth.dispose()
-      accentSynth = null
+      accentSynth.dispose();
+      accentSynth = null;
     }
-  })
+  });
 
-  return { bpm, isRunning, beatsPerMeasure, currentBeat, start, stop, setBpm }
+  return { bpm, isRunning, beatsPerMeasure, currentBeat, start, stop, setBpm };
 }

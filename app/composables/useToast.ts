@@ -4,7 +4,7 @@
  */
 
 export function useToast() {
-  const store = useToastStore()
+  const store = useToastStore();
 
   /**
    * Show a toast notification
@@ -13,8 +13,12 @@ export function useToast() {
    * @param duration - Optional duration in milliseconds (default: 3000)
    * @returns The toast ID
    */
-  function showToast(message: string, type: 'success' | 'error' | 'warning' | 'info' = 'info', duration?: number) {
-    return store.showToast(message, type, duration)
+  function showToast(
+    message: string,
+    type: 'success' | 'error' | 'warning' | 'info' = 'info',
+    duration?: number,
+  ) {
+    return store.showToast(message, type, duration);
   }
 
   /**
@@ -23,7 +27,7 @@ export function useToast() {
    * @param duration - Optional duration in milliseconds (default: 3000)
    */
   function showSuccess(message: string, duration?: number) {
-    return store.showSuccess(message, duration)
+    return store.showSuccess(message, duration);
   }
 
   /**
@@ -32,7 +36,7 @@ export function useToast() {
    * @param duration - Optional duration in milliseconds (default: 3000)
    */
   function showError(message: string, duration?: number) {
-    return store.showError(message, duration)
+    return store.showError(message, duration);
   }
 
   /**
@@ -41,7 +45,7 @@ export function useToast() {
    * @param duration - Optional duration in milliseconds (default: 3000)
    */
   function showInfo(message: string, duration?: number) {
-    return store.showInfo(message, duration)
+    return store.showInfo(message, duration);
   }
 
   /**
@@ -50,7 +54,7 @@ export function useToast() {
    * @param duration - Optional duration in milliseconds (default: 3000)
    */
   function showWarning(message: string, duration?: number) {
-    return store.showWarning(message, duration)
+    return store.showWarning(message, duration);
   }
 
   /**
@@ -58,14 +62,14 @@ export function useToast() {
    * @param id - The toast ID to remove
    */
   function removeToast(id: string) {
-    store.removeToast(id)
+    store.removeToast(id);
   }
 
   /**
    * Clear all toasts
    */
   function clearAll() {
-    store.clearAll()
+    store.clearAll();
   }
 
   return {
@@ -76,5 +80,5 @@ export function useToast() {
     showWarning,
     removeToast,
     clearAll,
-  }
+  };
 }

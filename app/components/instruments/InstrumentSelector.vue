@@ -1,29 +1,29 @@
 <script setup lang="ts">
 const props = defineProps<{
-  modelValue: string
-}>()
+  modelValue: string;
+}>();
 
 const emit = defineEmits<{
-  'update:modelValue': [value: string]
-}>()
+  'update:modelValue': [value: string];
+}>();
 
-const instrumentStore = useInstrumentStore()
+const instrumentStore = useInstrumentStore();
 
 onMounted(() => {
   if (instrumentStore.instruments.length === 0) {
-    instrumentStore.fetchInstruments()
+    instrumentStore.fetchInstruments();
   }
-})
+});
 
 const instrumentEmoji: Record<string, string> = {
   guitar: '\uD83C\uDFB8',
   bass: '\uD83C\uDFB8',
   piano: '\uD83C\uDFB9',
   violin: '\uD83C\uDFBB',
-}
+};
 
 function selectInstrument(id: string) {
-  emit('update:modelValue', id)
+  emit('update:modelValue', id);
 }
 </script>
 
@@ -33,11 +33,7 @@ function selectInstrument(id: string) {
       v-for="instrument in instrumentStore.instruments"
       :key="instrument.id"
       class="flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all duration-200 bg-card hover:bg-surface-alt"
-      :class="
-        modelValue === instrument.id
-          ? 'border-primary ring-2 ring-primary'
-          : 'border-border'
-      "
+      :class="modelValue === instrument.id ? 'border-primary ring-2 ring-primary' : 'border-border'"
       @click="selectInstrument(instrument.id)"
     >
       <span class="text-3xl">

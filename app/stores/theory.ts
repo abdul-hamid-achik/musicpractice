@@ -1,48 +1,57 @@
-import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
-import { useMusicTheory } from '~/composables/useMusicTheory'
-import type { Scale, Chord } from '#shared/types/music-theory'
+import { defineStore } from 'pinia';
+import { ref, computed } from 'vue';
+import { useMusicTheory } from '~/composables/useMusicTheory';
+import type { Scale, Chord } from '#shared/types/music-theory';
 
 export const useTheoryStore = defineStore('theory', () => {
-  const { getScaleNotes, getChordNotes } = useMusicTheory()
+  const { getScaleNotes, getChordNotes } = useMusicTheory();
+  const { showError } = useToast();
 
-  const selectedRoot = ref('C')
-  const selectedScale = ref<Scale | null>(null)
-  const selectedChord = ref<Chord | null>(null)
-  const scales = ref<Scale[]>([])
-  const chords = ref<Chord[]>([])
+  const selectedRoot = ref('C');
+  const selectedScale = ref<Scale | null>(null);
+  const selectedChord = ref<Chord | null>(null);
+  const scales = ref<Scale[]>([]);
+  const chords = ref<Chord[]>([]);
 
   const currentScaleNotes = computed(() => {
-    if (!selectedScale.value) return []
-    return getScaleNotes(selectedRoot.value, selectedScale.value.intervals)
-  })
+    if (!selectedScale.value) return [];
+    return getScaleNotes(selectedRoot.value, selectedScale.value.intervals);
+  });
 
   const currentChordNotes = computed(() => {
-    if (!selectedChord.value) return []
-    return getChordNotes(selectedRoot.value, selectedChord.value.intervals)
-  })
+    if (!selectedChord.value) return [];
+    return getChordNotes(selectedRoot.value, selectedChord.value.intervals);
+  });
 
   const fetchScales = async () => {
-    const res = await $fetch<{ data: Scale[] }>('/api/scales')
-    scales.value = res.data
-  }
+    try {
+      const res = await $fetch<{ data: Scale[] }>('/api/scales');
+      scales.value = res.data;
+    } catch {
+      showError('Failed to load scales');
+    }
+  };
 
   const fetchChords = async () => {
-    const res = await $fetch<{ data: Chord[] }>('/api/chords')
-    chords.value = res.data
-  }
+    try {
+      const res = await $fetch<{ data: Chord[] }>('/api/chords');
+      chords.value = res.data;
+    } catch {
+      showError('Failed to load chords');
+    }
+  };
 
   const setRoot = (note: string) => {
-    selectedRoot.value = note
-  }
+    selectedRoot.value = note;
+  };
 
   const setScale = (scale: Scale) => {
-    selectedScale.value = scale
-  }
+    selectedScale.value = scale;
+  };
 
   const setChord = (chord: Chord) => {
-    selectedChord.value = chord
-  }
+    selectedChord.value = chord;
+  };
 
   return {
     selectedRoot,
@@ -57,5 +66,5 @@ export const useTheoryStore = defineStore('theory', () => {
     setRoot,
     setScale,
     setChord,
-  }
-})
+  };
+});

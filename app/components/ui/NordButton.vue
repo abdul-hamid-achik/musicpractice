@@ -1,17 +1,17 @@
 <script setup lang="ts">
 defineProps<{
-  variant?: 'primary' | 'secondary' | 'danger' | 'success' | 'ghost'
-  size?: 'sm' | 'md' | 'lg'
-  disabled?: boolean
-  loading?: boolean
-  ariaLabel?: string
-  ariaPressed?: boolean
-  type?: 'button' | 'submit' | 'reset'
-}>()
+  variant?: 'primary' | 'secondary' | 'danger' | 'success' | 'ghost';
+  size?: 'sm' | 'md' | 'lg';
+  disabled?: boolean;
+  loading?: boolean;
+  ariaLabel?: string;
+  ariaPressed?: boolean;
+  type?: 'button' | 'submit' | 'reset';
+}>();
 
 const emit = defineEmits<{
-  click: [event: MouseEvent]
-}>()
+  click: [event: MouseEvent];
+}>();
 
 const variantClasses: Record<string, string> = {
   primary: 'bg-primary text-on-primary hover:brightness-110',
@@ -19,13 +19,13 @@ const variantClasses: Record<string, string> = {
   danger: 'bg-error text-on-error hover:brightness-110',
   success: 'bg-success text-on-success hover:brightness-110',
   ghost: 'bg-transparent text-text-muted hover:bg-surface-alt',
-}
+};
 
 const sizeClasses: Record<string, string> = {
   sm: 'px-3 py-1.5 text-sm',
   md: 'px-4 py-2 text-base',
   lg: 'px-6 py-3 text-lg',
-}
+};
 </script>
 
 <template>
@@ -51,14 +51,7 @@ const sizeClasses: Record<string, string> = {
       viewBox="0 0 24 24"
       aria-hidden="true"
     >
-      <circle
-        class="opacity-25"
-        cx="12"
-        cy="12"
-        r="10"
-        stroke="currentColor"
-        stroke-width="4"
-      />
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
       <path
         class="opacity-75"
         fill="currentColor"

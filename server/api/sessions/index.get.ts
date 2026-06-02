@@ -1,41 +1,43 @@
-import { eq, and, gte, lte, count } from 'drizzle-orm'
-import { practiceSessions, instruments, songs } from '../../db/schema'
-import { requireAuth } from '../../utils/auth'
-import { createApiError, handleApiError } from '../../utils/errors'
+import { eq, and, gte, lte, count } from 'drizzle-orm';
+import { practiceSessions, instruments, songs } from '../../db/schema';
+import { requireAuth } from '../../utils/auth';
+import { createApiError, handleApiError } from '../../utils/errors';
 
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export default defineEventHandler(async (event) => {
+  let userId: string | undefined;
   try {
-    const user = await requireAuth(event)
-    const db = useDb()
-    const query = getQuery(event)
+    const user = await requireAuth(event);
+    userId = user.id;
+    const db = useDb();
+    const query = getQuery(event);
 
-    const page = Math.max(1, parseInt(query.page as string) || 1)
-    const limit = Math.min(100, Math.max(1, parseInt(query.limit as string) || 20))
-    const offset = (page - 1) * limit
+    const page = Math.max(1, parseInt(query.page as string) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(query.limit as string) || 20));
+    const offset = (page - 1) * limit;
 
-    const conditions = [eq(practiceSessions.userId, user.id)]
+    const conditions = [eq(practiceSessions.userId, user.id)];
 
     if (query.instrumentId) {
       if (!UUID_RE.test(query.instrumentId as string)) {
-        throw createApiError('Invalid instrumentId format', 400)
+        throw createApiError('Invalid instrumentId format', 400);
       }
-      conditions.push(eq(practiceSessions.instrumentId, query.instrumentId as string))
+      conditions.push(eq(practiceSessions.instrumentId, query.instrumentId as string));
     }
 
     if (query.startDate) {
-      conditions.push(gte(practiceSessions.startedAt, new Date(query.startDate as string)))
+      conditions.push(gte(practiceSessions.startedAt, new Date(query.startDate as string)));
     }
 
     if (query.endDate) {
-      conditions.push(lte(practiceSessions.startedAt, new Date(query.endDate as string)))
+      conditions.push(lte(practiceSessions.startedAt, new Date(query.endDate as string)));
     }
 
-    const where = and(...conditions)
+    const where = and(...conditions);
 
-    const [countRow] = await db.select({ count: count() }).from(practiceSessions).where(where)
-    const total = countRow!.count
+    const [countRow] = await db.select({ count: count() }).from(practiceSessions).where(where);
+    const total = countRow!.count;
 
     const data = await db
       .select({
@@ -58,10 +60,10 @@ export default defineEventHandler(async (event) => {
       .leftJoin(songs, eq(practiceSessions.songId, songs.id))
       .where(where)
       .limit(limit)
-      .offset(offset)
+      .offset(offset);
 
-    return { data, total, page, limit }
+    return { data, total, page, limit };
   } catch (error) {
-    return handleApiError(error, { route: '/api/sessions', operation: 'list', userId: event.context.params?.id })
+    return handleApiError(error, { route: '/api/sessions', operation: 'list', userId });
   }
-})
+});

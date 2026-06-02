@@ -1,75 +1,81 @@
 <script setup lang="ts">
-import { BASS_TUNINGS, type TuningPreset } from '#shared/constants/tunings'
-import type { Scale, Chord } from '#shared/types/music-theory'
+import { BASS_TUNINGS, type TuningPreset } from '#shared/constants/tunings';
+import type { Scale, Chord } from '#shared/types/music-theory';
 
-const theoryStore = useTheoryStore()
-const { getNoteNames, getScaleNotes, getChordNotes } = useMusicTheory()
+const theoryStore = useTheoryStore();
+const { getNoteNames, getScaleNotes, getChordNotes } = useMusicTheory();
 
-const noteNames = getNoteNames()
-const selectedRoot = ref('C')
-const stringCount = ref<4 | 5 | 6>(4)
-const mode = ref<'scale' | 'chord'>('scale')
-const selectedScaleId = ref('')
-const selectedChordId = ref('')
-const lastClickedNote = ref('')
+const noteNames = getNoteNames();
+const selectedRoot = ref('C');
+const stringCount = ref<4 | 5 | 6>(4);
+const mode = ref<'scale' | 'chord'>('scale');
+const selectedScaleId = ref('');
+const selectedChordId = ref('');
+const lastClickedNote = ref('');
 
 // Track loading state
-const isTheoryLoading = computed(() => !theoryStore.scales.length || !theoryStore.chords.length)
+const isTheoryLoading = computed(() => !theoryStore.scales.length || !theoryStore.chords.length);
 
 // Tuning
-const selectedTuningIndex = ref(0)
+const selectedTuningIndex = ref(0);
 
-const availableTunings = computed(() => BASS_TUNINGS[stringCount.value] || [])
+const availableTunings = computed(() => BASS_TUNINGS[stringCount.value] || []);
 
 const activeTuning = computed(() => {
-  const tunings = availableTunings.value
-  const idx = Math.min(selectedTuningIndex.value, tunings.length - 1)
-  return tunings[idx] ? [...tunings[idx].notes] : undefined
-})
+  const tunings = availableTunings.value;
+  const idx = Math.min(selectedTuningIndex.value, tunings.length - 1);
+  return tunings[idx] ? [...tunings[idx].notes] : undefined;
+});
 
 const tuningLabel = computed(() => {
-  if (!activeTuning.value) return ''
-  return activeTuning.value.map(n => n.replace(/\d+$/, '')).join('-')
-})
+  if (!activeTuning.value) return '';
+  return activeTuning.value.map((n) => n.replace(/\d+$/, '')).join('-');
+});
 
 function onStringCountChange(count: 4 | 5 | 6) {
-  stringCount.value = count
-  selectedTuningIndex.value = 0
+  stringCount.value = count;
+  selectedTuningIndex.value = 0;
 }
 
 const highlightedNotes = computed(() => {
   if (mode.value === 'scale' && selectedScaleId.value) {
-    const scale = theoryStore.scales.find((s: Scale) => s.id === selectedScaleId.value)
-    if (scale) return getScaleNotes(selectedRoot.value, scale.intervals)
+    const scale = theoryStore.scales.find((s: Scale) => s.id === selectedScaleId.value);
+    if (scale) return getScaleNotes(selectedRoot.value, scale.intervals);
   }
   if (mode.value === 'chord' && selectedChordId.value) {
-    const chord = theoryStore.chords.find((c: Chord) => c.id === selectedChordId.value)
-    if (chord) return getChordNotes(selectedRoot.value, chord.intervals.map((i: number) => i % 12))
+    const chord = theoryStore.chords.find((c: Chord) => c.id === selectedChordId.value);
+    if (chord)
+      return getChordNotes(
+        selectedRoot.value,
+        chord.intervals.map((i: number) => i % 12),
+      );
   }
-  return []
-})
+  return [];
+});
 
 function handleNoteClick(payload: { string: number; fret: number; note: string; octave: number }) {
-  lastClickedNote.value = `${payload.note}${payload.octave}`
+  lastClickedNote.value = `${payload.note}${payload.octave}`;
 }
 
 function clearSelection() {
-  selectedScaleId.value = ''
-  selectedChordId.value = ''
+  selectedScaleId.value = '';
+  selectedChordId.value = '';
 }
 
 onMounted(async () => {
-  if (!theoryStore.scales.length) await theoryStore.fetchScales()
-  if (!theoryStore.chords.length) await theoryStore.fetchChords()
-  if (theoryStore.scales.length) selectedScaleId.value = theoryStore.scales[0]!.id
-})
+  if (!theoryStore.scales.length) await theoryStore.fetchScales();
+  if (!theoryStore.chords.length) await theoryStore.fetchChords();
+  if (theoryStore.scales.length) selectedScaleId.value = theoryStore.scales[0]!.id;
+});
 </script>
 
 <template>
   <div>
     <!-- Breadcrumb -->
     <nav class="flex items-center gap-1.5 text-sm text-text-muted mb-4">
-      <NuxtLink to="/instruments" class="hover:text-primary transition-colors">Instruments</NuxtLink>
+      <NuxtLink to="/instruments" class="hover:text-primary transition-colors"
+        >Instruments</NuxtLink
+      >
       <span>/</span>
       <span class="text-text">Bass</span>
     </nav>
@@ -80,10 +86,17 @@ onMounted(async () => {
         <NordButton variant="primary" size="sm">Practice Bass</NordButton>
       </NuxtLink>
     </div>
-    <p class="text-text-muted mb-6">4, 5, or 6-string bass fretboard — explore scales and chord tones across tunings.</p>
+    <p class="text-text-muted mb-6">
+      4, 5, or 6-string bass fretboard — explore scales and chord tones across tunings.
+    </p>
 
     <!-- Loading State for Fretboard and Controls -->
-    <div v-if="isTheoryLoading" class="space-y-4" aria-busy="true" aria-label="Loading bass fretboard...">
+    <div
+      v-if="isTheoryLoading"
+      class="space-y-4"
+      aria-busy="true"
+      aria-label="Loading bass fretboard..."
+    >
       <!-- Skeleton for Tuning Selector -->
       <SkeletonCard variant="card" height="60px" />
 
@@ -98,135 +111,148 @@ onMounted(async () => {
     <template v-else>
       <!-- Tuning Selector -->
       <NordCard class="mb-4">
-      <div class="flex flex-wrap items-center gap-3">
-        <div class="flex items-center gap-2">
-          <svg class="w-5 h-5 text-text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 2v20M9 5l6-2M9 9l6-2" /><circle cx="12" cy="19" r="3" />
-          </svg>
-          <span class="text-sm font-medium text-text">Tuning:</span>
-        </div>
-        <select
-          :value="selectedTuningIndex"
-          class="bg-surface-alt text-text border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-          @change="selectedTuningIndex = Number(($event.target as HTMLSelectElement).value)"
-        >
-          <option
-            v-for="(t, i) in availableTunings"
-            :key="t.name"
-            :value="i"
-          >
-            {{ t.name }} ({{ t.notes.map(n => n.replace(/\d+$/, '')).join('-') }})
-          </option>
-        </select>
-        <span class="text-xs text-text-muted font-mono bg-surface-alt px-2 py-1 rounded">
-          {{ tuningLabel }}
-        </span>
-      </div>
-    </NordCard>
-
-    <!-- Controls -->
-    <NordCard class="mb-6">
-      <div class="flex flex-wrap items-end gap-4">
-        <!-- String Count -->
-        <div>
-          <label class="block text-sm text-text-muted mb-1">Strings</label>
-          <div class="flex">
-            <button
-              v-for="count in ([4, 5, 6] as const)"
-              :key="count"
-              class="px-3 py-2 text-sm font-medium border border-border transition-colors first:rounded-l-md last:rounded-r-md"
-              :class="[
-                stringCount === count ? 'bg-primary text-on-primary' : 'bg-surface-alt text-text',
-                count !== 4 ? 'border-l-0' : '',
-              ]"
-              @click="onStringCountChange(count)"
+        <div class="flex flex-wrap items-center gap-3">
+          <div class="flex items-center gap-2">
+            <svg
+              class="w-5 h-5 text-text-muted"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
             >
-              {{ count }}
-            </button>
+              <path d="M12 2v20M9 5l6-2M9 9l6-2" />
+              <circle cx="12" cy="19" r="3" />
+            </svg>
+            <span class="text-sm font-medium text-text">Tuning:</span>
           </div>
-        </div>
-
-        <!-- Root Note -->
-        <div>
-          <label class="block text-sm text-text-muted mb-1">Root Note</label>
           <select
-            v-model="selectedRoot"
-            class="bg-surface-alt text-text border border-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+            :value="selectedTuningIndex"
+            class="bg-surface-alt text-text border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            @change="selectedTuningIndex = Number(($event.target as HTMLSelectElement).value)"
           >
-            <option v-for="note in noteNames" :key="note" :value="note">{{ note }}</option>
-          </select>
-        </div>
-
-        <!-- Mode Toggle -->
-        <div>
-          <label class="block text-sm text-text-muted mb-1">Mode</label>
-          <div class="flex">
-            <button
-              class="px-3 py-2 text-sm font-medium rounded-l-md border border-border transition-colors"
-              :class="mode === 'scale' ? 'bg-primary text-on-primary' : 'bg-surface-alt text-text'"
-              @click="mode = 'scale'"
-            >
-              Scale
-            </button>
-            <button
-              class="px-3 py-2 text-sm font-medium rounded-r-md border border-l-0 border-border transition-colors"
-              :class="mode === 'chord' ? 'bg-primary text-on-primary' : 'bg-surface-alt text-text'"
-              @click="mode = 'chord'"
-            >
-              Chord
-            </button>
-          </div>
-        </div>
-
-        <!-- Scale/Chord Selector -->
-        <div class="flex-1 min-w-[200px]">
-          <label class="block text-sm text-text-muted mb-1">
-            {{ mode === 'scale' ? 'Scale' : 'Chord' }}
-          </label>
-          <select
-            v-if="mode === 'scale'"
-            v-model="selectedScaleId"
-            class="w-full bg-surface-alt text-text border border-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-          >
-            <option value="">None</option>
-            <option v-for="scale in theoryStore.scales" :key="scale.id" :value="scale.id">
-              {{ scale.name }}
+            <option v-for="(t, i) in availableTunings" :key="t.name" :value="i">
+              {{ t.name }} ({{ t.notes.map((n) => n.replace(/\d+$/, '')).join('-') }})
             </option>
           </select>
-          <select
-            v-else
-            v-model="selectedChordId"
-            class="w-full bg-surface-alt text-text border border-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-          >
-            <option value="">None</option>
-            <option v-for="chord in theoryStore.chords" :key="chord.id" :value="chord.id">
-              {{ chord.name }}
-            </option>
-          </select>
+          <span class="text-xs text-text-muted font-mono bg-surface-alt px-2 py-1 rounded">
+            {{ tuningLabel }}
+          </span>
         </div>
+      </NordCard>
 
-        <!-- Clear -->
-        <NordButton variant="ghost" size="sm" @click="clearSelection">Clear</NordButton>
-      </div>
-    </NordCard>
+      <!-- Controls -->
+      <NordCard class="mb-6">
+        <div class="flex flex-wrap items-end gap-4">
+          <!-- String Count -->
+          <div>
+            <label class="block text-sm text-text-muted mb-1">Strings</label>
+            <div class="flex">
+              <button
+                v-for="count in [4, 5, 6] as const"
+                :key="count"
+                class="px-3 py-2 text-sm font-medium border border-border transition-colors first:rounded-l-md last:rounded-r-md"
+                :class="[
+                  stringCount === count ? 'bg-primary text-on-primary' : 'bg-surface-alt text-text',
+                  count !== 4 ? 'border-l-0' : '',
+                ]"
+                @click="onStringCountChange(count)"
+              >
+                {{ count }}
+              </button>
+            </div>
+          </div>
 
-    <!-- Fretboard -->
-    <NordCard>
-      <BassFretboard
-        :strings="stringCount"
-        :tuning="activeTuning"
-        :highlighted-notes="highlightedNotes"
-        :root-note="selectedRoot"
-        @note-click="handleNoteClick"
-      />
-    </NordCard>
+          <!-- Root Note -->
+          <div>
+            <label class="block text-sm text-text-muted mb-1">Root Note</label>
+            <select
+              v-model="selectedRoot"
+              class="bg-surface-alt text-text border border-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+            >
+              <option v-for="note in noteNames" :key="note" :value="note">{{ note }}</option>
+            </select>
+          </div>
 
-    <!-- Note Display -->
-    <NordCard v-if="lastClickedNote" title="Last Played" class="mt-6">
-      <div class="text-center">
-        <span class="text-2xl font-bold text-primary">{{ lastClickedNote }}</span>
-      </div>
-    </NordCard>
+          <!-- Mode Toggle -->
+          <div>
+            <label class="block text-sm text-text-muted mb-1">Mode</label>
+            <div class="flex" role="radiogroup" aria-label="Mode">
+              <button
+                class="px-3 py-2 text-sm font-medium rounded-l-md border border-border transition-colors"
+                role="radio"
+                :aria-checked="mode === 'scale'"
+                :class="
+                  mode === 'scale' ? 'bg-primary text-on-primary' : 'bg-surface-alt text-text'
+                "
+                @click="mode = 'scale'"
+              >
+                Scale
+              </button>
+              <button
+                class="px-3 py-2 text-sm font-medium rounded-r-md border border-l-0 border-border transition-colors"
+                role="radio"
+                :aria-checked="mode === 'chord'"
+                :class="
+                  mode === 'chord' ? 'bg-primary text-on-primary' : 'bg-surface-alt text-text'
+                "
+                @click="mode = 'chord'"
+              >
+                Chord
+              </button>
+            </div>
+          </div>
+
+          <!-- Scale/Chord Selector -->
+          <div class="flex-1 min-w-[200px]">
+            <label class="block text-sm text-text-muted mb-1">
+              {{ mode === 'scale' ? 'Scale' : 'Chord' }}
+            </label>
+            <select
+              v-if="mode === 'scale'"
+              v-model="selectedScaleId"
+              class="w-full bg-surface-alt text-text border border-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+            >
+              <option value="">None</option>
+              <option v-for="scale in theoryStore.scales" :key="scale.id" :value="scale.id">
+                {{ scale.name }}
+              </option>
+            </select>
+            <select
+              v-else
+              v-model="selectedChordId"
+              class="w-full bg-surface-alt text-text border border-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+            >
+              <option value="">None</option>
+              <option v-for="chord in theoryStore.chords" :key="chord.id" :value="chord.id">
+                {{ chord.name }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Clear -->
+          <NordButton variant="ghost" size="sm" @click="clearSelection">Clear</NordButton>
+        </div>
+      </NordCard>
+
+      <!-- Fretboard -->
+      <NordCard>
+        <BassFretboard
+          :strings="stringCount"
+          :tuning="activeTuning"
+          :highlighted-notes="highlightedNotes"
+          :root-note="selectedRoot"
+          @note-click="handleNoteClick"
+        />
+      </NordCard>
+
+      <!-- Note Display -->
+      <NordCard v-if="lastClickedNote" title="Last Played" class="mt-6">
+        <div class="text-center">
+          <span class="text-2xl font-bold text-primary">{{ lastClickedNote }}</span>
+        </div>
+      </NordCard>
     </template>
   </div>
 </template>

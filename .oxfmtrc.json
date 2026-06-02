@@ -1,0 +1,11 @@
+{
+  "$schema": "https://oxc.rs/docs/guide/usage/formatter/config",
+  "printWidth": 100,
+  "useTabs": false,
+  "tabWidth": 2,
+  "semi": true,
+  "singleQuote": true,
+  "trailingComma": "all",
+  "arrowParens": "always",
+  "endOfLine": "lf"
+}

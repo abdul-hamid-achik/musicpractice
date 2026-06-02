@@ -1,28 +1,31 @@
 <script setup lang="ts">
-import type { Song, UserProgress } from '#shared/types/notation'
+import type { Song, UserProgress } from '#shared/types/notation';
 
-const route = useRoute()
-const router = useRouter()
-const songId = route.params.id as string
-const { showSuccess, showError } = useToast()
+const route = useRoute();
+const router = useRouter();
+const songId = route.params.id as string;
+const { showSuccess, showError } = useToast();
 
 const { data: song, refresh } = await useAsyncData(`song-${songId}`, () =>
   $fetch<Song>(`/api/songs/${songId}`),
-)
+);
 
 // Fetch user progress for this song
-const { data: progress, refresh: refreshProgress } = await useAsyncData(`progress-${songId}`, async () => {
-  try {
-    const result = await $fetch<{ data: UserProgress[] }>(`/api/progress?songId=${songId}`)
-    return result.data?.[0] ?? null
-  } catch {
-    return null
-  }
-})
+const { data: progress, refresh: refreshProgress } = await useAsyncData(
+  `progress-${songId}`,
+  async () => {
+    try {
+      const result = await $fetch<{ data: UserProgress[] }>(`/api/progress?songId=${songId}`);
+      return result.data?.[0] ?? null;
+    } catch {
+      return null;
+    }
+  },
+);
 
-const showEditModal = ref(false)
-const showDeleteConfirm = ref(false)
-const showProgressEditModal = ref(false)
+const showEditModal = ref(false);
+const showDeleteConfirm = ref(false);
+const showProgressEditModal = ref(false);
 
 const editForm = ref({
   title: '',
@@ -31,17 +34,17 @@ const editForm = ref({
   difficulty: 'beginner',
   format: 'alphatex',
   notationData: '',
-})
+});
 
 const progressEditForm = ref({
   completionPercent: 0,
   maxTempoBpm: null as number | null,
   practiceCount: 0,
   lastPracticedAt: '',
-})
+});
 
 function openEdit() {
-  if (!song.value) return
+  if (!song.value) return;
   editForm.value = {
     title: song.value.title,
     artist: song.value.artist || '',
@@ -49,8 +52,8 @@ function openEdit() {
     difficulty: song.value.difficulty || 'beginner',
     format: song.value.format || 'alphatex',
     notationData: song.value.notationData || '',
-  }
-  showEditModal.value = true
+  };
+  showEditModal.value = true;
 }
 
 async function saveEdit() {
@@ -58,24 +61,22 @@ async function saveEdit() {
     await $fetch(`/api/songs/${songId}`, {
       method: 'PUT',
       body: editForm.value,
-    })
-    showSuccess('Song updated successfully')
-    showEditModal.value = false
-    refresh()
-  } catch (error) {
-    showError('Failed to update song')
-    console.error('Error updating song:', error)
+    });
+    showSuccess('Song updated successfully');
+    showEditModal.value = false;
+    refresh();
+  } catch {
+    showError('Failed to update song');
   }
 }
 
 async function deleteSong() {
   try {
-    await $fetch(`/api/songs/${songId}`, { method: 'DELETE' })
-    showSuccess('Song deleted successfully')
-    router.push('/songs')
-  } catch (error) {
-    showError('Failed to delete song')
-    console.error('Error deleting song:', error)
+    await $fetch(`/api/songs/${songId}`, { method: 'DELETE' });
+    showSuccess('Song deleted successfully');
+    router.push('/songs');
+  } catch {
+    showError('Failed to delete song');
   }
 }
 
@@ -86,7 +87,7 @@ function openProgressEdit() {
       maxTempoBpm: null,
       practiceCount: 0,
       lastPracticedAt: '',
-    }
+    };
   } else {
     progressEditForm.value = {
       completionPercent: progress.value.completionPercent ?? 0,
@@ -95,9 +96,9 @@ function openProgressEdit() {
       lastPracticedAt: progress.value.lastPracticedAt
         ? new Date(progress.value.lastPracticedAt).toISOString().slice(0, 16)
         : new Date().toISOString().slice(0, 16),
-    }
+    };
   }
-  showProgressEditModal.value = true
+  showProgressEditModal.value = true;
 }
 
 async function saveProgressEdit() {
@@ -110,13 +111,12 @@ async function saveProgressEdit() {
         practiceCount: progressEditForm.value.practiceCount,
         lastPracticedAt: progressEditForm.value.lastPracticedAt || null,
       },
-    })
-    showSuccess('Progress updated successfully')
-    showProgressEditModal.value = false
-    refreshProgress()
-  } catch (error) {
-    showError('Failed to update progress')
-    console.error('Error updating progress:', error)
+    });
+    showSuccess('Progress updated successfully');
+    showProgressEditModal.value = false;
+    refreshProgress();
+  } catch {
+    showError('Failed to update progress');
   }
 }
 
@@ -125,16 +125,16 @@ const difficultyColors: Record<string, string> = {
   intermediate: 'bg-nord13/20 text-nord13',
   advanced: 'bg-nord12/20 text-nord12',
   expert: 'bg-nord11/20 text-nord11',
-}
+};
 
 function formatDate(dateString: string | Date | null): string {
-  if (!dateString) return 'Never'
-  const date = typeof dateString === 'string' ? new Date(dateString) : dateString
+  if (!dateString) return 'Never';
+  const date = typeof dateString === 'string' ? new Date(dateString) : dateString;
   return date.toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
-  })
+  });
 }
 </script>
 
@@ -152,7 +152,9 @@ function formatDate(dateString: string | Date | null): string {
         </div>
         <div class="flex gap-2">
           <NordButton variant="ghost" size="sm" @click="openEdit">Edit</NordButton>
-          <NordButton variant="danger" size="sm" @click="showDeleteConfirm = true">Delete</NordButton>
+          <NordButton variant="danger" size="sm" @click="showDeleteConfirm = true"
+            >Delete</NordButton
+          >
         </div>
       </div>
     </div>
@@ -161,10 +163,7 @@ function formatDate(dateString: string | Date | null): string {
       <!-- Notation Viewer -->
       <div class="xl:col-span-3">
         <NordCard title="Score">
-          <AlphaTabViewer
-            v-if="song.notationData"
-            :alpha-tex="song.notationData"
-          />
+          <AlphaTabViewer v-if="song.notationData" :alpha-tex="song.notationData" />
           <p v-else class="text-text-muted">No notation data available for this song.</p>
         </NordCard>
       </div>
@@ -200,7 +199,9 @@ function formatDate(dateString: string | Date | null): string {
             <div>
               <div class="flex justify-between items-center mb-2">
                 <span class="text-sm text-text-muted">Completion</span>
-                <span class="text-sm font-semibold text-text">{{ Math.round(progress.completionPercent) }}%</span>
+                <span class="text-sm font-semibold text-text"
+                  >{{ Math.round(progress.completionPercent) }}%</span
+                >
               </div>
               <div class="h-2 bg-border rounded-full overflow-hidden">
                 <div
@@ -218,14 +219,19 @@ function formatDate(dateString: string | Date | null): string {
               </div>
               <div class="bg-surface-alt rounded-md p-2">
                 <span class="text-xs text-text-muted block">Max Tempo</span>
-                <span class="text-lg font-bold text-text">{{ progress.maxTempoBpm ?? '--' }} <span class="text-xs font-normal">BPM</span></span>
+                <span class="text-lg font-bold text-text"
+                  >{{ progress.maxTempoBpm ?? '--' }}
+                  <span class="text-xs font-normal">BPM</span></span
+                >
               </div>
             </div>
 
             <!-- Last Practiced -->
             <div class="bg-surface-alt rounded-md p-2">
               <span class="text-xs text-text-muted block">Last Practiced</span>
-              <span class="text-sm font-medium text-text">{{ formatDate(progress.lastPracticedAt) }}</span>
+              <span class="text-sm font-medium text-text">{{
+                formatDate(progress.lastPracticedAt)
+              }}</span>
             </div>
 
             <NordButton variant="secondary" size="sm" class="w-full" @click="openProgressEdit">
@@ -318,7 +324,9 @@ function formatDate(dateString: string | Date | null): string {
         </div>
 
         <div class="flex justify-end gap-3 pt-2">
-          <NordButton variant="ghost" type="button" @click="showEditModal = false">Cancel</NordButton>
+          <NordButton variant="ghost" type="button" @click="showEditModal = false"
+            >Cancel</NordButton
+          >
           <NordButton variant="primary" type="submit">Save Changes</NordButton>
         </div>
       </form>
@@ -336,7 +344,11 @@ function formatDate(dateString: string | Date | null): string {
     </NordModal>
 
     <!-- Progress Edit Modal -->
-    <NordModal :open="showProgressEditModal" title="Edit Progress" @close="showProgressEditModal = false">
+    <NordModal
+      :open="showProgressEditModal"
+      title="Edit Progress"
+      @close="showProgressEditModal = false"
+    >
       <form class="space-y-4" @submit.prevent="saveProgressEdit">
         <div>
           <label class="block text-sm text-text-muted mb-1">Completion (%)</label>
@@ -387,7 +399,9 @@ function formatDate(dateString: string | Date | null): string {
         </div>
 
         <div class="flex justify-end gap-3 pt-2">
-          <NordButton variant="ghost" type="button" @click="showProgressEditModal = false">Cancel</NordButton>
+          <NordButton variant="ghost" type="button" @click="showProgressEditModal = false"
+            >Cancel</NordButton
+          >
           <NordButton variant="primary" type="submit">Save Progress</NordButton>
         </div>
       </form>

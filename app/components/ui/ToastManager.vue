@@ -1,20 +1,15 @@
 <script setup lang="ts">
-const toastStore = useToastStore()
+const toastStore = useToastStore();
 
 function dismiss(id: string) {
-  toastStore.removeToast(id)
+  toastStore.removeToast(id);
 }
 </script>
 
 <template>
   <Teleport to="body">
     <!-- Aria-live region for screen reader announcements -->
-    <div
-      role="status"
-      aria-live="polite"
-      aria-atomic="true"
-      class="sr-only"
-    >
+    <div role="status" aria-live="polite" aria-atomic="true" class="sr-only">
       <span v-if="toastStore.toasts.length > 0">
         {{ toastStore.toasts[0]?.message }}
       </span>

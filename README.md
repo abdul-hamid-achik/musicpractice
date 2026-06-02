@@ -11,12 +11,14 @@ A comprehensive music practice tracking and theory learning application built wi
 ## Features
 
 ### Interactive Instruments
+
 - **Guitar** - Interactive fretboard with note visualization
 - **Bass** - 4-string and 5-string bass fretboard support
 - **Piano** - Full keyboard with octave navigation
 - **Violin** - Interactive fingerboard for string positions
 
 ### Practice Tracking
+
 - Log practice sessions with duration, tempo, and notes
 - Track daily practice streaks (current and longest)
 - Set and monitor weekly practice goals
@@ -24,18 +26,21 @@ A comprehensive music practice tracking and theory learning application built wi
 - Tag sessions for better organization
 
 ### Ear Training
+
 - Interval recognition exercises
 - Note identification training
 - Score tracking and progress monitoring
 - Customizable difficulty settings
 
 ### Music Theory
+
 - **Scales** - Explore scales with interval patterns and categories
 - **Chords** - Chord library with voicings for different instruments
 - **Circle of Fifths** - Interactive visual reference
 - **Interval Trainer** - Learn and practice musical intervals
 
 ### Song Library
+
 - Browse and search song collection
 - Difficulty levels: Beginner, Intermediate, Advanced, Expert
 - Multiple notation formats: AlphaTex, MusicXML, Guitar Pro, VexFlow JSON
@@ -43,6 +48,7 @@ A comprehensive music practice tracking and theory learning application built wi
 - AlphaTab integration for interactive notation display
 
 ### Metronome
+
 - Customizable tempo (BPM)
 - Time signature support
 - Accent patterns
@@ -50,6 +56,7 @@ A comprehensive music practice tracking and theory learning application built wi
 - Save presets for quick access
 
 ### Progress & Statistics
+
 - Dashboard with practice analytics
 - Song completion tracking
 - Tempo progression over time
@@ -59,6 +66,7 @@ A comprehensive music practice tracking and theory learning application built wi
 ## Tech Stack
 
 ### Frontend
+
 - **Framework**: [Nuxt 4](https://nuxt.com/) with Vue 3
 - **Language**: TypeScript
 - **State Management**: Pinia
@@ -68,6 +76,7 @@ A comprehensive music practice tracking and theory learning application built wi
 - **Music Theory**: VexFlow for music notation rendering
 
 ### Backend
+
 - **Server**: Nuxt Server Routes (Nitro)
 - **Database**: PostgreSQL
 - **ORM**: Drizzle ORM
@@ -75,6 +84,7 @@ A comprehensive music practice tracking and theory learning application built wi
 - **Password Hashing**: bcrypt
 
 ### Development Tools
+
 - **Package Manager**: Bun or npm
 - **Testing**: Vitest with Vue Test Utils
 - **Linting**: Oxlint
@@ -102,11 +112,13 @@ cd musicpractice
 ### 2. Install Dependencies
 
 Using Bun (recommended):
+
 ```bash
 bun install
 ```
 
 Or using npm:
+
 ```bash
 npm install
 ```
@@ -130,6 +142,7 @@ createdb musicpractice
 ```
 
 Or using psql:
+
 ```sql
 CREATE DATABASE musicpractice;
 ```
@@ -149,6 +162,7 @@ bun run db:migrate
 ```
 
 Alternatively, use push mode for development:
+
 ```bash
 bun run db:push
 ```
@@ -173,27 +187,27 @@ The application will be available at `http://localhost:3000`
 
 ### Available Commands
 
-| Command | Description |
-|---------|-------------|
-| `bun run dev` | Start development server with hot reload |
-| `bun run build` | Build for production |
-| `bun run preview` | Preview production build locally |
-| `bun run test` | Run tests in watch mode |
-| `bun run test:unit` | Run unit tests once |
-| `bun run test:watch` | Run tests in watch mode |
-| `bun run lint` | Run linter (Oxlint) |
-| `bun run lint:fix` | Run linter and auto-fix issues |
-| `bun run typecheck` | Run TypeScript type checking |
+| Command              | Description                              |
+| -------------------- | ---------------------------------------- |
+| `bun run dev`        | Start development server with hot reload |
+| `bun run build`      | Build for production                     |
+| `bun run preview`    | Preview production build locally         |
+| `bun run test`       | Run tests in watch mode                  |
+| `bun run test:unit`  | Run unit tests once                      |
+| `bun run test:watch` | Run tests in watch mode                  |
+| `bun run lint`       | Run linter (Oxlint)                      |
+| `bun run lint:fix`   | Run linter and auto-fix issues           |
+| `bun run typecheck`  | Run TypeScript type checking             |
 
 ### Database Commands
 
-| Command | Description |
-|---------|-------------|
-| `bun run db:generate` | Generate migrations from schema changes |
-| `bun run db:migrate` | Apply pending migrations |
-| `bun run db:push` | Push schema changes directly (development only) |
-| `bun run db:studio` | Open Drizzle Studio for database browsing |
-| `bun run db:seed` | Seed database with initial data |
+| Command               | Description                                     |
+| --------------------- | ----------------------------------------------- |
+| `bun run db:generate` | Generate migrations from schema changes         |
+| `bun run db:migrate`  | Apply pending migrations                        |
+| `bun run db:push`     | Push schema changes directly (development only) |
+| `bun run db:studio`   | Open Drizzle Studio for database browsing       |
+| `bun run db:seed`     | Seed database with initial data                 |
 
 ## Database Setup
 
@@ -222,6 +236,7 @@ bun run db:migrate
 ### Seeding Demo Data
 
 The seed script populates:
+
 - Default instruments (guitar, bass, piano, violin)
 - Common scales (major, minor, pentatonic, etc.)
 - Common chords (major, minor, 7th, etc.)
@@ -256,11 +271,11 @@ NODE_ENV=development
 
 ### Variable Descriptions
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `DATABASE_URL` | Yes | PostgreSQL connection string |
-| `JWT_SECRET` | Yes | Secret key for JWT token signing (min 32 characters) |
-| `NODE_ENV` | No | Environment mode (`development`, `production`, `test`) |
+| Variable       | Required | Description                                            |
+| -------------- | -------- | ------------------------------------------------------ |
+| `DATABASE_URL` | Yes      | PostgreSQL connection string                           |
+| `JWT_SECRET`   | Yes      | Secret key for JWT token signing (min 32 characters)   |
+| `NODE_ENV`     | No       | Environment mode (`development`, `production`, `test`) |
 
 ### Production Recommendations
 
@@ -331,19 +346,22 @@ For detailed API documentation, see [API.md](./API.md).
 
 ### API Endpoints Overview
 
-| Category | Endpoints |
-|----------|-----------|
-| Authentication | `POST /api/auth/register`, `POST /api/auth/login`, `POST /api/auth/logout` |
-| Account | `GET /api/account`, `PUT /api/account` |
-| Instruments | `GET /api/instruments`, `POST /api/instruments`, `PUT /api/instruments/:id` |
-| Practice Sessions | `GET /api/sessions`, `POST /api/sessions`, `PUT /api/sessions/:id` |
-| Songs | `GET /api/songs`, `POST /api/songs`, `GET /api/songs/:id` |
-| Theory | `GET /api/scales`, `GET /api/chords` |
-| Ear Training | `POST /api/ear-training/submit` |
-| Progress | `GET /api/progress`, `PUT /api/progress/:songId` |
-| Statistics | `GET /api/stats/overview`, `GET /api/stats/weekly` |
-| Streaks | `GET /api/streaks`, `POST /api/streaks/update` |
-| Goals | `GET /api/goals`, `POST /api/goals`, `PUT /api/goals/:id` |
+| Category          | Endpoints                                                                                                                          |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Authentication    | `POST /api/auth/register`, `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/me`                                     |
+| Account           | `GET /api/account`, `PUT /api/account/profile`, `POST /api/account/change-password`, `DELETE /api/account`                         |
+| Instruments       | `GET /api/instruments`, `GET /api/instruments/:id`, `DELETE /api/instruments/:id`                                                  |
+| Practice Sessions | `GET /api/sessions`, `POST /api/sessions`, `GET /api/sessions/:id`, `PUT /api/sessions/:id`, `DELETE /api/sessions/:id`            |
+| Songs             | `GET /api/songs`, `POST /api/songs`, `GET /api/songs/:id`, `PUT /api/songs/:id`, `DELETE /api/songs/:id`                           |
+| Theory            | `GET /api/scales`, `GET /api/scales/:id`, `GET /api/chords`, `GET /api/chords/:id`                                                 |
+| Ear Training      | `GET /api/ear-training`, `POST /api/ear-training`                                                                                  |
+| Progress          | `GET /api/progress`, `PUT /api/progress/:songId`                                                                                   |
+| Statistics        | `GET /api/stats/daily?days=N`, `GET /api/stats/heatmap`                                                                            |
+| Streaks           | `GET /api/streaks` (auto-updated on session save — no manual update endpoint)                                                      |
+| Goals             | `GET /api/goals`, `POST /api/goals`, `GET /api/goals/:id`, `PUT /api/goals/:id`, `DELETE /api/goals/:id`                           |
+| Metronome Presets | `GET /api/metronome-presets`, `POST /api/metronome-presets`, `PUT /api/metronome-presets/:id`, `DELETE /api/metronome-presets/:id` |
+
+> Streaks are computed automatically when a practice session is saved via `POST /api/sessions` — there is no separate update endpoint.
 
 ## Contributing
 

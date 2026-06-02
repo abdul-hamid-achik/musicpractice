@@ -1,24 +1,41 @@
-import { eq } from 'drizzle-orm'
-import { practiceSessions } from '../../db/schema'
-import { requireAuth } from '../../utils/auth'
-import { createApiError, handleApiError, validateId } from '../../utils/errors'
+import { eq } from 'drizzle-orm';
+import { practiceSessions } from '../../db/schema';
+import { requireAuth } from '../../utils/auth';
+import { applyRateLimit } from '../../utils/rate-limit';
+import { createApiError, handleApiError, validateId } from '../../utils/errors';
 
 export default defineEventHandler(async (event) => {
   try {
-    await requireAuth(event)
-    const db = useDb()
-    const id = getRouterParam(event, 'id')
+    await applyRateLimit(event, 'sessions:delete', 10);
+    const user = await requireAuth(event);
+    const db = useDb();
+    const id = getRouterParam(event, 'id');
 
-    const validId = validateId(id, 'session id')
+    const validId = validateId(id, 'session id');
 
-    const [deleted] = await db.delete(practiceSessions).where(eq(practiceSessions.id, validId)).returning()
+    const [existing] = await db
+      .select({ userId: practiceSessions.userId })
+      .from(practiceSessions)
+      .where(eq(practiceSessions.id, validId));
 
-    if (!deleted) {
-      throw createApiError('Session not found', 404)
+    if (!existing) {
+      throw createApiError('Session not found', 404);
+    }
+    if (existing.userId !== user.id) {
+      throw createApiError('You do not have permission to delete this session', 403);
     }
 
-    return { message: 'Session deleted', id: deleted.id }
+    const [deleted] = await db
+      .delete(practiceSessions)
+      .where(eq(practiceSessions.id, validId))
+      .returning();
+
+    if (!deleted) {
+      throw createApiError('Session not found', 404);
+    }
+
+    return { message: 'Session deleted', id: deleted.id };
   } catch (error) {
-    return handleApiError(error, { route: '/api/sessions/[id]', operation: 'delete' })
+    return handleApiError(error, { route: '/api/sessions/[id]', operation: 'delete' });
   }
-})
+});

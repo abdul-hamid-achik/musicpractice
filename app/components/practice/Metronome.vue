@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { apiGet, apiPost } from '~/utils/api'
+import { apiGet, apiPost } from '~/utils/api';
 
-const { bpm, isRunning, beatsPerMeasure, currentBeat, start, stop, setBpm } =
-  useMetronome()
-const { showError, showSuccess } = useToast()
+const { bpm, isRunning, beatsPerMeasure, currentBeat, start, stop, setBpm } = useMetronome();
+const { showError, showSuccess } = useToast();
 
 const timeSignatures = [
   { label: '2/4', beats: 2, unit: 4 },
@@ -12,88 +11,102 @@ const timeSignatures = [
   { label: '5/4', beats: 5, unit: 4 },
   { label: '6/8', beats: 6, unit: 8 },
   { label: '7/8', beats: 7, unit: 8 },
-]
+];
 
-const selectedTimeSig = ref('4/4')
+const selectedTimeSig = ref('4/4');
 
 function setTimeSignature(sig: (typeof timeSignatures)[number]) {
-  selectedTimeSig.value = sig.label
-  beatsPerMeasure.value = sig.beats
+  selectedTimeSig.value = sig.label;
+  beatsPerMeasure.value = sig.beats;
 }
 
 function adjustBpm(delta: number) {
-  const newBpm = Math.min(300, Math.max(30, bpm.value + delta))
-  setBpm(newBpm)
+  const newBpm = Math.min(300, Math.max(30, bpm.value + delta));
+  setBpm(newBpm);
 }
 
 function handleSliderInput(event: Event) {
-  const target = event.target as HTMLInputElement
-  setBpm(parseInt(target.value))
+  const target = event.target as HTMLInputElement;
+  setBpm(parseInt(target.value));
 }
 
 function togglePlayback() {
   if (isRunning.value) {
-    stop()
+    stop();
   } else {
-    start()
+    start();
   }
 }
 
 // Tap tempo
-const tapTimes = ref<number[]>([])
+const tapTimes = ref<number[]>([]);
+const tapResetTimeout = ref<ReturnType<typeof setTimeout> | null>(null);
 
 function handleTap() {
-  const now = Date.now()
-  tapTimes.value.push(now)
+  const now = Date.now();
+  tapTimes.value.push(now);
 
   // Keep only last 4 taps
   if (tapTimes.value.length > 4) {
-    tapTimes.value = tapTimes.value.slice(-4)
+    tapTimes.value = tapTimes.value.slice(-4);
   }
 
   if (tapTimes.value.length >= 2) {
-    const intervals: number[] = []
+    const intervals: number[] = [];
     for (let i = 1; i < tapTimes.value.length; i++) {
-      intervals.push(tapTimes.value[i]! - tapTimes.value[i - 1]!)
+      intervals.push(tapTimes.value[i]! - tapTimes.value[i - 1]!);
     }
-    const avgInterval = intervals.reduce((a, b) => a + b, 0) / intervals.length
-    const tapBpm = Math.round(60000 / avgInterval)
+    const avgInterval = intervals.reduce((a, b) => a + b, 0) / intervals.length;
+    const tapBpm = Math.round(60000 / avgInterval);
     if (tapBpm >= 30 && tapBpm <= 300) {
-      setBpm(tapBpm)
+      setBpm(tapBpm);
     }
   }
 
   // Reset if gap > 2 seconds
-  setTimeout(() => {
-    if (tapTimes.value.length > 0 && Date.now() - tapTimes.value[tapTimes.value.length - 1]! > 2000) {
-      tapTimes.value = []
+  if (tapResetTimeout.value) clearTimeout(tapResetTimeout.value);
+  tapResetTimeout.value = setTimeout(() => {
+    if (
+      tapTimes.value.length > 0 &&
+      Date.now() - tapTimes.value[tapTimes.value.length - 1]! > 2000
+    ) {
+      tapTimes.value = [];
     }
-  }, 2100)
+  }, 2100);
 }
 
 // Presets
-const presets = ref<Array<{ id: string; name: string; tempoBpm: number; beatsPerMeasure: number; beatUnit: number }>>([])
-const showSavePreset = ref(false)
-const presetName = ref('')
-const presetsLoading = ref(false)
+const presets = ref<
+  Array<{ id: string; name: string; tempoBpm: number; beatsPerMeasure: number; beatUnit: number }>
+>([]);
+const showSavePreset = ref(false);
+const presetName = ref('');
+const presetsLoading = ref(false);
 
 async function loadPresets() {
   try {
-    presetsLoading.value = true
-    const result = await apiGet<{ data: typeof presets.value }>('/api/metronome-presets', { suppressError: true })
-    presets.value = result.data
-  } catch (error) {
-    showError('Failed to load metronome presets')
-    console.error('Error loading presets:', error)
+    presetsLoading.value = true;
+    const result = await apiGet<{ data: typeof presets.value }>('/api/metronome-presets', {
+      suppressError: true,
+    });
+    presets.value = result.data;
+  } catch {
+    showError('Failed to load metronome presets');
   } finally {
-    presetsLoading.value = false
+    presetsLoading.value = false;
   }
 }
 
 async function savePreset() {
-  if (!presetName.value.trim()) return
+  if (!presetName.value.trim()) return;
   try {
-    const preset = await apiPost<{ id: string; name: string; tempoBpm: number; beatsPerMeasure: number; beatUnit: number }>(
+    const preset = await apiPost<{
+      id: string;
+      name: string;
+      tempoBpm: number;
+      beatsPerMeasure: number;
+      beatUnit: number;
+    }>(
       '/api/metronome-presets',
       {
         name: presetName.value.trim(),
@@ -101,31 +114,30 @@ async function savePreset() {
         beatsPerMeasure: beatsPerMeasure.value,
         beatUnit: 4,
       },
-      { successMessage: 'Preset saved successfully' }
-    )
-    presets.value.push(preset)
-    presetName.value = ''
-    showSavePreset.value = false
-  } catch (error) {
-    showError('Failed to save preset')
-    console.error('Error saving preset:', error)
+      { successMessage: 'Preset saved successfully' },
+    );
+    presets.value.push(preset);
+    presetName.value = '';
+    showSavePreset.value = false;
+  } catch {
+    showError('Failed to save preset');
   }
 }
 
 function loadPreset(preset: (typeof presets.value)[number]) {
-  setBpm(preset.tempoBpm)
-  beatsPerMeasure.value = preset.beatsPerMeasure
-  const matchedSig = timeSignatures.find((s) => s.beats === preset.beatsPerMeasure)
+  setBpm(preset.tempoBpm);
+  beatsPerMeasure.value = preset.beatsPerMeasure;
+  const matchedSig = timeSignatures.find((s) => s.beats === preset.beatsPerMeasure);
   if (matchedSig) {
-    selectedTimeSig.value = matchedSig.label
+    selectedTimeSig.value = matchedSig.label;
   }
 }
 
 onMounted(() => {
-  loadPresets()
-})
+  loadPresets();
+});
 
-defineExpose({ setBpm, adjustBpm, togglePlayback, bpm, isRunning })
+defineExpose({ setBpm, adjustBpm, togglePlayback, bpm, isRunning });
 </script>
 
 <template>
@@ -181,7 +193,11 @@ defineExpose({ setBpm, adjustBpm, togglePlayback, bpm, isRunning })
     />
 
     <!-- Time Signature -->
-    <div class="flex flex-wrap gap-2 justify-center" role="group" aria-label="Time signature selection">
+    <div
+      class="flex flex-wrap gap-2 justify-center"
+      role="group"
+      aria-label="Time signature selection"
+    >
       <NordButton
         v-for="sig in timeSignatures"
         :key="sig.label"
@@ -195,7 +211,12 @@ defineExpose({ setBpm, adjustBpm, togglePlayback, bpm, isRunning })
     </div>
 
     <!-- Visual Beat Indicator -->
-    <div class="flex justify-center gap-3" role="group" aria-label="Beat indicator" aria-live="polite">
+    <div
+      class="flex justify-center gap-3"
+      role="group"
+      aria-label="Beat indicator"
+      aria-live="polite"
+    >
       <div
         v-for="beat in beatsPerMeasure"
         :key="beat"
@@ -280,7 +301,11 @@ defineExpose({ setBpm, adjustBpm, togglePlayback, bpm, isRunning })
 }
 
 @keyframes beat-ripple {
-  from { box-shadow: 0 0 0 0 rgba(136, 192, 208, 0.5); }
-  to   { box-shadow: 0 0 0 10px rgba(136, 192, 208, 0); }
+  from {
+    box-shadow: 0 0 0 0 rgba(136, 192, 208, 0.5);
+  }
+  to {
+    box-shadow: 0 0 0 10px rgba(136, 192, 208, 0);
+  }
 }
 </style>

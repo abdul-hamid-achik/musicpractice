@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useAuthStore } from '~/stores/auth'
+import { useAuthStore } from '~/stores/auth';
 
 // Page metadata
 useHead({
@@ -7,27 +7,28 @@ useHead({
   meta: [
     {
       name: 'description',
-      content: 'Oops! The page you\'re looking for doesn\'t exist. Return to MusicPractice homepage or explore our instruments, practice sessions, and songs.',
+      content:
+        "Oops! The page you're looking for doesn't exist. Return to MusicPractice homepage or explore our instruments, practice sessions, and songs.",
     },
   ],
-})
+});
 
 // Auth store for conditional dashboard link
-const authStore = useAuthStore()
+const authStore = useAuthStore();
 
 // Search functionality
-const searchQuery = ref('')
-const router = useRouter()
+const searchQuery = ref('');
+const router = useRouter();
 
 function handleSearch() {
   if (searchQuery.value.trim()) {
-    router.push(`/songs?search=${encodeURIComponent(searchQuery.value.trim())}`)
+    router.push(`/songs?search=${encodeURIComponent(searchQuery.value.trim())}`);
   }
 }
 
 function handleSearchKeyDown(event: KeyboardEvent) {
   if (event.key === 'Enter') {
-    handleSearch()
+    handleSearch();
   }
 }
 
@@ -41,7 +42,7 @@ const floatingNotes = [
   { symbol: '♫', x: 85, delay: 5, duration: 17, size: 'text-2xl' },
   { symbol: '♩', x: 15, delay: 8, duration: 19, size: 'text-3xl' },
   { symbol: '♬', x: 90, delay: 3, duration: 21, size: 'text-2xl' },
-]
+];
 
 // Popular sections for quick navigation
 const popularSections = [
@@ -69,18 +70,25 @@ const popularSections = [
     icon: '🎼',
     href: '/theory',
   },
-]
+];
 </script>
 
 <template>
-  <div class="min-h-screen bg-surface flex items-center justify-center px-4 py-12 relative overflow-hidden">
+  <div
+    class="min-h-screen bg-surface flex items-center justify-center px-4 py-12 relative overflow-hidden"
+  >
     <!-- Animated background gradient -->
     <div class="absolute inset-0 bg-gradient-to-br from-surface via-surface-alt to-surface" />
 
     <!-- Animated grid overlay -->
     <div
       class="absolute inset-0 opacity-[0.03]"
-      style="background-image: linear-gradient(rgba(136,192,208,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(136,192,208,0.3) 1px, transparent 1px); background-size: 60px 60px;"
+      style="
+        background-image:
+          linear-gradient(rgba(136, 192, 208, 0.3) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(136, 192, 208, 0.3) 1px, transparent 1px);
+        background-size: 60px 60px;
+      "
     />
 
     <!-- Floating music notes -->
@@ -100,7 +108,9 @@ const popularSections = [
     </div>
 
     <!-- Radial glow effect -->
-    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-primary/5 blur-3xl" />
+    <div
+      class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-primary/5 blur-3xl"
+    />
 
     <!-- Main content -->
     <div class="relative z-10 w-full max-w-2xl">
@@ -202,8 +212,7 @@ const popularSections = [
 
           <!-- Description -->
           <p class="text-text-muted text-lg mb-8 max-w-md mx-auto">
-            The page you're looking for doesn't exist or has been moved.
-            Let's get you back in tune!
+            The page you're looking for doesn't exist or has been moved. Let's get you back in tune!
           </p>
 
           <!-- Search box -->
@@ -218,11 +227,7 @@ const popularSections = [
                 class="flex-1 px-4 py-2.5 bg-surface-alt border border-border rounded-md text-text placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
                 @keydown="handleSearchKeyDown"
               />
-              <NordButton
-                variant="primary"
-                aria-label="Search"
-                @click="handleSearch"
-              >
+              <NordButton variant="primary" aria-label="Search" @click="handleSearch">
                 <svg
                   class="w-5 h-5"
                   fill="none"
@@ -372,7 +377,8 @@ const popularSections = [
 
 /* ═══════ FLOAT ANIMATION ═══════ */
 @keyframes float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(100vh) rotate(0deg);
     opacity: 0;
   }
@@ -394,7 +400,8 @@ const popularSections = [
 
 /* ═══════ BOUNCE SLOW ANIMATION ═══════ */
 @keyframes bounceSlow {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0);
   }
   50% {

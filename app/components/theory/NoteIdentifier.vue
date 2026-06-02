@@ -1,182 +1,194 @@
 <script setup lang="ts">
-const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] as const
-const NATURAL_NOTES = ['C', 'D', 'E', 'F', 'G', 'A', 'B'] as const
+import { useMusicTheory } from '~/composables/useMusicTheory';
+
+const { getNoteNames } = useMusicTheory();
+const NOTE_NAMES = getNoteNames();
+const NATURAL_NOTES = NOTE_NAMES.filter((n) => !n.includes('#'));
 
 interface NoteQuiz {
-  note: string
-  octave: number
-  vexKey: string
+  note: string;
+  octave: number;
+  vexKey: string;
 }
 
 const emit = defineEmits<{
-  scoreUpdate: [payload: { correct: number; total: number }]
-}>()
+  scoreUpdate: [payload: { correct: number; total: number }];
+}>();
 
-const vexContainer = ref<HTMLDivElement | null>(null)
-const correct = ref(0)
-const total = ref(0)
-const currentNote = ref<NoteQuiz | null>(null)
-const clef = ref<'treble' | 'bass'>('treble')
-const difficulty = ref<'easy' | 'medium' | 'hard'>('easy')
-const answered = ref(false)
-const lastGuessCorrect = ref<boolean | null>(null)
-const correctAnswer = ref<string | null>(null)
-const flashStates = ref<Record<string, 'correct' | 'incorrect' | null>>({})
-const vexReady = ref(false)
+const vexContainer = ref<HTMLDivElement | null>(null);
+const correct = ref(0);
+const total = ref(0);
+const currentNote = ref<NoteQuiz | null>(null);
+const clef = ref<'treble' | 'bass'>('treble');
+const difficulty = ref<'easy' | 'medium' | 'hard'>('easy');
+const answered = ref(false);
+const lastGuessCorrect = ref<boolean | null>(null);
+const correctAnswer = ref<string | null>(null);
+const flashStates = ref<Record<string, 'correct' | 'incorrect' | null>>({});
+const vexReady = ref(false);
 
 function getCssVar(name: string): string {
-  return getComputedStyle(document.documentElement).getPropertyValue(name).trim()
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 }
 
 const scorePercent = computed(() => {
-  if (total.value === 0) return 0
-  return Math.round((correct.value / total.value) * 100)
-})
+  if (total.value === 0) return 0;
+  return Math.round((correct.value / total.value) * 100);
+});
 
 const answerButtons = computed(() => {
-  if (difficulty.value === 'easy') return [...NATURAL_NOTES]
-  return [...NOTE_NAMES]
-})
+  if (difficulty.value === 'easy') return [...NATURAL_NOTES];
+  return [...NOTE_NAMES];
+});
 
 // Note ranges per clef and difficulty
 function getNoteRange(): { notes: string[]; octaves: number[] } {
   if (clef.value === 'treble') {
-    if (difficulty.value === 'easy') return { notes: [...NATURAL_NOTES], octaves: [4, 5] }
-    if (difficulty.value === 'medium') return { notes: [...NOTE_NAMES], octaves: [4, 5] }
-    return { notes: [...NOTE_NAMES], octaves: [3, 4, 5, 6] }
+    if (difficulty.value === 'easy') return { notes: [...NATURAL_NOTES], octaves: [4, 5] };
+    if (difficulty.value === 'medium') return { notes: [...NOTE_NAMES], octaves: [4, 5] };
+    return { notes: [...NOTE_NAMES], octaves: [3, 4, 5, 6] };
   }
   // Bass clef
-  if (difficulty.value === 'easy') return { notes: [...NATURAL_NOTES], octaves: [2, 3] }
-  if (difficulty.value === 'medium') return { notes: [...NOTE_NAMES], octaves: [2, 3] }
-  return { notes: [...NOTE_NAMES], octaves: [1, 2, 3, 4] }
+  if (difficulty.value === 'easy') return { notes: [...NATURAL_NOTES], octaves: [2, 3] };
+  if (difficulty.value === 'medium') return { notes: [...NOTE_NAMES], octaves: [2, 3] };
+  return { notes: [...NOTE_NAMES], octaves: [1, 2, 3, 4] };
 }
 
 function pickRandomNote(): NoteQuiz {
-  const range = getNoteRange()
-  const note = range.notes[Math.floor(Math.random() * range.notes.length)]!
-  const octave = range.octaves[Math.floor(Math.random() * range.octaves.length)]!
+  const range = getNoteRange();
+  const note = range.notes[Math.floor(Math.random() * range.notes.length)]!;
+  const octave = range.octaves[Math.floor(Math.random() * range.octaves.length)]!;
 
   // Convert to VexFlow key format: "c/4", "c#/4"
-  const vexNote = note.toLowerCase().replace('#', '#')
-  const vexKey = `${vexNote}/${octave}`
+  const vexNote = note.toLowerCase().replace('#', '#');
+  const vexKey = `${vexNote}/${octave}`;
 
-  return { note, octave, vexKey }
+  return { note, octave, vexKey };
 }
 
 async function renderNote(quiz: NoteQuiz) {
-  if (!vexContainer.value) return
+  if (!vexContainer.value) return;
 
   try {
-    const VexFlow = await import('vexflow')
-    const { Renderer, Stave, StaveNote, Formatter, Accidental } = VexFlow.default || VexFlow
+    const VexFlow = await import('vexflow');
+    const { Renderer, Stave, StaveNote, Formatter, Accidental } = VexFlow.default || VexFlow;
 
-    vexContainer.value.innerHTML = ''
-    vexReady.value = true
+    vexContainer.value.innerHTML = '';
+    vexReady.value = true;
 
-    const renderer = new Renderer(vexContainer.value, Renderer.Backends.SVG)
-    renderer.resize(320, 180)
-    const context = renderer.getContext()
-    context.setFont('Arial', 10)
+    const renderer = new Renderer(vexContainer.value, Renderer.Backends.SVG);
+    renderer.resize(320, 180);
+    const context = renderer.getContext();
+    context.setFont('Arial', 10);
 
     // Style for Nord theme
-    const svg = vexContainer.value.querySelector('svg')
+    const svg = vexContainer.value.querySelector('svg');
     if (svg) {
-      svg.style.background = 'transparent'
+      svg.style.background = 'transparent';
     }
 
-    const stave = new Stave(10, 30, 300)
-    stave.addClef(clef.value)
-    stave.setStyle({ fillStyle: getCssVar('--color-text'), strokeStyle: getCssVar('--color-text-muted') })
-    stave.setContext(context).draw()
+    const stave = new Stave(10, 30, 300);
+    stave.addClef(clef.value);
+    stave.setStyle({
+      fillStyle: getCssVar('--color-text'),
+      strokeStyle: getCssVar('--color-text-muted'),
+    });
+    stave.setContext(context).draw();
 
     // Build VexFlow note
-    const baseName = quiz.note.replace('#', '')
-    const hasSharp = quiz.note.includes('#')
-    const vexNoteName = `${baseName.toLowerCase()}/${quiz.octave}`
+    const baseName = quiz.note.replace('#', '');
+    const hasSharp = quiz.note.includes('#');
+    const vexNoteName = `${baseName.toLowerCase()}/${quiz.octave}`;
 
     const staveNote = new StaveNote({
       clef: clef.value,
       keys: [vexNoteName],
       duration: 'w',
-    })
+    });
 
     if (hasSharp) {
-      staveNote.addModifier(new Accidental('#'))
+      staveNote.addModifier(new Accidental('#'));
     }
 
-    staveNote.setStyle({ fillStyle: getCssVar('--color-text'), strokeStyle: getCssVar('--color-text') })
+    staveNote.setStyle({
+      fillStyle: getCssVar('--color-text'),
+      strokeStyle: getCssVar('--color-text'),
+    });
 
-    Formatter.FormatAndDraw(context, stave, [staveNote])
+    Formatter.FormatAndDraw(context, stave, [staveNote]);
   } catch {
     // VexFlow not available in SSR
-    vexReady.value = false
+    vexReady.value = false;
   }
 }
 
 async function newNote() {
-  answered.value = false
-  lastGuessCorrect.value = null
-  correctAnswer.value = null
-  flashStates.value = {}
-  currentNote.value = pickRandomNote()
-  await nextTick()
-  await renderNote(currentNote.value)
+  answered.value = false;
+  lastGuessCorrect.value = null;
+  correctAnswer.value = null;
+  flashStates.value = {};
+  currentNote.value = pickRandomNote();
+  await nextTick();
+  await renderNote(currentNote.value);
 }
 
 function guess(note: string) {
-  if (answered.value || !currentNote.value) return
+  if (answered.value || !currentNote.value) return;
 
-  total.value++
+  total.value++;
   // Compare only note name (ignore octave)
   if (note === currentNote.value.note) {
-    correct.value++
-    lastGuessCorrect.value = true
-    flashStates.value = { [note]: 'correct' }
-    answered.value = true
-    emit('scoreUpdate', { correct: correct.value, total: total.value })
-    setTimeout(() => newNote(), 1000)
+    correct.value++;
+    lastGuessCorrect.value = true;
+    flashStates.value = { [note]: 'correct' };
+    answered.value = true;
+    emit('scoreUpdate', { correct: correct.value, total: total.value });
+    setTimeout(() => newNote(), 1000);
   } else {
-    lastGuessCorrect.value = false
-    correctAnswer.value = currentNote.value.note
+    lastGuessCorrect.value = false;
+    correctAnswer.value = currentNote.value.note;
     flashStates.value = {
       [note]: 'incorrect',
       [currentNote.value.note]: 'correct',
-    }
-    answered.value = true
-    emit('scoreUpdate', { correct: correct.value, total: total.value })
+    };
+    answered.value = true;
+    emit('scoreUpdate', { correct: correct.value, total: total.value });
   }
 }
 
 function reset() {
-  correct.value = 0
-  total.value = 0
-  currentNote.value = null
-  answered.value = false
-  lastGuessCorrect.value = null
-  correctAnswer.value = null
-  flashStates.value = {}
+  correct.value = 0;
+  total.value = 0;
+  currentNote.value = null;
+  answered.value = false;
+  lastGuessCorrect.value = null;
+  correctAnswer.value = null;
+  flashStates.value = {};
 }
 
 function buttonClass(note: string): string {
-  const flash = flashStates.value[note]
-  if (flash === 'correct') return 'bg-success text-on-success'
-  if (flash === 'incorrect') return 'bg-error text-on-error'
-  return 'bg-surface-alt text-text hover:bg-border'
+  const flash = flashStates.value[note];
+  if (flash === 'correct') return 'bg-success text-on-success';
+  if (flash === 'incorrect') return 'bg-error text-on-error';
+  return 'bg-surface-alt text-text hover:bg-border';
 }
 
 // Re-render when clef or difficulty changes
 watch([clef, difficulty], () => {
   if (currentNote.value) {
-    newNote()
+    newNote();
   }
-})
+});
 
-const settingsStore = useSettingsStore()
-watch(() => settingsStore.theme, () => {
-  if (currentNote.value) {
-    nextTick(() => renderNote(currentNote.value!))
-  }
-})
+const settingsStore = useSettingsStore();
+watch(
+  () => settingsStore.theme,
+  () => {
+    if (currentNote.value) {
+      nextTick(() => renderNote(currentNote.value!));
+    }
+  },
+);
 </script>
 
 <template>
@@ -215,10 +227,14 @@ watch(() => settingsStore.theme, () => {
         <label class="block text-sm font-medium text-text-muted mb-2">Clef</label>
         <div class="flex gap-2">
           <button
-            v-for="c in (['treble', 'bass'] as const)"
+            v-for="c in ['treble', 'bass'] as const"
             :key="c"
             class="px-3 py-1.5 rounded-md text-sm font-medium transition-all capitalize"
-            :class="clef === c ? 'bg-primary text-on-primary' : 'bg-surface-alt text-text-muted hover:bg-border'"
+            :class="
+              clef === c
+                ? 'bg-primary text-on-primary'
+                : 'bg-surface-alt text-text-muted hover:bg-border'
+            "
             @click="clef = c"
           >
             {{ c }}
@@ -231,10 +247,14 @@ watch(() => settingsStore.theme, () => {
         <label class="block text-sm font-medium text-text-muted mb-2">Difficulty</label>
         <div class="flex gap-2">
           <button
-            v-for="d in (['easy', 'medium', 'hard'] as const)"
+            v-for="d in ['easy', 'medium', 'hard'] as const"
             :key="d"
             class="px-3 py-1.5 rounded-md text-sm font-medium transition-all capitalize"
-            :class="difficulty === d ? 'bg-primary text-on-primary' : 'bg-surface-alt text-text-muted hover:bg-border'"
+            :class="
+              difficulty === d
+                ? 'bg-primary text-on-primary'
+                : 'bg-surface-alt text-text-muted hover:bg-border'
+            "
             @click="difficulty = d"
           >
             {{ d }}
@@ -244,7 +264,9 @@ watch(() => settingsStore.theme, () => {
     </div>
 
     <!-- VexFlow Staff Container -->
-    <div class="bg-surface rounded-lg p-4 border border-border flex justify-center min-h-[200px] items-center">
+    <div
+      class="bg-surface rounded-lg p-4 border border-border flex justify-center min-h-[200px] items-center"
+    >
       <div v-if="!currentNote" class="text-text-muted text-center">
         <p class="mb-4">Press "New Note" to start identifying notes on the staff.</p>
         <button
@@ -270,7 +292,10 @@ watch(() => settingsStore.theme, () => {
     <!-- Answer Buttons -->
     <div v-if="currentNote">
       <label class="block text-sm font-medium text-text-muted mb-2">Identify the Note</label>
-      <div class="grid gap-2" :class="difficulty === 'easy' ? 'grid-cols-7' : 'grid-cols-4 sm:grid-cols-6'">
+      <div
+        class="grid gap-2"
+        :class="difficulty === 'easy' ? 'grid-cols-7' : 'grid-cols-4 sm:grid-cols-6'"
+      >
         <button
           v-for="note in answerButtons"
           :key="note"
@@ -286,9 +311,7 @@ watch(() => settingsStore.theme, () => {
 
     <!-- Feedback -->
     <div v-if="lastGuessCorrect !== null" class="text-center">
-      <p v-if="lastGuessCorrect" class="text-success font-medium">
-        Correct!
-      </p>
+      <p v-if="lastGuessCorrect" class="text-success font-medium">Correct!</p>
       <p v-else class="text-error font-medium">
         Incorrect. The answer was <span class="text-primary font-bold">{{ correctAnswer }}</span>
       </p>

@@ -15,13 +15,15 @@ const cards = [
     description: 'Train your ear with interval recognition and note identification exercises.',
     to: '/theory/ear-training',
   },
-]
+];
 </script>
 
 <template>
   <div>
     <h1 class="text-3xl font-bold text-text mb-2">Music Theory</h1>
-    <p class="text-text-muted mb-8">Build your understanding of scales, chords, intervals, and harmonic relationships.</p>
+    <p class="text-text-muted mb-8">
+      Build your understanding of scales, chords, intervals, and harmonic relationships.
+    </p>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
       <NordCard v-for="card in cards" :key="card.title" :title="card.title">

@@ -1,17 +1,50 @@
 <script setup lang="ts">
 const emit = defineEmits<{
-  keySelected: [payload: { key: string; type: 'major' | 'minor' }]
-}>()
+  keySelected: [payload: { key: string; type: 'major' | 'minor' }];
+}>();
 
-const MAJOR_KEYS = ['C', 'G', 'D', 'A', 'E', 'B', 'F#/Gb', 'Db', 'Ab', 'Eb', 'Bb', 'F']
-const MINOR_KEYS = ['Am', 'Em', 'Bm', 'F#m', 'C#m', 'G#m', 'D#m/Ebm', 'Bbm', 'Fm', 'Cm', 'Gm', 'Dm']
+const MAJOR_KEYS = ['C', 'G', 'D', 'A', 'E', 'B', 'F#/Gb', 'Db', 'Ab', 'Eb', 'Bb', 'F'];
+const MINOR_KEYS = [
+  'Am',
+  'Em',
+  'Bm',
+  'F#m',
+  'C#m',
+  'G#m',
+  'D#m/Ebm',
+  'Bbm',
+  'Fm',
+  'Cm',
+  'Gm',
+  'Dm',
+];
 
 const KEY_SIGNATURES: Record<string, string> = {
-  C: '0', G: '1#', D: '2#', A: '3#', E: '4#', B: '5#',
-  'F#/Gb': '6#/6b', Db: '5b', Ab: '4b', Eb: '3b', Bb: '2b', F: '1b',
-  Am: '0', Em: '1#', Bm: '2#', 'F#m': '3#', 'C#m': '4#', 'G#m': '5#',
-  'D#m/Ebm': '6#/6b', Bbm: '5b', Fm: '4b', Cm: '3b', Gm: '2b', Dm: '1b',
-}
+  C: '0',
+  G: '1#',
+  D: '2#',
+  A: '3#',
+  E: '4#',
+  B: '5#',
+  'F#/Gb': '6#/6b',
+  Db: '5b',
+  Ab: '4b',
+  Eb: '3b',
+  Bb: '2b',
+  F: '1b',
+  Am: '0',
+  Em: '1#',
+  Bm: '2#',
+  'F#m': '3#',
+  'C#m': '4#',
+  'G#m': '5#',
+  'D#m/Ebm': '6#/6b',
+  Bbm: '5b',
+  Fm: '4b',
+  Cm: '3b',
+  Gm: '2b',
+  Dm: '1b',
+};
 
 const DIATONIC_CHORDS: Record<string, string[]> = {
   C: ['C', 'Dm', 'Em', 'F', 'G', 'Am', 'B\u00B0'],
@@ -26,79 +59,95 @@ const DIATONIC_CHORDS: Record<string, string[]> = {
   Eb: ['Eb', 'Fm', 'Gm', 'Ab', 'Bb', 'Cm', 'D\u00B0'],
   Bb: ['Bb', 'Cm', 'Dm', 'Eb', 'F', 'Gm', 'A\u00B0'],
   F: ['F', 'Gm', 'Am', 'Bb', 'C', 'Dm', 'E\u00B0'],
-}
+};
 
-const ROMAN_NUMERALS = ['I', 'ii', 'iii', 'IV', 'V', 'vi', 'vii\u00B0']
+const ROMAN_NUMERALS = ['I', 'ii', 'iii', 'IV', 'V', 'vi', 'vii\u00B0'];
 
-const selectedKey = ref<string | null>(null)
-const selectedType = ref<'major' | 'minor'>('major')
-const hoveredIndex = ref<number | null>(null)
+const selectedKey = ref<string | null>(null);
+const selectedType = ref<'major' | 'minor'>('major');
+const hoveredIndex = ref<number | null>(null);
 
-const cx = 200
-const cy = 200
-const outerR = 170
-const innerR = 120
-const segAngle = (2 * Math.PI) / 12
+const cx = 200;
+const cy = 200;
+const outerR = 170;
+const innerR = 120;
+const segAngle = (2 * Math.PI) / 12;
 
 function polarToXY(angle: number, radius: number) {
   // Start from 12 o'clock (-PI/2), go clockwise
-  const a = angle - Math.PI / 2
+  const a = angle - Math.PI / 2;
   return {
     x: cx + radius * Math.cos(a),
     y: cy + radius * Math.sin(a),
-  }
+  };
 }
 
 function arcPath(startAngle: number, endAngle: number, r1: number, r2: number) {
-  const s1 = polarToXY(startAngle, r1)
-  const e1 = polarToXY(endAngle, r1)
-  const s2 = polarToXY(endAngle, r2)
-  const e2 = polarToXY(startAngle, r2)
-  return `M ${s1.x} ${s1.y} A ${r1} ${r1} 0 0 1 ${e1.x} ${e1.y} L ${s2.x} ${s2.y} A ${r2} ${r2} 0 0 0 ${e2.x} ${e2.y} Z`
+  const s1 = polarToXY(startAngle, r1);
+  const e1 = polarToXY(endAngle, r1);
+  const s2 = polarToXY(endAngle, r2);
+  const e2 = polarToXY(startAngle, r2);
+  return `M ${s1.x} ${s1.y} A ${r1} ${r1} 0 0 1 ${e1.x} ${e1.y} L ${s2.x} ${s2.y} A ${r2} ${r2} 0 0 0 ${e2.x} ${e2.y} Z`;
 }
 
 const outerSegments = computed(() => {
   return MAJOR_KEYS.map((key, i) => {
-    const start = i * segAngle
-    const end = (i + 1) * segAngle
-    const mid = polarToXY(start + segAngle / 2, (outerR + innerR + 20) / 2)
-    const isSelected = selectedKey.value === key && selectedType.value === 'major'
-    const isHovered = hoveredIndex.value === i
-    return { key, path: arcPath(start, end, outerR, innerR + 10), labelX: mid.x, labelY: mid.y, isSelected, isHovered, index: i }
-  })
-})
+    const start = i * segAngle;
+    const end = (i + 1) * segAngle;
+    const mid = polarToXY(start + segAngle / 2, (outerR + innerR + 20) / 2);
+    const isSelected = selectedKey.value === key && selectedType.value === 'major';
+    const isHovered = hoveredIndex.value === i;
+    return {
+      key,
+      path: arcPath(start, end, outerR, innerR + 10),
+      labelX: mid.x,
+      labelY: mid.y,
+      isSelected,
+      isHovered,
+      index: i,
+    };
+  });
+});
 
 const innerSegments = computed(() => {
   return MINOR_KEYS.map((key, i) => {
-    const start = i * segAngle
-    const end = (i + 1) * segAngle
-    const mid = polarToXY(start + segAngle / 2, (innerR + 40) / 2)
-    const isSelected = selectedKey.value === key && selectedType.value === 'minor'
-    const isHovered = hoveredIndex.value === i + 12
-    return { key, path: arcPath(start, end, innerR + 6, 40), labelX: mid.x, labelY: mid.y, isSelected, isHovered, index: i + 12 }
-  })
-})
+    const start = i * segAngle;
+    const end = (i + 1) * segAngle;
+    const mid = polarToXY(start + segAngle / 2, (innerR + 40) / 2);
+    const isSelected = selectedKey.value === key && selectedType.value === 'minor';
+    const isHovered = hoveredIndex.value === i + 12;
+    return {
+      key,
+      path: arcPath(start, end, innerR + 6, 40),
+      labelX: mid.x,
+      labelY: mid.y,
+      isSelected,
+      isHovered,
+      index: i + 12,
+    };
+  });
+});
 
 const keySigDisplay = computed(() => {
-  if (!selectedKey.value) return null
-  return KEY_SIGNATURES[selectedKey.value] || '0'
-})
+  if (!selectedKey.value) return null;
+  return KEY_SIGNATURES[selectedKey.value] || '0';
+});
 
 const relatedChords = computed(() => {
-  if (!selectedKey.value || selectedType.value !== 'major') return null
-  return DIATONIC_CHORDS[selectedKey.value] || null
-})
+  if (!selectedKey.value || selectedType.value !== 'major') return null;
+  return DIATONIC_CHORDS[selectedKey.value] || null;
+});
 
 function selectMajor(key: string, index: number) {
-  selectedKey.value = key
-  selectedType.value = 'major'
-  emit('keySelected', { key, type: 'major' })
+  selectedKey.value = key;
+  selectedType.value = 'major';
+  emit('keySelected', { key, type: 'major' });
 }
 
 function selectMinor(key: string, index: number) {
-  selectedKey.value = key
-  selectedType.value = 'minor'
-  emit('keySelected', { key, type: 'minor' })
+  selectedKey.value = key;
+  selectedType.value = 'minor';
+  emit('keySelected', { key, type: 'minor' });
 }
 </script>
 
@@ -112,7 +161,13 @@ function selectMinor(key: string, index: number) {
         <g v-for="seg in outerSegments" :key="'outer-' + seg.index">
           <path
             :d="seg.path"
-            :fill="seg.isSelected ? '#88C0D0' : seg.isHovered ? 'var(--color-border)' : 'var(--color-card)'"
+            :fill="
+              seg.isSelected
+                ? '#88C0D0'
+                : seg.isHovered
+                  ? 'var(--color-border)'
+                  : 'var(--color-card)'
+            "
             style="stroke: var(--color-surface)"
             stroke-width="2"
             class="cursor-pointer transition-colors duration-150"
@@ -138,7 +193,13 @@ function selectMinor(key: string, index: number) {
         <g v-for="seg in innerSegments" :key="'inner-' + seg.index">
           <path
             :d="seg.path"
-            :fill="seg.isSelected ? '#5E81AC' : seg.isHovered ? 'var(--color-surface-alt)' : 'var(--color-surface)'"
+            :fill="
+              seg.isSelected
+                ? '#5E81AC'
+                : seg.isHovered
+                  ? 'var(--color-surface-alt)'
+                  : 'var(--color-surface)'
+            "
             style="stroke: var(--color-surface-alt)"
             stroke-width="1.5"
             class="cursor-pointer transition-colors duration-150"
@@ -161,7 +222,13 @@ function selectMinor(key: string, index: number) {
         </g>
 
         <!-- Center circle -->
-        <circle :cx="cx" :cy="cy" r="38" style="fill: var(--color-surface); stroke: var(--color-surface-alt)" stroke-width="1.5" />
+        <circle
+          :cx="cx"
+          :cy="cy"
+          r="38"
+          style="fill: var(--color-surface); stroke: var(--color-surface-alt)"
+          stroke-width="1.5"
+        />
         <text
           v-if="selectedKey"
           :x="cx"

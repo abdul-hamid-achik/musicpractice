@@ -3,25 +3,25 @@
  * Wraps $fetch with standardized error handling and toast notifications
  */
 
-import type { FetchOptions as OfetchOptions } from 'ofetch'
+import type { FetchOptions as OfetchOptions } from 'ofetch';
 
 interface FetchOptions extends Omit<OfetchOptions, 'onResponse' | 'onRequest' | 'onResponseError'> {
   /**
    * Whether to show error toast on failure (default: true)
    */
-  showError?: boolean
+  showError?: boolean;
   /**
    * Custom error message to show instead of the server response
    */
-  errorMessage?: string
+  errorMessage?: string;
   /**
    * Whether to suppress errors completely (no toast, no console error)
    */
-  suppressError?: boolean
+  suppressError?: boolean;
   /**
    * Success message to show on successful response
    */
-  successMessage?: string
+  successMessage?: string;
 }
 
 /**
@@ -29,26 +29,26 @@ interface FetchOptions extends Omit<OfetchOptions, 'onResponse' | 'onRequest' | 
  */
 function extractErrorMessage(error: unknown): string {
   if (typeof error === 'string') {
-    return error
+    return error;
   }
 
   if (error && typeof error === 'object' && 'data' in error) {
-    const apiError = error as { data?: { message?: string } | string }
+    const apiError = error as { data?: { message?: string } | string };
     if (apiError.data) {
       if (typeof apiError.data === 'string') {
-        return apiError.data
+        return apiError.data;
       }
       if (apiError.data.message) {
-        return apiError.data.message
+        return apiError.data.message;
       }
     }
   }
 
   if (error && typeof error === 'object' && 'message' in error) {
-    return (error as { message: string }).message
+    return (error as { message: string }).message;
   }
 
-  return 'An unexpected error occurred'
+  return 'An unexpected error occurred';
 }
 
 /**
@@ -62,38 +62,33 @@ export async function apiFetch<T>(url: string, options: FetchOptions = {}): Prom
     successMessage,
     method,
     ...fetchOptions
-  } = options
+  } = options;
 
   try {
-    const result = await $fetch<T>(url, { ...fetchOptions, method } as typeof fetchOptions)
+    const result = await $fetch<T>(url, { ...fetchOptions, method } as typeof fetchOptions);
 
     // Show success message if provided
     if (successMessage) {
-      const { showSuccess } = useToast()
-      showSuccess(successMessage)
+      const { showSuccess } = useToast();
+      showSuccess(successMessage);
     }
 
-    return result as T
+    return result as T;
   } catch (error) {
     // Don't show error if suppressed
     if (suppressError) {
-      throw error
+      throw error;
     }
 
-    const { showError: showToastError } = useToast()
-    const message = errorMessage || extractErrorMessage(error)
+    const { showError: showToastError } = useToast();
+    const message = errorMessage || extractErrorMessage(error);
 
     // Show error toast
     if (showError) {
-      showToastError(message)
+      showToastError(message);
     }
 
-    // Log error for debugging
-    if (!suppressError) {
-      console.error(`API Error [${url}]:`, error)
-    }
-
-    throw error
+    throw error;
   }
 }
 
@@ -101,26 +96,34 @@ export async function apiFetch<T>(url: string, options: FetchOptions = {}): Prom
  * GET request with error handling
  */
 export function apiGet<T>(url: string, options: FetchOptions = {}): Promise<T> {
-  return apiFetch<T>(url, { ...options, method: 'GET' })
+  return apiFetch<T>(url, { ...options, method: 'GET' });
 }
 
 /**
  * POST request with error handling
  */
-export function apiPost<T>(url: string, body?: Record<string, unknown>, options: FetchOptions = {}): Promise<T> {
-  return apiFetch<T>(url, { ...options, method: 'POST', body })
+export function apiPost<T>(
+  url: string,
+  body?: Record<string, unknown>,
+  options: FetchOptions = {},
+): Promise<T> {
+  return apiFetch<T>(url, { ...options, method: 'POST', body });
 }
 
 /**
  * PUT request with error handling
  */
-export function apiPut<T>(url: string, body?: Record<string, unknown>, options: FetchOptions = {}): Promise<T> {
-  return apiFetch<T>(url, { ...options, method: 'PUT', body })
+export function apiPut<T>(
+  url: string,
+  body?: Record<string, unknown>,
+  options: FetchOptions = {},
+): Promise<T> {
+  return apiFetch<T>(url, { ...options, method: 'PUT', body });
 }
 
 /**
  * DELETE request with error handling
  */
 export function apiDelete<T>(url: string, options: FetchOptions = {}): Promise<T> {
-  return apiFetch<T>(url, { ...options, method: 'DELETE' })
+  return apiFetch<T>(url, { ...options, method: 'DELETE' });
 }

@@ -1,18 +1,20 @@
 <script setup lang="ts">
 interface ProgressEntry {
-  id: string
-  songTitle: string | null
-  completionPercent: number
-  maxTempoBpm: number | null
-  lastPracticedAt: string | null
-  practiceCount: number
+  id: string;
+  songTitle: string | null;
+  completionPercent: number;
+  maxTempoBpm: number | null;
+  lastPracticedAt: string | null;
+  practiceCount: number;
 }
 
-const { data: progressData, status } = useFetch<{ data: ProgressEntry[] }>('/api/progress?limit=100')
+const { data: progressData, status } = useFetch<{ data: ProgressEntry[] }>(
+  '/api/progress?limit=100',
+);
 
-const isLoading = computed(() => status.value === 'pending')
-const skills = computed(() => progressData.value?.data ?? [])
-const hasSkills = computed(() => skills.value.length > 0)
+const isLoading = computed(() => status.value === 'pending');
+const skills = computed(() => progressData.value?.data ?? []);
+const hasSkills = computed(() => skills.value.length > 0);
 </script>
 
 <template>
@@ -31,7 +33,9 @@ const hasSkills = computed(() => skills.value.length > 0)
 
     <!-- Empty state -->
     <div v-else-if="!hasSkills" class="empty-state">
-      <p class="text-text-muted text-sm">No song progress tracked yet. Start practicing a song to see your progress here.</p>
+      <p class="text-text-muted text-sm">
+        No song progress tracked yet. Start practicing a song to see your progress here.
+      </p>
     </div>
 
     <div v-else class="skill-list">
@@ -42,21 +46,21 @@ const hasSkills = computed(() => skills.value.length > 0)
         </div>
 
         <div class="progress-bar">
-          <div
-            class="progress-fill"
-            :style="{ width: skill.completionPercent + '%' }"
-          />
+          <div class="progress-fill" :style="{ width: skill.completionPercent + '%' }" />
         </div>
 
         <div class="skill-meta">
-          <span v-if="skill.maxTempoBpm" class="meta-item">
-            {{ skill.maxTempoBpm }} BPM max
-          </span>
+          <span v-if="skill.maxTempoBpm" class="meta-item"> {{ skill.maxTempoBpm }} BPM max </span>
           <span class="meta-item">
             {{ skill.practiceCount }} session{{ skill.practiceCount !== 1 ? 's' : '' }}
           </span>
           <span v-if="skill.lastPracticedAt" class="meta-item">
-            {{ new Date(skill.lastPracticedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) }}
+            {{
+              new Date(skill.lastPracticedAt).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+              })
+            }}
           </span>
         </div>
       </div>

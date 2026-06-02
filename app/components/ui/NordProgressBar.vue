@@ -1,19 +1,19 @@
 <script setup lang="ts">
 const props = withDefaults(
   defineProps<{
-    value: number
-    color?: 'primary' | 'success' | 'warning' | 'error' | 'info' | 'secondary'
-    size?: 'sm' | 'md'
-    animated?: boolean
+    value: number;
+    color?: 'primary' | 'success' | 'warning' | 'error' | 'info' | 'secondary';
+    size?: 'sm' | 'md';
+    animated?: boolean;
   }>(),
   {
     color: 'primary',
     size: 'md',
     animated: false,
   },
-)
+);
 
-const clampedValue = computed(() => Math.max(0, Math.min(100, props.value)))
+const clampedValue = computed(() => Math.max(0, Math.min(100, props.value)));
 
 const colorClasses: Record<string, string> = {
   primary: 'bg-primary',
@@ -22,7 +22,7 @@ const colorClasses: Record<string, string> = {
   error: 'bg-error',
   info: 'bg-info',
   secondary: 'bg-secondary',
-}
+};
 </script>
 
 <template>
@@ -40,8 +40,12 @@ const colorClasses: Record<string, string> = {
 
 <style scoped>
 @keyframes progress-shimmer {
-  from { background-position: -200% 0; }
-  to   { background-position: 200% 0; }
+  from {
+    background-position: -200% 0;
+  }
+  to {
+    background-position: 200% 0;
+  }
 }
 
 .progress-animated {

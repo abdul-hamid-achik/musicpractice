@@ -9,4 +9,7 @@ dist
 coverage
 .vecgrep
 .vercel
+.auto-imports
+.mavis
+.opencode
 auto-imports.d.ts

@@ -1,35 +1,40 @@
-import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
-import type { Instrument } from '#shared/types/instrument'
+import { defineStore } from 'pinia';
+import { ref, computed } from 'vue';
+import type { Instrument } from '#shared/types/instrument';
 
 export const useInstrumentStore = defineStore('instrument', () => {
-  const instruments = ref<Instrument[]>([])
-  const activeInstrument = ref<Instrument | null>(null)
-  const activeInstrumentId = ref('')
+  const { showError } = useToast();
+  const instruments = ref<Instrument[]>([]);
+  const activeInstrument = ref<Instrument | null>(null);
+  const activeInstrumentId = ref('');
 
   const currentTuning = computed(() => {
-    if (!activeInstrument.value) return null
-    return activeInstrument.value.tuning
-  })
+    if (!activeInstrument.value) return null;
+    return activeInstrument.value.tuning;
+  });
 
   const instrumentsByType = computed(() => {
-    const grouped: Record<string, Instrument[]> = {}
+    const grouped: Record<string, Instrument[]> = {};
     for (const inst of instruments.value) {
-      if (!grouped[inst.type]) grouped[inst.type] = []
-      grouped[inst.type]!.push(inst)
+      if (!grouped[inst.type]) grouped[inst.type] = [];
+      grouped[inst.type]!.push(inst);
     }
-    return grouped
-  })
+    return grouped;
+  });
 
   const fetchInstruments = async () => {
-    const res = await $fetch<{ data: Instrument[] }>('/api/instruments')
-    instruments.value = res.data
-  }
+    try {
+      const res = await $fetch<{ data: Instrument[] }>('/api/instruments');
+      instruments.value = res.data;
+    } catch {
+      showError('Failed to load instruments');
+    }
+  };
 
   const setActiveInstrument = (id: string) => {
-    activeInstrumentId.value = id
-    activeInstrument.value = instruments.value.find((i) => i.id === id) || null
-  }
+    activeInstrumentId.value = id;
+    activeInstrument.value = instruments.value.find((i) => i.id === id) || null;
+  };
 
   return {
     instruments,
@@ -39,5 +44,5 @@ export const useInstrumentStore = defineStore('instrument', () => {
     instrumentsByType,
     fetchInstruments,
     setActiveInstrument,
-  }
-})
+  };
+});

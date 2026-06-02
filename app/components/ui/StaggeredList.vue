@@ -1,26 +1,26 @@
 <script setup lang="ts">
 const props = withDefaults(
   defineProps<{
-    tag?: string
-    delay?: number
+    tag?: string;
+    delay?: number;
   }>(),
   {
     tag: 'div',
     delay: 50,
   },
-)
+);
 
 function onBeforeEnter(el: Element) {
-  const htmlEl = el as HTMLElement
-  const siblings = htmlEl.parentElement?.children
+  const htmlEl = el as HTMLElement;
+  const siblings = htmlEl.parentElement?.children;
   if (siblings) {
-    const index = Array.from(siblings).indexOf(el)
-    htmlEl.style.transitionDelay = `${index * props.delay}ms`
+    const index = Array.from(siblings).indexOf(el);
+    htmlEl.style.transitionDelay = `${index * props.delay}ms`;
   }
 }
 
 function onAfterEnter(el: Element) {
-  ;(el as HTMLElement).style.transitionDelay = ''
+  (el as HTMLElement).style.transitionDelay = '';
 }
 </script>
 

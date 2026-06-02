@@ -1,13 +1,13 @@
 <script setup lang="ts">
-const { noteToMidi } = useMusicTheory()
-const { playNote } = useInstrumentSound()
+const { noteToMidi } = useMusicTheory();
+const { playNote } = useInstrumentSound();
 
 const props = withDefaults(
   defineProps<{
-    startOctave?: number
-    octaves?: number
-    highlightedNotes?: string[]
-    rootNote?: string
+    startOctave?: number;
+    octaves?: number;
+    highlightedNotes?: string[];
+    rootNote?: string;
   }>(),
   {
     startOctave: 3,
@@ -15,51 +15,51 @@ const props = withDefaults(
     highlightedNotes: () => [],
     rootNote: '',
   },
-)
+);
 
 const emit = defineEmits<{
-  noteClick: [payload: { note: string; octave: number; midi: number }]
-}>()
+  noteClick: [payload: { note: string; octave: number; midi: number }];
+}>();
 
-const whiteNotes = ['C', 'D', 'E', 'F', 'G', 'A', 'B'] as const
-const blackNotes = ['C#', 'D#', '', 'F#', 'G#', 'A#', ''] as const
+const whiteNotes = ['C', 'D', 'E', 'F', 'G', 'A', 'B'] as const;
+const blackNotes = ['C#', 'D#', '', 'F#', 'G#', 'A#', ''] as const;
 const blackKeyOffsets: Record<string, number> = {
   'C#': 0.65,
   'D#': 1.75,
   'F#': 3.7,
   'G#': 4.75,
   'A#': 5.8,
-}
+};
 
-const whiteKeyWidth = 36
-const whiteKeyHeight = 140
-const blackKeyWidth = 22
-const blackKeyHeight = 90
+const whiteKeyWidth = 36;
+const whiteKeyHeight = 140;
+const blackKeyWidth = 22;
+const blackKeyHeight = 90;
 
-const totalWhiteKeys = computed(() => props.octaves * 7)
-const svgWidth = computed(() => totalWhiteKeys.value * whiteKeyWidth + 2)
-const svgHeight = whiteKeyHeight + 10
+const totalWhiteKeys = computed(() => props.octaves * 7);
+const svgWidth = computed(() => totalWhiteKeys.value * whiteKeyWidth + 2);
+const svgHeight = whiteKeyHeight + 10;
 
 interface KeyData {
-  note: string
-  octave: number
-  midi: number
-  x: number
-  y: number
-  w: number
-  h: number
-  isBlack: boolean
-  index: number
+  note: string;
+  octave: number;
+  midi: number;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  isBlack: boolean;
+  index: number;
 }
 
 const whiteKeys = computed<KeyData[]>(() => {
-  const keys: KeyData[] = []
-  let globalIndex = 0
+  const keys: KeyData[] = [];
+  let globalIndex = 0;
   for (let o = 0; o < props.octaves; o++) {
-    const octave = props.startOctave + o
+    const octave = props.startOctave + o;
     for (let i = 0; i < whiteNotes.length; i++) {
-      const note = whiteNotes[i]!
-      const keyIndex = o * 7 + i
+      const note = whiteNotes[i]!;
+      const keyIndex = o * 7 + i;
       keys.push({
         note,
         octave,
@@ -70,20 +70,20 @@ const whiteKeys = computed<KeyData[]>(() => {
         h: whiteKeyHeight,
         isBlack: false,
         index: globalIndex++,
-      })
+      });
     }
   }
-  return keys
-})
+  return keys;
+});
 
 const blackKeys = computed<KeyData[]>(() => {
-  const keys: KeyData[] = []
-  let globalIndex = whiteKeys.value.length
+  const keys: KeyData[] = [];
+  let globalIndex = whiteKeys.value.length;
   for (let o = 0; o < props.octaves; o++) {
-    const octave = props.startOctave + o
+    const octave = props.startOctave + o;
     for (const [note, offset] of Object.entries(blackKeyOffsets)) {
-      if (!note) continue
-      const x = (o * 7 + offset) * whiteKeyWidth - blackKeyWidth / 2 + whiteKeyWidth / 2
+      if (!note) continue;
+      const x = (o * 7 + offset) * whiteKeyWidth - blackKeyWidth / 2 + whiteKeyWidth / 2;
       keys.push({
         note,
         octave,
@@ -94,105 +94,109 @@ const blackKeys = computed<KeyData[]>(() => {
         h: blackKeyHeight,
         isBlack: true,
         index: globalIndex++,
-      })
+      });
     }
   }
-  return keys
-})
+  return keys;
+});
 
 // All keys combined for keyboard navigation
 const allKeys = computed(() => {
-  return [...whiteKeys.value, ...blackKeys.value].sort((a, b) => a.x - b.x)
-})
+  return [...whiteKeys.value, ...blackKeys.value].sort((a, b) => a.x - b.x);
+});
 
 // Keyboard navigation state
-const focusedKeyIndex = ref<number | null>(null)
-const keyboardRef = ref<SVGSVGElement | null>(null)
+const focusedKeyIndex = ref<number | null>(null);
+const keyboardRef = ref<SVGSVGElement | null>(null);
 
 function isHighlighted(note: string): boolean {
-  return props.highlightedNotes.includes(note)
+  return props.highlightedNotes.includes(note);
 }
 
 function isRoot(note: string): boolean {
-  return props.rootNote === note
+  return props.rootNote === note;
 }
 
 function getWhiteKeyFill(note: string): string {
-  if (isRoot(note)) return 'var(--color-primary)'
-  if (isHighlighted(note)) return 'var(--color-secondary)'
-  return 'var(--color-key-white)'
+  if (isRoot(note)) return 'var(--color-primary)';
+  if (isHighlighted(note)) return 'var(--color-secondary)';
+  return 'var(--color-key-white)';
 }
 
 function getBlackKeyFill(note: string): string {
-  if (isRoot(note)) return 'var(--color-primary)'
-  if (isHighlighted(note)) return 'var(--color-secondary)'
-  return 'var(--color-key-black)'
+  if (isRoot(note)) return 'var(--color-primary)';
+  if (isHighlighted(note)) return 'var(--color-secondary)';
+  return 'var(--color-key-black)';
 }
 
 function getTextFill(note: string, isBlack: boolean): string {
-  if (isRoot(note) || isHighlighted(note)) return 'var(--color-on-highlight)'
-  return isBlack ? 'var(--color-note-text-inv)' : 'var(--color-note-text)'
+  if (isRoot(note) || isHighlighted(note)) return 'var(--color-on-highlight)';
+  return isBlack ? 'var(--color-note-text-inv)' : 'var(--color-note-text)';
 }
 
-const pressedKey = ref<string | null>(null)
-const tappedKey = ref<string | null>(null)
+const pressedKey = ref<string | null>(null);
+const tappedKey = ref<string | null>(null);
 
 function keyId(key: KeyData): string {
-  return `${key.note}-${key.octave}`
+  return `${key.note}-${key.octave}`;
 }
 
 function handleMouseDown(key: KeyData) {
-  pressedKey.value = keyId(key)
+  pressedKey.value = keyId(key);
 }
 
 function handleMouseUp() {
-  pressedKey.value = null
+  pressedKey.value = null;
 }
 
 function handleClick(key: KeyData) {
-  tappedKey.value = keyId(key)
-  setTimeout(() => { tappedKey.value = null }, 250)
-  playNote(key.note, key.octave, 'piano')
-  emit('noteClick', { note: key.note, octave: key.octave, midi: key.midi })
+  tappedKey.value = keyId(key);
+  setTimeout(() => {
+    tappedKey.value = null;
+  }, 250);
+  playNote(key.note, key.octave, 'piano');
+  emit('noteClick', { note: key.note, octave: key.octave, midi: key.midi });
 }
 
 // Keyboard navigation
 function handleKeydown(event: KeyboardEvent) {
   if (focusedKeyIndex.value === null) {
-    focusedKeyIndex.value = 0
-    return
+    focusedKeyIndex.value = 0;
+    return;
   }
 
   switch (event.key) {
     case 'ArrowRight':
-      event.preventDefault()
-      focusedKeyIndex.value = Math.min(focusedKeyIndex.value + 1, allKeys.value.length - 1)
-      break
+      event.preventDefault();
+      focusedKeyIndex.value = Math.min(focusedKeyIndex.value + 1, allKeys.value.length - 1);
+      break;
     case 'ArrowLeft':
-      event.preventDefault()
-      focusedKeyIndex.value = Math.max(focusedKeyIndex.value - 1, 0)
-      break
+      event.preventDefault();
+      focusedKeyIndex.value = Math.max(focusedKeyIndex.value - 1, 0);
+      break;
     case 'Enter':
     case ' ':
-      event.preventDefault()
-      const currentKey = allKeys.value[focusedKeyIndex.value]
+      event.preventDefault();
+      const currentKey = allKeys.value[focusedKeyIndex.value];
       if (currentKey) {
-        handleClick(currentKey)
+        handleClick(currentKey);
       }
-      break
+      break;
     default:
-      return
+      return;
   }
 }
 
 function isFocused(key: KeyData): boolean {
-  return focusedKeyIndex.value !== null && allKeys.value[focusedKeyIndex.value]?.index === key.index
+  return (
+    focusedKeyIndex.value !== null && allKeys.value[focusedKeyIndex.value]?.index === key.index
+  );
 }
 
 function getKeyLabel(key: KeyData): string {
-  const state = isHighlighted(key.note) ? ' (highlighted)' : ''
-  const rootState = isRoot(key.note) ? ' (root note)' : ''
-  return `${key.note}${key.octave}${key.isBlack ? ' sharp' : ''}${state}${rootState}`
+  const state = isHighlighted(key.note) ? ' (highlighted)' : '';
+  const rootState = isRoot(key.note) ? ' (root note)' : '';
+  return `${key.note}${key.octave}${key.isBlack ? ' sharp' : ''}${state}${rootState}`;
 }
 </script>
 
@@ -221,7 +225,7 @@ function getKeyLabel(key: KeyData): string {
       @mousedown="handleMouseDown(key)"
       @mouseup="handleMouseUp"
       @mouseleave="handleMouseUp"
-      @focus="focusedKeyIndex = allKeys.findIndex(k => k.index === key.index)"
+      @focus="focusedKeyIndex = allKeys.findIndex((k) => k.index === key.index)"
     >
       <rect
         :x="key.x"
@@ -273,7 +277,7 @@ function getKeyLabel(key: KeyData): string {
       @mousedown="handleMouseDown(key)"
       @mouseup="handleMouseUp"
       @mouseleave="handleMouseUp"
-      @focus="focusedKeyIndex = allKeys.findIndex(k => k.index === key.index)"
+      @focus="focusedKeyIndex = allKeys.findIndex((k) => k.index === key.index)"
     >
       <rect
         :x="key.x"
@@ -306,22 +310,35 @@ function getKeyLabel(key: KeyData): string {
 
 <style scoped>
 .white-key {
-  transition: fill 0.1s, y 0.05s ease;
+  transition:
+    fill 0.1s,
+    y 0.05s ease;
 }
 .white-key:hover {
   filter: brightness(0.92);
 }
 .black-key {
-  transition: fill 0.1s, y 0.05s ease;
+  transition:
+    fill 0.1s,
+    y 0.05s ease;
 }
 .black-key:hover {
   filter: brightness(1.3);
 }
 
 @keyframes note-glow {
-  0%   { transform: scale(1); filter: none; }
-  50%  { transform: scale(1.08); filter: drop-shadow(0 0 4px rgba(136, 192, 208, 0.6)); }
-  100% { transform: scale(1); filter: none; }
+  0% {
+    transform: scale(1);
+    filter: none;
+  }
+  50% {
+    transform: scale(1.08);
+    filter: drop-shadow(0 0 4px rgba(136, 192, 208, 0.6));
+  }
+  100% {
+    transform: scale(1);
+    filter: none;
+  }
 }
 
 .note-tapped {
@@ -335,12 +352,17 @@ function getKeyLabel(key: KeyData): string {
 }
 
 @keyframes focus-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 /* Ensure focused elements are visible */
-g[tabindex="0"]:focus {
+g[tabindex='0']:focus {
   outline: none;
 }
 </style>

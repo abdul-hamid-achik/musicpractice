@@ -1,10 +1,10 @@
 <script setup lang="ts">
 withDefaults(
   defineProps<{
-    variant?: 'card' | 'text' | 'circle' | 'image'
-    width?: string
-    height?: string
-    lines?: number
+    variant?: 'card' | 'text' | 'circle' | 'image';
+    width?: string;
+    height?: string;
+    lines?: number;
   }>(),
   {
     variant: 'card',
@@ -12,7 +12,7 @@ withDefaults(
     height: 'auto',
     lines: 3,
   },
-)
+);
 </script>
 
 <template>

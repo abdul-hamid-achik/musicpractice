@@ -1,21 +1,21 @@
 <script setup lang="ts">
-import type { Scale } from '#shared/types/music-theory'
+import type { Scale } from '#shared/types/music-theory';
 
-const theoryStore = useTheoryStore()
+const theoryStore = useTheoryStore();
 
-const previewNotes = ref<string[]>([])
-const previewRoot = ref('C')
+const previewNotes = ref<string[]>([]);
+const previewRoot = ref('C');
 
-const isTheoryLoading = computed(() => !theoryStore.scales.length)
+const isTheoryLoading = computed(() => !theoryStore.scales.length);
 
 function handleScaleSelected(payload: { root: string; scale: Scale; notes: string[] }) {
-  previewRoot.value = payload.root
-  previewNotes.value = payload.notes
+  previewRoot.value = payload.root;
+  previewNotes.value = payload.notes;
 }
 
 onMounted(async () => {
-  if (!theoryStore.scales.length) await theoryStore.fetchScales()
-})
+  if (!theoryStore.scales.length) await theoryStore.fetchScales();
+});
 </script>
 
 <template>
@@ -23,7 +23,12 @@ onMounted(async () => {
     <h1 class="text-3xl font-bold text-text mb-6">Scale Explorer</h1>
 
     <!-- Loading State -->
-    <div v-if="isTheoryLoading" class="grid grid-cols-1 xl:grid-cols-3 gap-6" aria-busy="true" aria-label="Loading scales...">
+    <div
+      v-if="isTheoryLoading"
+      class="grid grid-cols-1 xl:grid-cols-3 gap-6"
+      aria-busy="true"
+      aria-label="Loading scales..."
+    >
       <!-- Skeleton for Scale Explorer -->
       <SkeletonCard variant="card" height="400px" class="xl:col-span-2" />
 
@@ -53,11 +58,7 @@ onMounted(async () => {
         </NordCard>
 
         <NordCard title="Guitar Preview">
-          <GuitarFretboard
-            :frets="12"
-            :highlighted-notes="previewNotes"
-            :root-note="previewRoot"
-          />
+          <GuitarFretboard :frets="12" :highlighted-notes="previewNotes" :root-note="previewRoot" />
         </NordCard>
       </div>
     </div>

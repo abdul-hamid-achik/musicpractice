@@ -1,28 +1,37 @@
-import { defineStore } from 'pinia'
-import { ref, watch } from 'vue'
+import { defineStore } from 'pinia';
+import { ref, watch, type Ref } from 'vue';
 
-const STORAGE_KEY = 'musicpractice-settings'
+const STORAGE_KEY = 'musicpractice-settings';
+
+interface Settings {
+  theme: string;
+  defaultInstrument: string;
+  defaultTempo: number;
+  showNotation: boolean;
+  showTablature: boolean;
+  volume: number;
+}
 
 export const useSettingsStore = defineStore('settings', () => {
-  const theme = ref('dark')
-  const defaultInstrument = ref('guitar')
-  const defaultTempo = ref(120)
-  const showNotation = ref(true)
-  const showTablature = ref(true)
-  const volume = ref(80)
+  const theme = ref('dark');
+  const defaultInstrument = ref('guitar');
+  const defaultTempo = ref(120);
+  const showNotation = ref(true);
+  const showTablature = ref(true);
+  const volume = ref(80);
 
   // Load saved settings from localStorage on init
   if (import.meta.client) {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY)
+      const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
-        const parsed = JSON.parse(saved)
-        if (parsed.theme) theme.value = parsed.theme
-        if (parsed.defaultInstrument) defaultInstrument.value = parsed.defaultInstrument
-        if (parsed.defaultTempo) defaultTempo.value = parsed.defaultTempo
-        if (parsed.showNotation !== undefined) showNotation.value = parsed.showNotation
-        if (parsed.showTablature !== undefined) showTablature.value = parsed.showTablature
-        if (parsed.volume !== undefined) volume.value = parsed.volume
+        const parsed = JSON.parse(saved) as Partial<Settings>;
+        if (parsed.theme) theme.value = parsed.theme;
+        if (parsed.defaultInstrument) defaultInstrument.value = parsed.defaultInstrument;
+        if (parsed.defaultTempo) defaultTempo.value = parsed.defaultTempo;
+        if (parsed.showNotation !== undefined) showNotation.value = parsed.showNotation;
+        if (parsed.showTablature !== undefined) showTablature.value = parsed.showTablature;
+        if (parsed.volume !== undefined) volume.value = parsed.volume;
       }
     } catch {
       // Ignore parse errors
@@ -30,7 +39,7 @@ export const useSettingsStore = defineStore('settings', () => {
   }
 
   const persist = () => {
-    if (!import.meta.client) return
+    if (!import.meta.client) return;
     localStorage.setItem(
       STORAGE_KEY,
       JSON.stringify({
@@ -41,35 +50,35 @@ export const useSettingsStore = defineStore('settings', () => {
         showTablature: showTablature.value,
         volume: volume.value,
       }),
-    )
-  }
+    );
+  };
 
   const updateSetting = <K extends keyof Settings>(key: K, value: Settings[K]) => {
-    const refs: Record<string, any> = {
+    const refs: Record<keyof Settings, Ref<Settings[keyof Settings]>> = {
       theme,
       defaultInstrument,
       defaultTempo,
       showNotation,
       showTablature,
       volume,
-    }
+    };
     if (refs[key]) {
-      refs[key].value = value
-      persist()
+      refs[key].value = value;
+      persist();
     }
-  }
+  };
 
   // Apply theme class to <html>
   function applyTheme() {
-    if (!import.meta.client) return
-    document.documentElement.classList.toggle('light', theme.value === 'light')
+    if (!import.meta.client) return;
+    document.documentElement.classList.toggle('light', theme.value === 'light');
   }
 
-  applyTheme()
-  watch(theme, applyTheme)
+  applyTheme();
+  watch(theme, applyTheme);
 
   // Auto-persist on any change
-  watch([theme, defaultInstrument, defaultTempo, showNotation, showTablature, volume], persist)
+  watch([theme, defaultInstrument, defaultTempo, showNotation, showTablature, volume], persist);
 
   return {
     theme,
@@ -79,14 +88,5 @@ export const useSettingsStore = defineStore('settings', () => {
     showTablature,
     volume,
     updateSetting,
-  }
-})
-
-interface Settings {
-  theme: string
-  defaultInstrument: string
-  defaultTempo: number
-  showNotation: boolean
-  showTablature: boolean
-  volume: number
-}
+  };
+});

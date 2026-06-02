@@ -1,32 +1,32 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted } from 'vue'
+import { onMounted, onUnmounted } from 'vue';
 
 const props = defineProps<{
-  message: string
-  type?: 'success' | 'error' | 'warning' | 'info'
-  duration?: number
-}>()
+  message: string;
+  type?: 'success' | 'error' | 'warning' | 'info';
+  duration?: number;
+}>();
 
 const emit = defineEmits<{
-  dismiss: []
-}>()
+  dismiss: [];
+}>();
 
 const typeClasses: Record<string, string> = {
   success: 'bg-success text-on-success',
   error: 'bg-error text-on-error',
   warning: 'bg-warning text-on-warning',
   info: 'bg-info text-on-info',
-}
+};
 
-let timer: ReturnType<typeof setTimeout>
+let timer: ReturnType<typeof setTimeout>;
 
 onMounted(() => {
-  timer = setTimeout(() => emit('dismiss'), props.duration || 3000)
-})
+  timer = setTimeout(() => emit('dismiss'), props.duration || 3000);
+});
 
 onUnmounted(() => {
-  clearTimeout(timer)
-})
+  clearTimeout(timer);
+});
 </script>
 
 <template>
@@ -45,9 +45,22 @@ onUnmounted(() => {
       :class="typeClasses[type || 'info']"
     >
       <span>{{ message }}</span>
-      <button class="ml-2 hover:opacity-80" aria-label="Dismiss notification" @click="emit('dismiss')">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+      <button
+        class="ml-2 hover:opacity-80"
+        aria-label="Dismiss notification"
+        @click="emit('dismiss')"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-4 w-4"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path
+            fill-rule="evenodd"
+            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+            clip-rule="evenodd"
+          />
         </svg>
       </button>
     </div>

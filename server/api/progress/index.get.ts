@@ -1,29 +1,29 @@
-import { eq, and, count } from 'drizzle-orm'
-import { userProgress, songs } from '../../db/schema'
-import { requireAuth } from '../../utils/auth'
-import { handleApiError, validateId } from '../../utils/errors'
+import { eq, and, count } from 'drizzle-orm';
+import { userProgress, songs } from '../../db/schema';
+import { requireAuth } from '../../utils/auth';
+import { handleApiError, validateId } from '../../utils/errors';
 
 export default defineEventHandler(async (event) => {
   try {
-    const user = await requireAuth(event)
-    const db = useDb()
-    const query = getQuery(event)
+    const user = await requireAuth(event);
+    const db = useDb();
+    const query = getQuery(event);
 
-    const page = Math.max(1, parseInt(query.page as string) || 1)
-    const limit = Math.min(100, Math.max(1, parseInt(query.limit as string) || 20))
-    const offset = (page - 1) * limit
+    const page = Math.max(1, parseInt(query.page as string) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(query.limit as string) || 20));
+    const offset = (page - 1) * limit;
 
-    const conditions = [eq(userProgress.userId, user.id)]
+    const conditions = [eq(userProgress.userId, user.id)];
 
     if (query.songId) {
-      validateId(query.songId as string, 'songId')
-      conditions.push(eq(userProgress.songId, query.songId as string))
+      validateId(query.songId as string, 'songId');
+      conditions.push(eq(userProgress.songId, query.songId as string));
     }
 
-    const where = and(...conditions)
+    const where = and(...conditions);
 
-    const [countRow] = await db.select({ count: count() }).from(userProgress).where(where)
-    const total = countRow!.count
+    const [countRow] = await db.select({ count: count() }).from(userProgress).where(where);
+    const total = countRow!.count;
 
     const data = await db
       .select({
@@ -40,10 +40,10 @@ export default defineEventHandler(async (event) => {
       .leftJoin(songs, eq(userProgress.songId, songs.id))
       .where(where)
       .limit(limit)
-      .offset(offset)
+      .offset(offset);
 
-    return { data, total, page, limit }
+    return { data, total, page, limit };
   } catch (error) {
-    return handleApiError(error, { route: '/api/progress', operation: 'list' })
+    return handleApiError(error, { route: '/api/progress', operation: 'list' });
   }
-})
+});

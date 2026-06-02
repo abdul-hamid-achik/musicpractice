@@ -1,4 +1,4 @@
-import type { Scale } from '../types/music-theory'
+import type { Scale } from '../types/music-theory';
 
 export const SCALES: Omit<Scale, 'id'>[] = [
   // Diatonic
@@ -220,4 +220,4 @@ export const SCALES: Omit<Scale, 'id'>[] = [
     category: 'exotic',
     description: 'Rare scale created by Verdi. Mysterious and ambiguous.',
   },
-]
+];

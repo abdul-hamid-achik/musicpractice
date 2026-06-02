@@ -15,14 +15,14 @@ The MusicPractice API uses **JWT cookie-based authentication**.
 
 ### Cookie Details
 
-| Property | Value |
-|----------|-------|
-| **Cookie Name** | `auth-token` |
-| **Token Expiration** | 7 days |
-| **HttpOnly** | `true` (not accessible via JavaScript) |
-| **Secure** | `true` in production, `false` in development |
-| **SameSite** | `lax` |
-| **Path** | `/` |
+| Property             | Value                                        |
+| -------------------- | -------------------------------------------- |
+| **Cookie Name**      | `auth-token`                                 |
+| **Token Expiration** | 7 days                                       |
+| **HttpOnly**         | `true` (not accessible via JavaScript)       |
+| **Secure**           | `true` in production, `false` in development |
+| **SameSite**         | `lax`                                        |
+| **Path**             | `/`                                          |
 
 ### Authentication Flow
 
@@ -51,6 +51,7 @@ Authenticate a user and receive an authentication cookie.
 **Authentication:** Not required
 
 **Request Body:**
+
 ```json
 {
   "identifier": "string (email or username)",
@@ -59,6 +60,7 @@ Authenticate a user and receive an authentication cookie.
 ```
 
 **Response:**
+
 ```json
 {
   "id": "uuid",
@@ -72,10 +74,12 @@ Authenticate a user and receive an authentication cookie.
 ```
 
 **Errors:**
+
 - `400`: Missing required fields
 - `401`: Invalid credentials
 
 **Example:**
+
 ```bash
 curl -X POST /api/auth/login \
   -H "Content-Type: application/json" \
@@ -91,6 +95,7 @@ Create a new user account.
 **Authentication:** Not required
 
 **Request Body:**
+
 ```json
 {
   "email": "string (valid email format)",
@@ -101,6 +106,7 @@ Create a new user account.
 ```
 
 **Response:**
+
 ```json
 {
   "id": "uuid",
@@ -114,10 +120,12 @@ Create a new user account.
 ```
 
 **Errors:**
+
 - `400`: Invalid email format, username length, or password length
 - `409`: Email or username already exists
 
 **Example:**
+
 ```bash
 curl -X POST /api/auth/register \
   -H "Content-Type: application/json" \
@@ -133,6 +141,7 @@ Clear the authentication cookie and log out the user.
 **Authentication:** Not required (but typically called when authenticated)
 
 **Response:**
+
 ```json
 {
   "success": true
@@ -140,6 +149,7 @@ Clear the authentication cookie and log out the user.
 ```
 
 **Example:**
+
 ```bash
 curl -X POST /api/auth/logout
 ```
@@ -153,6 +163,7 @@ Get the currently authenticated user's profile.
 **Authentication:** Required
 
 **Response:**
+
 ```json
 {
   "id": "uuid",
@@ -166,9 +177,11 @@ Get the currently authenticated user's profile.
 ```
 
 **Errors:**
+
 - `401`: Not authenticated or invalid token
 
 **Example:**
+
 ```bash
 curl /api/auth/me
 ```
@@ -193,6 +206,7 @@ List practice sessions with pagination and filtering.
 | `endDate` | ISO date | No | - | Filter sessions until this date |
 
 **Response:**
+
 ```json
 {
   "data": [
@@ -219,10 +233,12 @@ List practice sessions with pagination and filtering.
 ```
 
 **Errors:**
+
 - `400`: Invalid instrumentId format
 - `401`: Not authenticated
 
 **Example:**
+
 ```bash
 curl "/api/sessions?page=1&limit=10&instrumentId=abc-123"
 ```
@@ -236,6 +252,7 @@ Create a new practice session.
 **Authentication:** Required
 
 **Request Body:**
+
 ```json
 {
   "instrumentId": "uuid (required)",
@@ -250,6 +267,7 @@ Create a new practice session.
 ```
 
 **Response:**
+
 ```json
 {
   "id": "uuid",
@@ -267,14 +285,17 @@ Create a new practice session.
 ```
 
 **Side Effects:**
+
 - Updates user's streak (current and longest)
 - Updates song progress if `songId` is provided
 
 **Errors:**
+
 - `400`: Missing required fields, invalid UUID format, invalid number values
 - `401`: Not authenticated
 
 **Example:**
+
 ```bash
 curl -X POST /api/sessions \
   -H "Content-Type: application/json" \
@@ -301,6 +322,7 @@ Get a specific practice session by ID.
 | `id` | uuid | Session ID |
 
 **Response:**
+
 ```json
 {
   "id": "uuid",
@@ -318,11 +340,13 @@ Get a specific practice session by ID.
 ```
 
 **Errors:**
+
 - `400`: Invalid session ID format
 - `401`: Not authenticated
 - `404`: Session not found
 
 **Example:**
+
 ```bash
 curl /api/sessions/abc-123-def
 ```
@@ -341,6 +365,7 @@ Update a practice session.
 | `id` | uuid | Session ID |
 
 **Request Body:**
+
 ```json
 {
   "endedAt": "ISO 8601 datetime | null (optional)",
@@ -352,6 +377,7 @@ Update a practice session.
 ```
 
 **Response:**
+
 ```json
 {
   "id": "uuid",
@@ -368,11 +394,13 @@ Update a practice session.
 ```
 
 **Errors:**
+
 - `400`: Invalid ID format, invalid field values, no valid fields to update
 - `401`: Not authenticated
 - `404`: Session not found
 
 **Example:**
+
 ```bash
 curl -X PUT /api/sessions/abc-123-def \
   -H "Content-Type: application/json" \
@@ -393,6 +421,7 @@ Delete a practice session.
 | `id` | uuid | Session ID |
 
 **Response:**
+
 ```json
 {
   "message": "Session deleted",
@@ -401,11 +430,13 @@ Delete a practice session.
 ```
 
 **Errors:**
+
 - `400`: Invalid session ID format
 - `401`: Not authenticated
 - `404`: Session not found
 
 **Example:**
+
 ```bash
 curl -X DELETE /api/sessions/abc-123-def
 ```
@@ -428,6 +459,7 @@ List practice goals with pagination and filtering.
 | `isActive` | boolean | No | - | Filter by active status |
 
 **Response:**
+
 ```json
 {
   "data": [
@@ -450,9 +482,11 @@ List practice goals with pagination and filtering.
 ```
 
 **Errors:**
+
 - `401`: Not authenticated
 
 **Example:**
+
 ```bash
 curl "/api/goals?isActive=true&page=1"
 ```
@@ -466,6 +500,7 @@ Create a new practice goal.
 **Authentication:** Required
 
 **Request Body:**
+
 ```json
 {
   "title": "string (required)",
@@ -476,6 +511,7 @@ Create a new practice goal.
 ```
 
 **Response:**
+
 ```json
 {
   "id": "uuid",
@@ -490,10 +526,12 @@ Create a new practice goal.
 ```
 
 **Errors:**
+
 - `400`: Missing required fields, invalid instrumentId, invalid targetMinutesPerWeek
 - `401`: Not authenticated
 
 **Example:**
+
 ```bash
 curl -X POST /api/goals \
   -H "Content-Type: application/json" \
@@ -519,6 +557,7 @@ Get a specific goal by ID.
 | `id` | uuid | Goal ID |
 
 **Response:**
+
 ```json
 {
   "id": "uuid",
@@ -534,11 +573,13 @@ Get a specific goal by ID.
 ```
 
 **Errors:**
+
 - `400`: Invalid goal ID format
 - `401`: Not authenticated
 - `404`: Goal not found
 
 **Example:**
+
 ```bash
 curl /api/goals/abc-123-def
 ```
@@ -557,6 +598,7 @@ Update a practice goal.
 | `id` | uuid | Goal ID |
 
 **Request Body:**
+
 ```json
 {
   "title": "string (optional)",
@@ -568,6 +610,7 @@ Update a practice goal.
 ```
 
 **Response:**
+
 ```json
 {
   "id": "uuid",
@@ -582,11 +625,13 @@ Update a practice goal.
 ```
 
 **Errors:**
+
 - `400`: Invalid ID format, invalid field values, no valid fields to update
 - `401`: Not authenticated
 - `404`: Goal not found
 
 **Example:**
+
 ```bash
 curl -X PUT /api/goals/abc-123-def \
   -H "Content-Type: application/json" \
@@ -607,6 +652,7 @@ Delete a practice goal.
 | `id` | uuid | Goal ID |
 
 **Response:**
+
 ```json
 {
   "message": "Goal deleted",
@@ -615,11 +661,13 @@ Delete a practice goal.
 ```
 
 **Errors:**
+
 - `400`: Invalid goal ID format
 - `401`: Not authenticated
 - `404`: Goal not found
 
 **Example:**
+
 ```bash
 curl -X DELETE /api/goals/abc-123-def
 ```
@@ -644,6 +692,7 @@ List songs with pagination, search, and filtering.
 | `difficulty` | string | No | - | Filter: `beginner`, `intermediate`, `advanced`, `expert` |
 
 **Response:**
+
 ```json
 {
   "data": [
@@ -666,9 +715,11 @@ List songs with pagination, search, and filtering.
 ```
 
 **Errors:**
+
 - `400`: Invalid instrumentType or difficulty value
 
 **Example:**
+
 ```bash
 curl "/api/songs?search=beatles&difficulty=intermediate&instrumentType=guitar"
 ```
@@ -682,6 +733,7 @@ Create a new song (admin/teacher function).
 **Authentication:** Not required (consider adding auth in production)
 
 **Request Body:**
+
 ```json
 {
   "title": "string (required)",
@@ -695,6 +747,7 @@ Create a new song (admin/teacher function).
 ```
 
 **Response:**
+
 ```json
 {
   "id": "uuid",
@@ -710,9 +763,11 @@ Create a new song (admin/teacher function).
 ```
 
 **Errors:**
+
 - `400`: Missing required fields, invalid enum values
 
 **Example:**
+
 ```bash
 curl -X POST /api/songs \
   -H "Content-Type: application/json" \
@@ -740,6 +795,7 @@ Get a specific song by ID.
 | `id` | uuid | Song ID |
 
 **Response:**
+
 ```json
 {
   "id": "uuid",
@@ -755,10 +811,12 @@ Get a specific song by ID.
 ```
 
 **Errors:**
+
 - `400`: Invalid song ID format
 - `404`: Song not found
 
 **Example:**
+
 ```bash
 curl /api/songs/abc-123-def
 ```
@@ -777,6 +835,7 @@ Update a song.
 | `id` | uuid | Song ID |
 
 **Request Body:**
+
 ```json
 {
   "title": "string (optional)",
@@ -790,6 +849,7 @@ Update a song.
 ```
 
 **Response:**
+
 ```json
 {
   "id": "uuid",
@@ -805,10 +865,12 @@ Update a song.
 ```
 
 **Errors:**
+
 - `400`: Invalid ID format, invalid enum values, no valid fields to update
 - `404`: Song not found
 
 **Example:**
+
 ```bash
 curl -X PUT /api/songs/abc-123-def \
   -H "Content-Type: application/json" \
@@ -829,6 +891,7 @@ Delete a song.
 | `id` | uuid | Song ID |
 
 **Response:**
+
 ```json
 {
   "message": "Song deleted",
@@ -837,10 +900,12 @@ Delete a song.
 ```
 
 **Errors:**
+
 - `400`: Invalid song ID format
 - `404`: Song not found
 
 **Example:**
+
 ```bash
 curl -X DELETE /api/songs/abc-123-def
 ```
@@ -863,6 +928,7 @@ List user progress for songs.
 | `songId` | uuid | No | - | Filter by specific song |
 
 **Response:**
+
 ```json
 {
   "data": [
@@ -884,174 +950,14 @@ List user progress for songs.
 ```
 
 **Errors:**
+
 - `400`: Invalid songId format
 - `401`: Not authenticated
 
 **Example:**
+
 ```bash
 curl "/api/progress?songId=abc-123"
-```
-
----
-
-#### POST /progress
-
-Create a new progress entry for a song.
-
-**Authentication:** Required
-
-**Request Body:**
-```json
-{
-  "songId": "uuid (required)",
-  "completionPercent": "number (optional, 0-100, default: 0)",
-  "maxTempoBpm": "number (optional, positive integer)",
-  "lastPracticedAt": "ISO 8601 datetime (optional)",
-  "practiceCount": "number (optional, non-negative integer, default: 0)"
-}
-```
-
-**Response:**
-```json
-{
-  "id": "uuid",
-  "userId": "uuid",
-  "songId": "uuid",
-  "completionPercent": "number",
-  "maxTempoBpm": "number | null",
-  "lastPracticedAt": "ISO 8601 datetime | null",
-  "practiceCount": "number"
-}
-```
-
-**Errors:**
-- `400`: Missing songId, invalid field values
-- `401`: Not authenticated
-
-**Example:**
-```bash
-curl -X POST /api/progress \
-  -H "Content-Type: application/json" \
-  -d '{
-    "songId": "abc-123-def",
-    "completionPercent": 25,
-    "maxTempoBpm": 100
-  }'
-```
-
----
-
-#### GET /progress/:id
-
-Get a specific progress entry by ID.
-
-**Authentication:** Required
-
-**Path Parameters:**
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `id` | uuid | Progress ID |
-
-**Response:**
-```json
-{
-  "id": "uuid",
-  "userId": "uuid",
-  "songId": "uuid",
-  "completionPercent": "number",
-  "maxTempoBpm": "number | null",
-  "lastPracticedAt": "ISO 8601 datetime | null",
-  "practiceCount": "number"
-}
-```
-
-**Errors:**
-- `400`: Invalid progress ID format
-- `401`: Not authenticated
-- `404`: Progress not found
-
-**Example:**
-```bash
-curl /api/progress/abc-123-def
-```
-
----
-
-#### PUT /progress/:id
-
-Update a progress entry.
-
-**Authentication:** Required
-
-**Path Parameters:**
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `id` | uuid | Progress ID |
-
-**Request Body:**
-```json
-{
-  "completionPercent": "number (optional, 0-100)",
-  "maxTempoBpm": "number (optional, positive integer)",
-  "lastPracticedAt": "ISO 8601 datetime (optional)",
-  "practiceCount": "number (optional, non-negative integer)"
-}
-```
-
-**Response:**
-```json
-{
-  "id": "uuid",
-  "userId": "uuid",
-  "songId": "uuid",
-  "completionPercent": "number",
-  "maxTempoBpm": "number | null",
-  "lastPracticedAt": "ISO 8601 datetime | null",
-  "practiceCount": "number"
-}
-```
-
-**Errors:**
-- `400`: Invalid ID format, invalid field values, no valid fields to update
-- `401`: Not authenticated
-- `404`: Progress not found
-
-**Example:**
-```bash
-curl -X PUT /api/progress/abc-123-def \
-  -H "Content-Type: application/json" \
-  -d '{"completionPercent": 50, "maxTempoBpm": 120}'
-```
-
----
-
-#### DELETE /progress/:id
-
-Delete a progress entry.
-
-**Authentication:** Required
-
-**Path Parameters:**
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `id` | uuid | Progress ID |
-
-**Response:**
-```json
-{
-  "message": "Progress deleted",
-  "id": "uuid"
-}
-```
-
-**Errors:**
-- `400`: Invalid progress ID format
-- `401`: Not authenticated
-- `404`: Progress not found
-
-**Example:**
-```bash
-curl -X DELETE /api/progress/abc-123-def
 ```
 
 ---
@@ -1068,6 +974,7 @@ Upsert (create or update) progress for a specific song.
 | `songId` | uuid | Song ID |
 
 **Request Body:**
+
 ```json
 {
   "completionPercent": "number (optional, 0-100)",
@@ -1078,6 +985,7 @@ Upsert (create or update) progress for a specific song.
 ```
 
 **Response:**
+
 ```json
 {
   "id": "uuid",
@@ -1091,10 +999,12 @@ Upsert (create or update) progress for a specific song.
 ```
 
 **Errors:**
+
 - `400`: Invalid songId format, invalid field values
 - `401`: Not authenticated
 
 **Example:**
+
 ```bash
 curl -X PUT /api/progress/abc-123-def \
   -H "Content-Type: application/json" \
@@ -1119,6 +1029,7 @@ List available instruments.
 | `type` | string | No | - | Filter: `guitar`, `bass`, `piano`, `violin` |
 
 **Response:**
+
 ```json
 {
   "data": [
@@ -1139,9 +1050,11 @@ List available instruments.
 ```
 
 **Errors:**
+
 - `400`: Invalid type value
 
 **Example:**
+
 ```bash
 curl "/api/instruments?type=guitar"
 ```
@@ -1160,6 +1073,7 @@ Get a specific instrument by ID.
 | `id` | uuid | Instrument ID |
 
 **Response:**
+
 ```json
 {
   "id": "uuid",
@@ -1173,10 +1087,12 @@ Get a specific instrument by ID.
 ```
 
 **Errors:**
+
 - `400`: Invalid instrument ID format
 - `404`: Instrument not found
 
 **Example:**
+
 ```bash
 curl /api/instruments/abc-123-def
 ```
@@ -1195,6 +1111,7 @@ Delete an instrument.
 | `id` | uuid | Instrument ID |
 
 **Response:**
+
 ```json
 {
   "message": "Instrument deleted",
@@ -1203,11 +1120,13 @@ Delete an instrument.
 ```
 
 **Errors:**
+
 - `400`: Invalid instrument ID format
 - `404`: Instrument not found
 - `409`: Cannot delete (referenced by sessions or goals)
 
 **Example:**
+
 ```bash
 curl -X DELETE /api/instruments/abc-123-def
 ```
@@ -1230,6 +1149,7 @@ List music scales.
 | `category` | string | No | - | Filter by category |
 
 **Response:**
+
 ```json
 {
   "data": [
@@ -1248,9 +1168,11 @@ List music scales.
 ```
 
 **Errors:**
+
 - `400`: Invalid page/limit values
 
 **Example:**
+
 ```bash
 curl "/api/scales?category=major"
 ```
@@ -1269,6 +1191,7 @@ Get a specific scale by ID.
 | `id` | uuid | Scale ID |
 
 **Response:**
+
 ```json
 {
   "id": "uuid",
@@ -1280,10 +1203,12 @@ Get a specific scale by ID.
 ```
 
 **Errors:**
+
 - `400`: Invalid scale ID format
 - `404`: Scale not found
 
 **Example:**
+
 ```bash
 curl /api/scales/abc-123-def
 ```
@@ -1304,6 +1229,7 @@ List music chords.
 | `instrumentType` | string | No | - | Filter: `guitar`, `bass`, `piano`, `violin` |
 
 **Response:**
+
 ```json
 {
   "data": [
@@ -1323,9 +1249,11 @@ List music chords.
 ```
 
 **Errors:**
+
 - `400`: Invalid instrumentType value
 
 **Example:**
+
 ```bash
 curl "/api/chords?instrumentType=guitar"
 ```
@@ -1344,6 +1272,7 @@ Get a specific chord by ID.
 | `id` | uuid | Chord ID |
 
 **Response:**
+
 ```json
 {
   "id": "uuid",
@@ -1356,10 +1285,12 @@ Get a specific chord by ID.
 ```
 
 **Errors:**
+
 - `400`: Invalid chord ID format
 - `404`: Chord not found
 
 **Example:**
+
 ```bash
 curl /api/chords/abc-123-def
 ```
@@ -1381,6 +1312,7 @@ List user's ear training scores.
 | `limit` | number | No | 20 | Max results (max: 50) |
 
 **Response:**
+
 ```json
 {
   "data": [
@@ -1398,10 +1330,12 @@ List user's ear training scores.
 ```
 
 **Errors:**
+
 - `400`: Invalid type value
 - `401`: Not authenticated
 
 **Example:**
+
 ```bash
 curl "/api/ear-training?type=intervals&limit=10"
 ```
@@ -1415,6 +1349,7 @@ Save an ear training exercise score.
 **Authentication:** Required
 
 **Request Body:**
+
 ```json
 {
   "exerciseType": "intervals | notes (required)",
@@ -1425,6 +1360,7 @@ Save an ear training exercise score.
 ```
 
 **Response:**
+
 ```json
 {
   "id": "uuid",
@@ -1438,10 +1374,12 @@ Save an ear training exercise score.
 ```
 
 **Errors:**
+
 - `400`: Invalid exerciseType, invalid correct/total values
 - `401`: Not authenticated
 
 **Example:**
+
 ```bash
 curl -X POST /api/ear-training \
   -H "Content-Type: application/json" \
@@ -1457,13 +1395,18 @@ curl -X POST /api/ear-training \
 
 ### Stats
 
-#### GET /stats/weekly
+#### GET /stats/daily
 
-Get weekly practice statistics (last 14 days).
+Get daily practice statistics for the last N days (default 14, min 1, max 90).
 
 **Authentication:** Required
 
+**Query Parameters:**
+
+- `days` (optional): Number of days to include, between 1 and 90. Defaults to 14.
+
 **Response:**
+
 ```json
 [
   {
@@ -1480,16 +1423,21 @@ Get weekly practice statistics (last 14 days).
 ```
 
 **Notes:**
-- Returns exactly 14 days of data
+
+- Returns exactly `days` days of data (default 14)
 - Missing days are filled with zero values
 - Dates are in `YYYY-MM-DD` format
 
 **Errors:**
+
+- `400`: `days` is not an integer
 - `401`: Not authenticated
 
 **Example:**
+
 ```bash
-curl /api/stats/weekly
+curl /api/stats/daily
+curl /api/stats/daily?days=30
 ```
 
 ---
@@ -1501,6 +1449,7 @@ Get practice heatmap data (last 90 days).
 **Authentication:** Required
 
 **Response:**
+
 ```json
 [
   {
@@ -1517,14 +1466,17 @@ Get practice heatmap data (last 90 days).
 ```
 
 **Notes:**
+
 - Returns only days with practice sessions (no zero-filling)
 - Covers the last 90 days
 - Dates are in `YYYY-MM-DD` format
 
 **Errors:**
+
 - `401`: Not authenticated
 
 **Example:**
+
 ```bash
 curl /api/stats/heatmap
 ```
@@ -1540,6 +1492,7 @@ Get user's practice streak information.
 **Authentication:** Required
 
 **Response:**
+
 ```json
 {
   "currentStreak": "number (days)",
@@ -1550,10 +1503,12 @@ Get user's practice streak information.
 ```
 
 **Errors:**
+
 - `401`: Not authenticated
 - `404`: User not found
 
 **Example:**
+
 ```bash
 curl /api/streaks
 ```
@@ -1575,6 +1530,7 @@ List user's metronome presets.
 | `limit` | number | No | 20 | Items per page (max: 100) |
 
 **Response:**
+
 ```json
 {
   "data": [
@@ -1596,9 +1552,11 @@ List user's metronome presets.
 ```
 
 **Errors:**
+
 - `401`: Not authenticated
 
 **Example:**
+
 ```bash
 curl "/api/metronome-presets?page=1"
 ```
@@ -1612,6 +1570,7 @@ Create a new metronome preset.
 **Authentication:** Required
 
 **Request Body:**
+
 ```json
 {
   "name": "string (required)",
@@ -1624,6 +1583,7 @@ Create a new metronome preset.
 ```
 
 **Response:**
+
 ```json
 {
   "id": "uuid",
@@ -1638,10 +1598,12 @@ Create a new metronome preset.
 ```
 
 **Errors:**
+
 - `400`: Missing required fields, invalid number values
 - `401`: Not authenticated
 
 **Example:**
+
 ```bash
 curl -X POST /api/metronome-presets \
   -H "Content-Type: application/json" \
@@ -1669,6 +1631,7 @@ Update a metronome preset.
 | `id` | uuid | Preset ID |
 
 **Request Body:**
+
 ```json
 {
   "name": "string (optional)",
@@ -1681,6 +1644,7 @@ Update a metronome preset.
 ```
 
 **Response:**
+
 ```json
 {
   "id": "uuid",
@@ -1695,11 +1659,13 @@ Update a metronome preset.
 ```
 
 **Errors:**
+
 - `400`: Invalid ID format, invalid field values, no valid fields to update
 - `401`: Not authenticated
 - `404`: Preset not found
 
 **Example:**
+
 ```bash
 curl -X PUT /api/metronome-presets/abc-123-def \
   -H "Content-Type: application/json" \
@@ -1720,6 +1686,7 @@ Delete a metronome preset.
 | `id` | uuid | Preset ID |
 
 **Response:**
+
 ```json
 {
   "message": "Metronome preset deleted",
@@ -1728,11 +1695,13 @@ Delete a metronome preset.
 ```
 
 **Errors:**
+
 - `400`: Invalid preset ID format
 - `401`: Not authenticated
 - `404`: Preset not found
 
 **Example:**
+
 ```bash
 curl -X DELETE /api/metronome-presets/abc-123-def
 ```
@@ -1748,6 +1717,7 @@ Get the current user's account information.
 **Authentication:** Required
 
 **Response:**
+
 ```json
 {
   "id": "uuid",
@@ -1764,9 +1734,11 @@ Get the current user's account information.
 ```
 
 **Errors:**
+
 - `401`: Not authenticated
 
 **Example:**
+
 ```bash
 curl /api/account
 ```
@@ -1780,6 +1752,7 @@ Update user profile information.
 **Authentication:** Required
 
 **Request Body:**
+
 ```json
 {
   "email": "string (optional, valid email format)",
@@ -1789,10 +1762,12 @@ Update user profile information.
 ```
 
 **Notes:**
+
 - At least one field is required
 - Email and username must be unique
 
 **Response:**
+
 ```json
 {
   "id": "uuid",
@@ -1806,11 +1781,13 @@ Update user profile information.
 ```
 
 **Errors:**
+
 - `400`: No fields provided, invalid email format, invalid username format/name length
 - `401`: Not authenticated
 - `409`: Email or username already in use
 
 **Example:**
+
 ```bash
 curl -X PUT /api/account/profile \
   -H "Content-Type: application/json" \
@@ -1826,6 +1803,7 @@ Change the user's password.
 **Authentication:** Required
 
 **Request Body:**
+
 ```json
 {
   "currentPassword": "string (required)",
@@ -1834,6 +1812,7 @@ Change the user's password.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -1842,11 +1821,13 @@ Change the user's password.
 ```
 
 **Errors:**
+
 - `400`: Missing required fields, new password too short
 - `401`: Current password incorrect
 - `404`: User not found
 
 **Example:**
+
 ```bash
 curl -X POST /api/account/change-password \
   -H "Content-Type: application/json" \
@@ -1865,6 +1846,7 @@ Delete the user's account.
 **Authentication:** Required
 
 **Request Body:**
+
 ```json
 {
   "confirmation": "DELETE (required, must be exactly this string)"
@@ -1872,10 +1854,12 @@ Delete the user's account.
 ```
 
 **Notes:**
+
 - Account deletion cascades to related records (sessions, goals, progress, etc.)
 - Authentication cookie is cleared after deletion
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -1884,11 +1868,13 @@ Delete the user's account.
 ```
 
 **Errors:**
+
 - `400`: Missing or incorrect confirmation
 - `401`: Not authenticated
 - `500`: Failed to delete account
 
 **Example:**
+
 ```bash
 curl -X DELETE /api/account \
   -H "Content-Type: application/json" \
@@ -1914,15 +1900,15 @@ All API errors follow a standardized format:
 
 ### Common HTTP Status Codes
 
-| Code | Description |
-|------|-------------|
-| `200` | Success |
-| `400` | Bad Request - Invalid input or missing required fields |
-| `401` | Unauthorized - Authentication required or invalid token |
-| `403` | Forbidden - Access denied |
-| `404` | Not Found - Resource does not exist |
+| Code  | Description                                                  |
+| ----- | ------------------------------------------------------------ |
+| `200` | Success                                                      |
+| `400` | Bad Request - Invalid input or missing required fields       |
+| `401` | Unauthorized - Authentication required or invalid token      |
+| `403` | Forbidden - Access denied                                    |
+| `404` | Not Found - Resource does not exist                          |
 | `409` | Conflict - Resource already exists or foreign key constraint |
-| `500` | Internal Server Error |
+| `500` | Internal Server Error                                        |
 
 ### Validation Error Details
 
@@ -1946,10 +1932,10 @@ For validation errors (400), the response may include a `details` object with fi
 
 All list endpoints support pagination with consistent parameters:
 
-| Parameter | Type | Default | Max | Description |
-|-----------|------|---------|-----|-------------|
-| `page` | number | 1 | - | Page number (1-indexed) |
-| `limit` | number | 20 | 100 | Items per page |
+| Parameter | Type   | Default | Max | Description             |
+| --------- | ------ | ------- | --- | ----------------------- |
+| `page`    | number | 1       | -   | Page number (1-indexed) |
+| `limit`   | number | 20      | 100 | Items per page          |
 
 ### Pagination Response
 
@@ -1997,6 +1983,7 @@ Currently, the API does not implement rate limiting. In production environments,
 ## UUID Format
 
 All resource IDs use UUID format:
+
 ```
 xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 ```
@@ -2010,6 +1997,7 @@ Invalid UUID formats will result in `400 Bad Request` errors.
 ## Date/Time Format
 
 All dates and times use ISO 8601 format:
+
 - Full datetime: `2024-01-15T10:30:00.000Z`
 - Date only: `2024-01-15`
 

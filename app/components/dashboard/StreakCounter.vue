@@ -1,22 +1,27 @@
 <script setup lang="ts">
 interface StreakData {
-  currentStreak: number
-  longestStreak: number
-  practicedToday: boolean
+  currentStreak: number;
+  longestStreak: number;
+  practicedToday: boolean;
 }
 
-const { data: streak, status } = await useFetch<StreakData>('/api/streaks')
+const { data: streak, status } = await useFetch<StreakData>('/api/streaks');
 
-const isLoaded = computed(() => status.value === 'success')
-const isLoading = computed(() => status.value === 'pending')
-const currentStreak = computed(() => streak.value?.currentStreak ?? 0)
-const longestStreak = computed(() => streak.value?.longestStreak ?? 0)
-const practicedToday = computed(() => streak.value?.practicedToday ?? false)
+const isLoaded = computed(() => status.value === 'success');
+const isLoading = computed(() => status.value === 'pending');
+const currentStreak = computed(() => streak.value?.currentStreak ?? 0);
+const longestStreak = computed(() => streak.value?.longestStreak ?? 0);
+const practicedToday = computed(() => streak.value?.practicedToday ?? false);
 </script>
 
 <template>
   <!-- Loading Skeleton -->
-  <div v-if="isLoading" class="bg-card border border-border rounded-lg p-4 animate-pulse" aria-busy="true" aria-label="Loading streak...">
+  <div
+    v-if="isLoading"
+    class="bg-card border border-border rounded-lg p-4 animate-pulse"
+    aria-busy="true"
+    aria-label="Loading streak..."
+  >
     <div class="flex items-center gap-4">
       <NordSkeleton variant="circle" width="48px" height="48px" />
       <div class="flex-1">
@@ -73,7 +78,9 @@ const practicedToday = computed(() => streak.value?.practicedToday ?? false)
   border-radius: var(--radius-lg);
   background: var(--color-card);
   border: 1px solid var(--color-border);
-  transition: border-color 0.3s, box-shadow 0.3s;
+  transition:
+    border-color 0.3s,
+    box-shadow 0.3s;
 }
 
 .streak-counter.streak-active {
@@ -172,8 +179,14 @@ const practicedToday = computed(() => streak.value?.practicedToday ?? false)
 }
 
 @keyframes flicker {
-  0% { transform: scale(1) rotate(-1deg); }
-  50% { transform: scale(1.05) rotate(1deg); }
-  100% { transform: scale(1) rotate(-0.5deg); }
+  0% {
+    transform: scale(1) rotate(-1deg);
+  }
+  50% {
+    transform: scale(1.05) rotate(1deg);
+  }
+  100% {
+    transform: scale(1) rotate(-0.5deg);
+  }
 }
 </style>

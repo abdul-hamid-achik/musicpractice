@@ -1,156 +1,174 @@
 <script setup lang="ts">
 interface UserData {
-  email: string
-  username: string
-  name: string
+  email: string;
+  username: string;
+  name: string;
 }
 
-definePageMeta({ middleware: 'auth' })
+interface ApiError {
+  data?: {
+    message?: string;
+    details?: Record<string, string[]>;
+  };
+}
 
-const auth = useAuth()
-const { showSuccess, showError } = useToast()
+function getApiErrorMessage(error: unknown, fallback: string): string {
+  const apiErr = error as ApiError;
+  return apiErr.data?.message ?? fallback;
+}
+
+function getApiErrorDetails(error: unknown): Record<string, string[]> | null {
+  const apiErr = error as ApiError;
+  return apiErr.data?.details ?? null;
+}
+
+definePageMeta({ middleware: 'auth' });
+
+const auth = useAuth();
+const { showSuccess, showError } = useToast();
 
 // Loading state
-const isLoading = ref(true)
-const isSavingProfile = ref(false)
-const isSavingPassword = ref(false)
-const isDeletingAccount = ref(false)
+const isLoading = ref(true);
+const isSavingProfile = ref(false);
+const isSavingPassword = ref(false);
+const isDeletingAccount = ref(false);
 
 // Delete confirmation modal
-const isDeleteModalOpen = ref(false)
-const deleteConfirmation = ref('')
+const isDeleteModalOpen = ref(false);
+const deleteConfirmation = ref('');
 
 // Profile form
 const profileForm = ref({
   email: '',
   username: '',
   name: '',
-})
+});
 
 // Password form
 const passwordForm = ref({
   currentPassword: '',
   newPassword: '',
   confirmPassword: '',
-})
+});
 
 // Validation errors
-const profileErrors = ref<Record<string, string[]>>({})
-const passwordErrors = ref<Record<string, string[]>>({})
+const profileErrors = ref<Record<string, string[]>>({});
+const passwordErrors = ref<Record<string, string[]>>({});
 
 // Load user data
 async function loadUserData() {
   try {
-    const user = await $fetch<UserData>('/api/account')
+    const user = await $fetch<UserData>('/api/account');
     profileForm.value = {
       email: user.email,
       username: user.username,
       name: user.name,
-    }
+    };
   } catch (error) {
-    showError('Failed to load account data')
-    console.error('Error loading account:', error)
+    showError('Failed to load account data');
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
 }
 
 onMounted(() => {
-  loadUserData()
-})
+  loadUserData();
+});
 
 // Validation helpers
 function validateEmail(email: string): boolean {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  return emailRegex.test(email)
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
 }
 
 function validateUsername(username: string): boolean {
-  const usernameRegex = /^[a-zA-Z0-9_]+$/
-  return username.length >= 3 && username.length <= 30 && usernameRegex.test(username)
+  const usernameRegex = /^[a-zA-Z0-9_]+$/;
+  return username.length >= 3 && username.length <= 30 && usernameRegex.test(username);
 }
 
 function validatePassword(password: string): boolean {
-  return password.length >= 8
+  return password.length >= 8;
 }
 
 // Profile update
 async function updateProfile() {
-  isSavingProfile.value = true
-  profileErrors.value = {}
+  isSavingProfile.value = true;
+  profileErrors.value = {};
 
   try {
-    const errors: Record<string, string[]> = {}
+    const errors: Record<string, string[]> = {};
 
     // Validate email
     if (!validateEmail(profileForm.value.email)) {
-      errors.email = ['Invalid email format']
+      errors.email = ['Invalid email format'];
     }
 
     // Validate username
     if (!validateUsername(profileForm.value.username)) {
-      errors.username = ['Username must be 3-30 characters and contain only letters, numbers, and underscores']
+      errors.username = [
+        'Username must be 3-30 characters and contain only letters, numbers, and underscores',
+      ];
     }
 
     // Validate name
     if (profileForm.value.name.length < 1 || profileForm.value.name.length > 50) {
-      errors.name = ['Display name must be between 1 and 50 characters']
+      errors.name = ['Display name must be between 1 and 50 characters'];
     }
 
     if (Object.keys(errors).length > 0) {
-      profileErrors.value = errors
-      showError('Please fix the validation errors')
-      return
+      profileErrors.value = errors;
+      showError('Please fix the validation errors');
+      return;
     }
 
     const updatedUser = await $fetch('/api/account/profile', {
       method: 'PUT',
       body: profileForm.value,
-    })
+    });
 
-    showSuccess('Profile updated successfully')
-    
+    showSuccess('Profile updated successfully');
+
     // Update auth store with new user data
-    await auth.fetchUser()
-  } catch (error: any) {
-    if (error.data?.details) {
-      profileErrors.value = error.data.details
+    await auth.fetchUser();
+  } catch (error: unknown) {
+    const details = getApiErrorDetails(error);
+    if (details) {
+      profileErrors.value = details;
     } else {
-      showError(error.data?.message || 'Failed to update profile')
+      showError(getApiErrorMessage(error, 'Failed to update profile'));
     }
-    console.error('Error updating profile:', error)
   } finally {
-    isSavingProfile.value = false
+    isSavingProfile.value = false;
   }
 }
 
 // Password change
 async function changePassword() {
-  isSavingPassword.value = true
-  passwordErrors.value = {}
+  isSavingPassword.value = true;
+  passwordErrors.value = {};
 
   try {
-    const errors: Record<string, string[]> = {}
+    const errors: Record<string, string[]> = {};
 
     // Validate current password
     if (!passwordForm.value.currentPassword) {
-      errors.currentPassword = ['Current password is required']
+      errors.currentPassword = ['Current password is required'];
     }
 
     // Validate new password
     if (!validatePassword(passwordForm.value.newPassword)) {
-      errors.newPassword = ['New password must be at least 8 characters long']
+      errors.newPassword = ['New password must be at least 8 characters long'];
     }
 
     // Validate password confirmation
     if (passwordForm.value.newPassword !== passwordForm.value.confirmPassword) {
-      errors.confirmPassword = ['Passwords do not match']
+      errors.confirmPassword = ['Passwords do not match'];
     }
 
     if (Object.keys(errors).length > 0) {
-      passwordErrors.value = errors
-      showError('Please fix the validation errors')
-      return
+      passwordErrors.value = errors;
+      showError('Please fix the validation errors');
+      return;
     }
 
     await $fetch('/api/account/change-password', {
@@ -159,64 +177,63 @@ async function changePassword() {
         currentPassword: passwordForm.value.currentPassword,
         newPassword: passwordForm.value.newPassword,
       },
-    })
+    });
 
-    showSuccess('Password changed successfully')
-    
+    showSuccess('Password changed successfully');
+
     // Reset password form
     passwordForm.value = {
       currentPassword: '',
       newPassword: '',
       confirmPassword: '',
-    }
-  } catch (error: any) {
-    if (error.data?.details) {
-      passwordErrors.value = error.data.details
+    };
+  } catch (error: unknown) {
+    const details = getApiErrorDetails(error);
+    if (details) {
+      passwordErrors.value = details;
     } else {
-      showError(error.data?.message || 'Failed to change password')
+      showError(getApiErrorMessage(error, 'Failed to change password'));
     }
-    console.error('Error changing password:', error)
   } finally {
-    isSavingPassword.value = false
+    isSavingPassword.value = false;
   }
 }
 
 // Delete account
 async function deleteAccount() {
   if (deleteConfirmation.value !== 'DELETE') {
-    showError('Please type "DELETE" to confirm')
-    return
+    showError('Please type "DELETE" to confirm');
+    return;
   }
 
-  isDeletingAccount.value = true
+  isDeletingAccount.value = true;
 
   try {
     await $fetch('/api/account', {
       method: 'DELETE',
       body: { confirmation: 'DELETE' },
-    })
+    });
 
-    showSuccess('Account deleted successfully')
-    isDeleteModalOpen.value = false
-    
+    showSuccess('Account deleted successfully');
+    isDeleteModalOpen.value = false;
+
     // Redirect to login
-    await auth.logout()
-  } catch (error: any) {
-    showError(error.data?.message || 'Failed to delete account')
-    console.error('Error deleting account:', error)
+    await auth.logout();
+  } catch (error: unknown) {
+    showError(getApiErrorMessage(error, 'Failed to delete account'));
   } finally {
-    isDeletingAccount.value = false
+    isDeletingAccount.value = false;
   }
 }
 
 function openDeleteModal() {
-  isDeleteModalOpen.value = true
-  deleteConfirmation.value = ''
+  isDeleteModalOpen.value = true;
+  deleteConfirmation.value = '';
 }
 
 function closeDeleteModal() {
-  isDeleteModalOpen.value = false
-  deleteConfirmation.value = ''
+  isDeleteModalOpen.value = false;
+  deleteConfirmation.value = '';
 }
 </script>
 
@@ -247,7 +264,9 @@ function closeDeleteModal() {
               :class="{ 'border-red-500': profileErrors.email }"
               placeholder="your@email.com"
             />
-            <p v-if="profileErrors.email" class="text-red-500 text-xs mt-1">{{ profileErrors.email[0] }}</p>
+            <p v-if="profileErrors.email" class="text-red-500 text-xs mt-1">
+              {{ profileErrors.email[0] }}
+            </p>
           </div>
 
           <!-- Username -->
@@ -261,7 +280,9 @@ function closeDeleteModal() {
               :class="{ 'border-red-500': profileErrors.username }"
               placeholder="username"
             />
-            <p v-if="profileErrors.username" class="text-red-500 text-xs mt-1">{{ profileErrors.username[0] }}</p>
+            <p v-if="profileErrors.username" class="text-red-500 text-xs mt-1">
+              {{ profileErrors.username[0] }}
+            </p>
           </div>
 
           <!-- Display Name -->
@@ -275,15 +296,13 @@ function closeDeleteModal() {
               :class="{ 'border-red-500': profileErrors.name }"
               placeholder="Your Name"
             />
-            <p v-if="profileErrors.name" class="text-red-500 text-xs mt-1">{{ profileErrors.name[0] }}</p>
+            <p v-if="profileErrors.name" class="text-red-500 text-xs mt-1">
+              {{ profileErrors.name[0] }}
+            </p>
           </div>
 
           <!-- Save Button -->
-          <NordButton
-            variant="primary"
-            :disabled="isSavingProfile"
-            @click="updateProfile"
-          >
+          <NordButton variant="primary" :disabled="isSavingProfile" @click="updateProfile">
             {{ isSavingProfile ? 'Saving...' : 'Save Changes' }}
           </NordButton>
         </div>
@@ -294,7 +313,9 @@ function closeDeleteModal() {
         <div class="space-y-4">
           <!-- Current Password -->
           <div>
-            <label for="currentPassword" class="block text-sm text-text-muted mb-2">Current Password</label>
+            <label for="currentPassword" class="block text-sm text-text-muted mb-2"
+              >Current Password</label
+            >
             <input
               id="currentPassword"
               v-model="passwordForm.currentPassword"
@@ -303,7 +324,9 @@ function closeDeleteModal() {
               :class="{ 'border-red-500': passwordErrors.currentPassword }"
               placeholder="Enter current password"
             />
-            <p v-if="passwordErrors.currentPassword" class="text-red-500 text-xs mt-1">{{ passwordErrors.currentPassword[0] }}</p>
+            <p v-if="passwordErrors.currentPassword" class="text-red-500 text-xs mt-1">
+              {{ passwordErrors.currentPassword[0] }}
+            </p>
           </div>
 
           <!-- New Password -->
@@ -317,12 +340,16 @@ function closeDeleteModal() {
               :class="{ 'border-red-500': passwordErrors.newPassword }"
               placeholder="Minimum 8 characters"
             />
-            <p v-if="passwordErrors.newPassword" class="text-red-500 text-xs mt-1">{{ passwordErrors.newPassword[0] }}</p>
+            <p v-if="passwordErrors.newPassword" class="text-red-500 text-xs mt-1">
+              {{ passwordErrors.newPassword[0] }}
+            </p>
           </div>
 
           <!-- Confirm Password -->
           <div>
-            <label for="confirmPassword" class="block text-sm text-text-muted mb-2">Confirm New Password</label>
+            <label for="confirmPassword" class="block text-sm text-text-muted mb-2"
+              >Confirm New Password</label
+            >
             <input
               id="confirmPassword"
               v-model="passwordForm.confirmPassword"
@@ -331,15 +358,13 @@ function closeDeleteModal() {
               :class="{ 'border-red-500': passwordErrors.confirmPassword }"
               placeholder="Re-enter new password"
             />
-            <p v-if="passwordErrors.confirmPassword" class="text-red-500 text-xs mt-1">{{ passwordErrors.confirmPassword[0] }}</p>
+            <p v-if="passwordErrors.confirmPassword" class="text-red-500 text-xs mt-1">
+              {{ passwordErrors.confirmPassword[0] }}
+            </p>
           </div>
 
           <!-- Save Button -->
-          <NordButton
-            variant="primary"
-            :disabled="isSavingPassword"
-            @click="changePassword"
-          >
+          <NordButton variant="primary" :disabled="isSavingPassword" @click="changePassword">
             {{ isSavingPassword ? 'Changing...' : 'Change Password' }}
           </NordButton>
         </div>
@@ -350,7 +375,8 @@ function closeDeleteModal() {
         <div class="space-y-4">
           <div>
             <p class="text-sm text-text-muted">
-              Once you delete your account, there is no going back. This action will permanently delete all your data including:
+              Once you delete your account, there is no going back. This action will permanently
+              delete all your data including:
             </p>
             <ul class="list-disc list-inside text-sm text-text-muted mt-2 space-y-1">
               <li>All practice sessions</li>
@@ -360,12 +386,7 @@ function closeDeleteModal() {
               <li>All metronome presets</li>
             </ul>
           </div>
-          <NordButton
-            variant="danger"
-            @click="openDeleteModal"
-          >
-            Delete Account
-          </NordButton>
+          <NordButton variant="danger" @click="openDeleteModal"> Delete Account </NordButton>
         </div>
       </NordCard>
     </div>
@@ -387,11 +408,7 @@ function closeDeleteModal() {
           @keyup.enter="deleteAccount"
         />
         <div class="flex gap-3 pt-4">
-          <NordButton
-            variant="secondary"
-            :disabled="isDeletingAccount"
-            @click="closeDeleteModal"
-          >
+          <NordButton variant="secondary" :disabled="isDeletingAccount" @click="closeDeleteModal">
             Cancel
           </NordButton>
           <NordButton

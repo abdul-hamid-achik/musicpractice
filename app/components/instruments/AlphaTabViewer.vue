@@ -1,39 +1,39 @@
 <script setup lang="ts">
 const props = defineProps<{
-  alphaTex?: string
-  fileData?: ArrayBuffer
-}>()
+  alphaTex?: string;
+  fileData?: ArrayBuffer;
+}>();
 
-const containerRef = ref<HTMLElement | null>(null)
+const containerRef = ref<HTMLElement | null>(null);
 const { api, isLoaded, isPlaying, loadAlphaTex, loadFile, play, stop, setTempo } =
-  useAlphaTab(containerRef)
+  useAlphaTab(containerRef);
 
-const tempoMultiplier = ref(100)
+const tempoMultiplier = ref(100);
 
 function handleTempoChange() {
-  setTempo(tempoMultiplier.value)
+  setTempo(tempoMultiplier.value);
 }
 
 function formatTempo(value: number): string {
-  return `${(value / 100).toFixed(2)}x`
+  return `${(value / 100).toFixed(2)}x`;
 }
 
 // Watch both the API readiness and the prop to handle initial load
 watch(
   [api, () => props.alphaTex],
   ([apiVal, tex]) => {
-    if (apiVal && tex) loadAlphaTex(tex)
+    if (apiVal && tex) loadAlphaTex(tex);
   },
   { immediate: true },
-)
+);
 
 watch(
   [api, () => props.fileData],
   ([apiVal, data]) => {
-    if (apiVal && data) loadFile(data)
+    if (apiVal && data) loadFile(data);
   },
   { immediate: true },
-)
+);
 </script>
 
 <template>
@@ -46,12 +46,7 @@ watch(
         :disabled="!isLoaded"
         @click="play()"
       >
-        <svg
-          v-if="!isPlaying"
-          class="w-5 h-5 ml-0.5"
-          viewBox="0 0 24 24"
-          fill="currentColor"
-        >
+        <svg v-if="!isPlaying" class="w-5 h-5 ml-0.5" viewBox="0 0 24 24" fill="currentColor">
           <path d="M8 5v14l11-7z" />
         </svg>
         <svg v-else class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">

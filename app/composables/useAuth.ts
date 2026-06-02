@@ -1,5 +1,5 @@
 export function useAuth() {
-  const store = useAuthStore()
+  const store = useAuthStore();
 
   return {
     user: computed(() => store.user),
@@ -11,5 +11,5 @@ export function useAuth() {
     logout: store.logout,
     register: store.register,
     fetchUser: store.fetchUser,
-  }
+  };
 }

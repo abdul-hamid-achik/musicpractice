@@ -1,10 +1,10 @@
 <script setup lang="ts">
 defineProps<{
-  isActive: boolean
-  isPaused?: boolean
-  elapsed: number
-  formatTime: (seconds: number) => string
-}>()
+  isActive: boolean;
+  isPaused?: boolean;
+  elapsed: number;
+  formatTime: (seconds: number) => string;
+}>();
 </script>
 
 <template>
@@ -15,7 +15,11 @@ defineProps<{
     >
       {{ formatTime(elapsed) }}
     </div>
-    <div v-if="isActive" class="mt-2 text-sm" :class="isPaused ? 'text-warning' : 'text-text-muted'">
+    <div
+      v-if="isActive"
+      class="mt-2 text-sm"
+      :class="isPaused ? 'text-warning' : 'text-text-muted'"
+    >
       {{ isPaused ? 'Session paused' : 'Session in progress' }}
     </div>
   </div>

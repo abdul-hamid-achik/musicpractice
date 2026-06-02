@@ -1,37 +1,47 @@
 <script setup lang="ts">
 interface DayData {
-  date: string
-  totalMinutes: number
-  sessionCount: number
+  date: string;
+  totalMinutes: number;
+  sessionCount: number;
 }
 
-const { data: chartData, status } = useFetch<DayData[]>('/api/stats/weekly')
+const { data: chartData, status } = useFetch<DayData[]>('/api/stats/daily', {
+  query: { days: 14 },
+});
 
-const isLoading = computed(() => status.value === 'pending')
+const isLoading = computed(() => status.value === 'pending');
 
 const maxMinutes = computed(() => {
-  if (!chartData.value?.length) return 60
-  return Math.max(60, ...chartData.value.map((d) => Number(d.totalMinutes)))
-})
+  if (!chartData.value?.length) return 60;
+  return Math.max(60, ...chartData.value.map((d) => Number(d.totalMinutes)));
+});
 
 const bars = computed(() => {
-  if (!chartData.value) return []
+  if (!chartData.value) return [];
   return chartData.value.map((d) => {
-    const mins = Number(d.totalMinutes)
+    const mins = Number(d.totalMinutes);
     return {
       date: d.date,
       minutes: mins,
       height: maxMinutes.value > 0 ? (mins / maxMinutes.value) * 100 : 0,
       dayLabel: new Date(d.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short' }),
-      dateLabel: new Date(d.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-    }
-  })
-})
+      dateLabel: new Date(d.date + 'T12:00:00').toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+      }),
+    };
+  });
+});
 </script>
 
 <template>
   <!-- Loading Skeleton -->
-  <div v-if="isLoading" class="h-40 flex items-end gap-1" aria-busy="true" aria-label="Loading chart...">
+  <div
+    v-if="isLoading"
+    class="h-40 flex items-end gap-1"
+    aria-busy="true"
+    aria-label="Loading chart..."
+  >
     <div v-for="i in 7" :key="i" class="flex-1 flex flex-col items-center">
       <NordSkeleton height="0.75rem" width="30px" class="mb-1" />
       <NordSkeleton height="80px" width="20px" class="flex-1" />

@@ -1,18 +1,22 @@
-import bcrypt from 'bcrypt'
-import { eq, or } from 'drizzle-orm'
-import { users } from '../../db/schema'
-import { createAuthToken, setAuthCookie } from '../../utils/auth'
-import { createApiError, handleApiError } from '../../utils/errors'
+import bcrypt from 'bcrypt';
+import { eq, or } from 'drizzle-orm';
+import { users } from '../../db/schema';
+import { createAuthToken, setAuthCookie } from '../../utils/auth';
+import { checkRateLimit } from '../../utils/rate-limit';
+import { createApiError, handleApiError } from '../../utils/errors';
 
 export default defineEventHandler(async (event) => {
   try {
-    const db = useDb()
-    const body = await readBody(event)
+    const ip = getRequestIP(event, { xForwardedFor: true }) ?? 'unknown';
+    checkRateLimit(`login:${ip}`);
 
-    const { identifier, password } = body || {}
+    const db = useDb();
+    const body = await readBody(event);
+
+    const { identifier, password } = body || {};
 
     if (!identifier || !password) {
-      throw createApiError('identifier and password are required', 400)
+      throw createApiError('identifier and password are required', 400);
     }
 
     // Look up by email or username
@@ -20,23 +24,23 @@ export default defineEventHandler(async (event) => {
       .select()
       .from(users)
       .where(or(eq(users.email, identifier), eq(users.username, identifier)))
-      .limit(1)
+      .limit(1);
 
     if (!user) {
-      throw createApiError('Invalid credentials', 401)
+      throw createApiError('Invalid credentials', 401);
     }
 
-    const valid = await bcrypt.compare(password, user.passwordHash)
+    const valid = await bcrypt.compare(password, user.passwordHash);
     if (!valid) {
-      throw createApiError('Invalid credentials', 401)
+      throw createApiError('Invalid credentials', 401);
     }
 
-    const token = createAuthToken(user.id)
-    setAuthCookie(event, token)
+    const token = createAuthToken(user.id);
+    setAuthCookie(event, token);
 
-    const { passwordHash: _, ...safeUser } = user
-    return safeUser
+    const { passwordHash: _, ...safeUser } = user;
+    return safeUser;
   } catch (error) {
-    return handleApiError(error, { route: '/api/auth/login' })
+    return handleApiError(error, { route: '/api/auth/login' });
   }
-})
+});

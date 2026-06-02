@@ -1,7 +1,7 @@
 <script setup lang="ts">
-const auth = useAuth()
-const { mobileOpen, close } = useSidebar()
-const route = useRoute()
+const auth = useAuth();
+const { mobileOpen, close } = useSidebar();
+const route = useRoute();
 
 const sections = [
   {
@@ -29,16 +29,16 @@ const sections = [
       { label: 'Ear Training', to: '/theory/ear-training' },
     ],
   },
-]
+];
 
 const standaloneLinks = [
   { label: 'Songs', to: '/songs' },
   { label: 'Settings', to: '/settings' },
   { label: 'Account', to: '/account' },
-]
+];
 
 function isActiveLink(to: string): boolean {
-  return route.path === to || route.path.startsWith(to + '/')
+  return route.path === to || route.path.startsWith(to + '/');
 }
 </script>
 
@@ -54,10 +54,16 @@ function isActiveLink(to: string): boolean {
   >
     <nav aria-label="Main navigation" class="p-4 space-y-6 flex-1" role="navigation">
       <div v-for="section in sections" :key="section.label">
-        <h4 class="uppercase text-xs text-text-muted tracking-wider mb-2 px-4" :id="`section-${section.label.toLowerCase().replace(/\s+/g, '-')}`">
+        <h4
+          class="uppercase text-xs text-text-muted tracking-wider mb-2 px-4"
+          :id="`section-${section.label.toLowerCase().replace(/\s+/g, '-')}`"
+        >
           {{ section.label }}
         </h4>
-        <ul :aria-labelledby="`section-${section.label.toLowerCase().replace(/\s+/g, '-')}`" class="space-y-1">
+        <ul
+          :aria-labelledby="`section-${section.label.toLowerCase().replace(/\s+/g, '-')}`"
+          class="space-y-1"
+        >
           <li v-for="link in section.links" :key="link.to">
             <NuxtLink
               :to="link.to"
@@ -92,7 +98,10 @@ function isActiveLink(to: string): boolean {
     <!-- User section at bottom -->
     <div v-if="auth.isAuthenticated.value" class="p-4 border-t border-border">
       <div class="flex items-center gap-3 px-2">
-        <div class="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center text-sm font-bold shrink-0" aria-hidden="true">
+        <div
+          class="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center text-sm font-bold shrink-0"
+          aria-hidden="true"
+        >
           {{ auth.userName.value?.charAt(0)?.toUpperCase() }}
         </div>
         <div class="min-w-0 flex-1">

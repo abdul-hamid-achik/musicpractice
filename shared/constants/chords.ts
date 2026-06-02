@@ -1,4 +1,4 @@
-import type { Chord } from '../types/music-theory'
+import type { Chord } from '../types/music-theory';
 
 export const CHORDS: Omit<Chord, 'id' | 'voicings' | 'instrumentType'>[] = [
   {
@@ -101,4 +101,4 @@ export const CHORDS: Omit<Chord, 'id' | 'voicings' | 'instrumentType'>[] = [
     symbol: 'mMaj7',
     intervals: [0, 3, 7, 11],
   },
-]
+];

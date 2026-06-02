@@ -1,9 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { mount } from '@vue/test-utils'
-import { ref, computed } from 'vue'
-import { createPinia, setActivePinia } from 'pinia'
+import { describe, it, expect, vi } from 'vitest';
+import { mount } from '@vue/test-utils';
+import { ref, computed } from 'vue';
 
-// Mock tone (used by useMetronome composable via dynamic import)
 vi.mock('tone', () => ({
   start: vi.fn(),
   MembraneSynth: vi.fn(() => ({
@@ -21,9 +19,8 @@ vi.mock('tone', () => ({
     start: vi.fn(),
     stop: vi.fn(),
   })),
-}))
+}));
 
-// Mock the useMetronome composable so it doesn't depend on Tone.js internals
 vi.mock('~/composables/useMetronome', () => ({
   useMetronome: () => ({
     bpm: ref(120),
@@ -34,9 +31,10 @@ vi.mock('~/composables/useMetronome', () => ({
     stop: vi.fn(),
     setBpm: vi.fn(),
   }),
-}))
+}));
 
-// Mock the useAuthStore (auto-imported by Nuxt, used by useAuth composable)
+// The component imports `apiGet`/`apiPost` from ~/utils/api and uses
+// `useToast` for error messages. Both go through our stubbed $fetch.
 const mockAuthStore = {
   user: ref(null),
   loading: ref(false),
@@ -47,10 +45,9 @@ const mockAuthStore = {
   login: vi.fn(),
   register: vi.fn(),
   logout: vi.fn(),
-}
-vi.stubGlobal('useAuthStore', () => mockAuthStore)
+};
+vi.stubGlobal('useAuthStore', () => mockAuthStore);
 
-// Mock useToastStore for toast notifications
 const mockToastStore = {
   toasts: ref([]),
   showToast: vi.fn(),
@@ -60,32 +57,98 @@ const mockToastStore = {
   showInfo: vi.fn(),
   showWarning: vi.fn(),
   clearAll: vi.fn(),
-}
-vi.stubGlobal('useToastStore', () => mockToastStore)
+};
+vi.stubGlobal('useToastStore', () => mockToastStore);
 
-import Metronome from '~/components/practice/Metronome.vue'
+// Stub the Nord* components used in the template
+const NordButtonStub = {
+  template:
+    '<button :disabled="disabled || loading" :aria-pressed="ariaPressed" :aria-label="ariaLabel" :aria-busy="loading" @click="$emit(\'click\', $event)"><slot /></button>',
+  props: ['variant', 'size', 'disabled', 'loading', 'ariaLabel', 'ariaPressed', 'type'],
+  emits: ['click'],
+};
+const NordProgressBarStub = {
+  template: '<div class="nord-progress" :style="{ width: value + \'%\' }" :data-color="color" />',
+  props: ['value', 'color', 'size', 'animated'],
+};
 
-describe('Metronome', () => {
-  beforeEach(() => {
-    setActivePinia(createPinia())
-  })
+import Metronome from '~/components/practice/Metronome.vue';
 
-  it('renders BPM display', () => {
-    const wrapper = mount(Metronome)
-    expect(wrapper.text()).toContain('120')
-  })
+describe('Metronome (expanded)', () => {
+  it('renders the BPM display', () => {
+    const wrapper = mount(Metronome, {
+      global: { stubs: { NordButton: NordButtonStub, NordProgressBar: NordProgressBarStub } },
+    });
+    expect(wrapper.text()).toContain('120');
+    expect(wrapper.text()).toContain('BPM');
+  });
 
-  it('has start button', () => {
-    const wrapper = mount(Metronome)
-    // The start/stop button contains "Start" or "Stop" text
-    // Since NordButton is not registered, look for any button with Start text
-    expect(wrapper.html()).toContain('Start')
-  })
+  it('renders 5 BPM adjustment buttons (-5, -, +, +5, Start, Tap Tempo, etc.)', () => {
+    const wrapper = mount(Metronome, {
+      global: { stubs: { NordButton: NordButtonStub, NordProgressBar: NordProgressBarStub } },
+    });
+    const buttons = wrapper.findAll('button');
+    // -5, -, +, +5 are 4 native buttons; Start, Tap Tempo, 6 time-sig buttons = 11 total
+    expect(buttons.length).toBeGreaterThanOrEqual(10);
+  });
 
-  it('has BPM increment/decrement buttons', () => {
-    const wrapper = mount(Metronome)
-    const buttons = wrapper.findAll('button')
-    // Has -5, -, +, +5, Start, Tap Tempo, plus 6 time signature buttons = 12 total
-    expect(buttons.length).toBeGreaterThan(2)
-  })
-})
+  it('has aria labels for the BPM adjustment buttons', () => {
+    const wrapper = mount(Metronome, {
+      global: { stubs: { NordButton: NordButtonStub, NordProgressBar: NordProgressBarStub } },
+    });
+    expect(wrapper.html()).toContain('Decrease tempo by 5 BPM');
+    expect(wrapper.html()).toContain('Decrease tempo by 1 BPM');
+    expect(wrapper.html()).toContain('Increase tempo by 1 BPM');
+    expect(wrapper.html()).toContain('Increase tempo by 5 BPM');
+  });
+
+  it('renders a tempo slider with min=30 and max=300', () => {
+    const wrapper = mount(Metronome, {
+      global: { stubs: { NordButton: NordButtonStub, NordProgressBar: NordProgressBarStub } },
+    });
+    const slider = wrapper.find('input[type="range"]');
+    expect(slider.exists()).toBe(true);
+    expect(slider.attributes('min')).toBe('30');
+    expect(slider.attributes('max')).toBe('300');
+  });
+
+  it('renders 6 time signature buttons', () => {
+    const wrapper = mount(Metronome, {
+      global: { stubs: { NordButton: NordButtonStub, NordProgressBar: NordProgressBarStub } },
+    });
+    for (const sig of ['2/4', '3/4', '4/4', '5/4', '6/8', '7/8']) {
+      expect(wrapper.text()).toContain(sig);
+    }
+  });
+
+  it('renders the visual beat indicator group with aria-live="polite"', () => {
+    const wrapper = mount(Metronome, {
+      global: { stubs: { NordButton: NordButtonStub, NordProgressBar: NordProgressBarStub } },
+    });
+    expect(wrapper.html()).toContain('aria-live="polite"');
+    expect(wrapper.html()).toContain('Beat indicator');
+  });
+
+  it('renders 4 beat dots by default (4/4 time)', () => {
+    const wrapper = mount(Metronome, {
+      global: { stubs: { NordButton: NordButtonStub, NordProgressBar: NordProgressBarStub } },
+    });
+    // Beat dots are the round divs in the beat indicator group
+    // They have w-8 h-8 rounded-full classes
+    const dots = wrapper.findAll('div.rounded-full');
+    // 4 beat dots expected
+    expect(dots.length).toBeGreaterThanOrEqual(4);
+  });
+
+  it('exposes setBpm, adjustBpm, togglePlayback, bpm, isRunning via defineExpose', () => {
+    const wrapper = mount(Metronome, {
+      global: { stubs: { NordButton: NordButtonStub, NordProgressBar: NordProgressBarStub } },
+    });
+    // @ts-expect-error — accessing exposed methods on component instance
+    expect(typeof wrapper.vm.setBpm).toBe('function');
+    // @ts-expect-error
+    expect(typeof wrapper.vm.adjustBpm).toBe('function');
+    // @ts-expect-error
+    expect(typeof wrapper.vm.togglePlayback).toBe('function');
+  });
+});

@@ -1,10 +1,10 @@
 <script setup lang="ts">
 const props = withDefaults(
   defineProps<{
-    startBpm?: number
-    targetBpm?: number
-    incrementBpm?: number
-    intervalSeconds?: number
+    startBpm?: number;
+    targetBpm?: number;
+    incrementBpm?: number;
+    intervalSeconds?: number;
   }>(),
   {
     startBpm: 60,
@@ -12,70 +12,70 @@ const props = withDefaults(
     incrementBpm: 5,
     intervalSeconds: 30,
   },
-)
+);
 
 const emit = defineEmits<{
-  tempoChange: [bpm: number]
-}>()
+  tempoChange: [bpm: number];
+}>();
 
-const currentBpm = ref(props.startBpm)
-const isRunning = ref(false)
-const countdown = ref(props.intervalSeconds)
-let timer: ReturnType<typeof setInterval> | null = null
+const currentBpm = ref(props.startBpm);
+const isRunning = ref(false);
+const countdown = ref(props.intervalSeconds);
+let timer: ReturnType<typeof setInterval> | null = null;
 
 const progress = computed(() => {
-  const range = props.targetBpm - props.startBpm
-  if (range <= 0) return 100
-  const current = currentBpm.value - props.startBpm
-  return Math.min(100, Math.round((current / range) * 100))
-})
+  const range = props.targetBpm - props.startBpm;
+  if (range <= 0) return 100;
+  const current = currentBpm.value - props.startBpm;
+  return Math.min(100, Math.round((current / range) * 100));
+});
 
-const isComplete = computed(() => currentBpm.value >= props.targetBpm)
+const isComplete = computed(() => currentBpm.value >= props.targetBpm);
 
 function startTraining() {
   if (isComplete.value) {
-    currentBpm.value = props.startBpm
-    countdown.value = props.intervalSeconds
+    currentBpm.value = props.startBpm;
+    countdown.value = props.intervalSeconds;
   }
-  isRunning.value = true
-  countdown.value = props.intervalSeconds
+  isRunning.value = true;
+  countdown.value = props.intervalSeconds;
 
   timer = setInterval(() => {
-    countdown.value--
+    countdown.value--;
     if (countdown.value <= 0) {
-      incrementTempo()
+      incrementTempo();
     }
-  }, 1000)
+  }, 1000);
 }
 
 function stopTraining() {
-  isRunning.value = false
+  isRunning.value = false;
   if (timer) {
-    clearInterval(timer)
-    timer = null
+    clearInterval(timer);
+    timer = null;
   }
 }
 
 function incrementTempo() {
-  const newBpm = Math.min(currentBpm.value + props.incrementBpm, props.targetBpm)
-  currentBpm.value = newBpm
-  countdown.value = props.intervalSeconds
-  emit('tempoChange', newBpm)
+  const newBpm = Math.min(currentBpm.value + props.incrementBpm, props.targetBpm);
+  currentBpm.value = newBpm;
+  countdown.value = props.intervalSeconds;
+  emit('tempoChange', newBpm);
 
   if (newBpm >= props.targetBpm) {
-    stopTraining()
+    stopTraining();
   }
 }
 
 function reset() {
-  stopTraining()
-  currentBpm.value = props.startBpm
-  countdown.value = props.intervalSeconds
+  stopTraining();
+  currentBpm.value = props.startBpm;
+  countdown.value = props.intervalSeconds;
 }
 
 onBeforeUnmount(() => {
-  if (timer) clearInterval(timer)
-})
+  if (timer) clearInterval(timer);
+});
 </script>
 
 <template>
@@ -106,9 +106,7 @@ onBeforeUnmount(() => {
     <!-- Countdown -->
     <div v-if="isRunning && !isComplete" class="text-center">
       <div class="text-2xl font-mono text-primary">{{ countdown }}s</div>
-      <div class="text-xs text-text-muted">
-        until +{{ incrementBpm }} BPM
-      </div>
+      <div class="text-xs text-text-muted">until +{{ incrementBpm }} BPM</div>
     </div>
 
     <!-- Completed message -->
@@ -125,12 +123,8 @@ onBeforeUnmount(() => {
       >
         {{ isComplete ? 'Restart' : 'Start' }}
       </NordButton>
-      <NordButton v-else variant="danger" @click="stopTraining">
-        Stop
-      </NordButton>
-      <NordButton variant="ghost" @click="reset">
-        Reset
-      </NordButton>
+      <NordButton v-else variant="danger" @click="stopTraining"> Stop </NordButton>
+      <NordButton variant="ghost" @click="reset"> Reset </NordButton>
     </div>
   </div>
 </template>

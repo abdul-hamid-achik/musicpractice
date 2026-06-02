@@ -1,11 +1,11 @@
-import { clearAuthCookie } from '../../utils/auth'
-import { handleApiError } from '../../utils/errors'
+import { clearAuthCookie } from '../../utils/auth';
+import { handleApiError } from '../../utils/errors';
 
 export default defineEventHandler(async (event) => {
   try {
-    clearAuthCookie(event)
-    return { success: true }
+    clearAuthCookie(event);
+    return { success: true };
   } catch (error) {
-    return handleApiError(error, { route: '/api/auth/logout' })
+    return handleApiError(error, { route: '/api/auth/logout' });
   }
-})
+});

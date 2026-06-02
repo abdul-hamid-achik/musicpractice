@@ -156,12 +156,8 @@
           "name": "ear_training_scores_user_id_users_id_fk",
           "tableFrom": "ear_training_scores",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -309,12 +305,8 @@
           "name": "metronome_presets_user_id_users_id_fk",
           "tableFrom": "metronome_presets",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -418,12 +410,8 @@
           "name": "practice_goals_user_id_users_id_fk",
           "tableFrom": "practice_goals",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -431,12 +419,8 @@
           "name": "practice_goals_instrument_id_instruments_id_fk",
           "tableFrom": "practice_goals",
           "tableTo": "instruments",
-          "columnsFrom": [
-            "instrument_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["instrument_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -609,12 +593,8 @@
           "name": "practice_sessions_user_id_users_id_fk",
           "tableFrom": "practice_sessions",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -622,12 +602,8 @@
           "name": "practice_sessions_instrument_id_instruments_id_fk",
           "tableFrom": "practice_sessions",
           "tableTo": "instruments",
-          "columnsFrom": [
-            "instrument_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["instrument_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -635,12 +611,8 @@
           "name": "practice_sessions_song_id_songs_id_fk",
           "tableFrom": "practice_sessions",
           "tableTo": "songs",
-          "columnsFrom": [
-            "song_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["song_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -907,12 +879,8 @@
           "name": "user_progress_user_id_users_id_fk",
           "tableFrom": "user_progress",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -920,12 +888,8 @@
           "name": "user_progress_song_id_songs_id_fk",
           "tableFrom": "user_progress",
           "tableTo": "songs",
-          "columnsFrom": [
-            "song_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["song_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1019,16 +983,12 @@
         "users_email_unique": {
           "name": "users_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         },
         "users_username_unique": {
           "name": "users_username_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "username"
-          ]
+          "columns": ["username"]
         }
       },
       "policies": {},
@@ -1040,32 +1000,17 @@
     "public.difficulty": {
       "name": "difficulty",
       "schema": "public",
-      "values": [
-        "beginner",
-        "intermediate",
-        "advanced",
-        "expert"
-      ]
+      "values": ["beginner", "intermediate", "advanced", "expert"]
     },
     "public.instrument_type": {
       "name": "instrument_type",
       "schema": "public",
-      "values": [
-        "guitar",
-        "bass",
-        "piano",
-        "violin"
-      ]
+      "values": ["guitar", "bass", "piano", "violin"]
     },
     "public.notation_format": {
       "name": "notation_format",
       "schema": "public",
-      "values": [
-        "alphatex",
-        "musicxml",
-        "guitar_pro",
-        "vexflow_json"
-      ]
+      "values": ["alphatex", "musicxml", "guitar_pro", "vexflow_json"]
     }
   },
   "schemas": {},

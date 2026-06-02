@@ -1,15 +1,15 @@
 <script setup lang="ts">
-const settingsStore = useSettingsStore()
+const settingsStore = useSettingsStore();
 
 // Simulate loading state for settings (they load from localStorage)
-const isLoading = ref(true)
+const isLoading = ref(true);
 
 onMounted(() => {
   // Settings are loaded synchronously from localStorage, but we show a brief skeleton
   setTimeout(() => {
-    isLoading.value = false
-  }, 300)
-})
+    isLoading.value = false;
+  }, 300);
+});
 </script>
 
 <template>
@@ -25,7 +25,12 @@ onMounted(() => {
     </div>
 
     <!-- Loading Skeletons -->
-    <div v-if="isLoading" class="max-w-2xl space-y-6" aria-busy="true" aria-label="Loading settings...">
+    <div
+      v-if="isLoading"
+      class="max-w-2xl space-y-6"
+      aria-busy="true"
+      aria-label="Loading settings..."
+    >
       <SkeletonCard variant="card" height="100px" />
       <SkeletonCard variant="card" height="120px" />
       <SkeletonCard variant="card" height="100px" />
@@ -47,10 +52,19 @@ onMounted(() => {
               type="checkbox"
               :checked="settingsStore.theme === 'dark'"
               class="sr-only peer"
-              @change="settingsStore.updateSetting('theme', settingsStore.theme === 'dark' ? 'light' : 'dark')"
+              @change="
+                settingsStore.updateSetting(
+                  'theme',
+                  settingsStore.theme === 'dark' ? 'light' : 'dark',
+                )
+              "
             />
-            <div class="w-11 h-6 bg-surface-alt rounded-full peer peer-checked:bg-primary transition-colors" />
-            <div class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full transition-transform peer-checked:translate-x-5" />
+            <div
+              class="w-11 h-6 bg-surface-alt rounded-full peer peer-checked:bg-primary transition-colors"
+            />
+            <div
+              class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full transition-transform peer-checked:translate-x-5"
+            />
           </div>
         </label>
       </NordCard>
@@ -62,7 +76,13 @@ onMounted(() => {
           <select
             :value="settingsStore.defaultInstrument"
             class="w-full bg-surface-alt text-text border border-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-            @change="(e) => settingsStore.updateSetting('defaultInstrument', (e.target as HTMLSelectElement).value)"
+            @change="
+              (e) =>
+                settingsStore.updateSetting(
+                  'defaultInstrument',
+                  (e.target as HTMLSelectElement).value,
+                )
+            "
           >
             <option value="guitar">Guitar</option>
             <option value="bass">Bass</option>
@@ -76,7 +96,8 @@ onMounted(() => {
       <NordCard title="Metronome">
         <div>
           <label class="block text-sm text-text-muted mb-2">
-            Default Tempo: <span class="text-primary font-medium">{{ settingsStore.defaultTempo }} BPM</span>
+            Default Tempo:
+            <span class="text-primary font-medium">{{ settingsStore.defaultTempo }} BPM</span>
           </label>
           <input
             type="range"
@@ -85,7 +106,13 @@ onMounted(() => {
             max="300"
             step="1"
             class="w-full accent-primary"
-            @input="(e) => settingsStore.updateSetting('defaultTempo', parseInt((e.target as HTMLInputElement).value))"
+            @input="
+              (e) =>
+                settingsStore.updateSetting(
+                  'defaultTempo',
+                  parseInt((e.target as HTMLInputElement).value),
+                )
+            "
           />
           <div class="flex justify-between text-xs text-text-muted mt-1">
             <span>30</span>
@@ -106,8 +133,12 @@ onMounted(() => {
                 class="sr-only peer"
                 @change="settingsStore.updateSetting('showNotation', !settingsStore.showNotation)"
               />
-              <div class="w-11 h-6 bg-surface-alt rounded-full peer peer-checked:bg-primary transition-colors" />
-              <div class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full transition-transform peer-checked:translate-x-5" />
+              <div
+                class="w-11 h-6 bg-surface-alt rounded-full peer peer-checked:bg-primary transition-colors"
+              />
+              <div
+                class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full transition-transform peer-checked:translate-x-5"
+              />
             </div>
           </label>
 
@@ -120,8 +151,12 @@ onMounted(() => {
                 class="sr-only peer"
                 @change="settingsStore.updateSetting('showTablature', !settingsStore.showTablature)"
               />
-              <div class="w-11 h-6 bg-surface-alt rounded-full peer peer-checked:bg-primary transition-colors" />
-              <div class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full transition-transform peer-checked:translate-x-5" />
+              <div
+                class="w-11 h-6 bg-surface-alt rounded-full peer peer-checked:bg-primary transition-colors"
+              />
+              <div
+                class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full transition-transform peer-checked:translate-x-5"
+              />
             </div>
           </label>
         </div>
@@ -140,7 +175,13 @@ onMounted(() => {
             max="100"
             step="1"
             class="w-full accent-primary"
-            @input="(e) => settingsStore.updateSetting('volume', parseInt((e.target as HTMLInputElement).value))"
+            @input="
+              (e) =>
+                settingsStore.updateSetting(
+                  'volume',
+                  parseInt((e.target as HTMLInputElement).value),
+                )
+            "
           />
           <div class="flex justify-between text-xs text-text-muted mt-1">
             <span>0</span>

@@ -1,60 +1,60 @@
 <script setup lang="ts">
-const { transposeNote, noteToMidi, midiToNote } = useMusicTheory()
-const { playNote } = useInstrumentSound()
+const { transposeNote, noteToMidi, midiToNote } = useMusicTheory();
+const { playNote } = useInstrumentSound();
 
 const props = withDefaults(
   defineProps<{
-    position?: number
-    highlightedNotes?: string[]
-    rootNote?: string
+    position?: number;
+    highlightedNotes?: string[];
+    rootNote?: string;
   }>(),
   {
     position: 1,
     highlightedNotes: () => [],
     rootNote: '',
   },
-)
+);
 
 const emit = defineEmits<{
-  noteClick: [payload: { note: string; string: number; finger: number; octave: number }]
-}>()
+  noteClick: [payload: { note: string; string: number; finger: number; octave: number }];
+}>();
 
-const openStrings = ['G3', 'D4', 'A4', 'E5']
-const stringLabels = ['G', 'D', 'A', 'E']
+const openStrings = ['G3', 'D4', 'A4', 'E5'];
+const stringLabels = ['G', 'D', 'A', 'E'];
 
-const svgWidth = 220
-const svgHeight = 350
-const stringSpacing = 36
-const fingerSpacing = 55
-const topPadding = 50
-const leftPadding = 50
+const svgWidth = 220;
+const svgHeight = 350;
+const stringSpacing = 36;
+const fingerSpacing = 55;
+const topPadding = 50;
+const leftPadding = 50;
 
 // Keyboard navigation state
-const focusedPosition = ref<{ string: number; finger: number } | null>(null)
-const fingerboardRef = ref<SVGSVGElement | null>(null)
+const focusedPosition = ref<{ string: number; finger: number } | null>(null);
+const fingerboardRef = ref<SVGSVGElement | null>(null);
 
 function parseNote(noteWithOctave: string): { note: string; octave: number } {
-  const match = noteWithOctave.match(/^([A-G][#b]?)(\d+)$/)
-  if (!match) return { note: 'C', octave: 4 }
-  return { note: match[1]!, octave: parseInt(match[2]!) }
+  const match = noteWithOctave.match(/^([A-G][#b]?)(\d+)$/);
+  if (!match) return { note: 'C', octave: 4 };
+  return { note: match[1]!, octave: parseInt(match[2]!) };
 }
 
 const fingerPositions = computed(() => {
   const positions: {
-    string: number
-    finger: number
-    note: string
-    x: number
-    y: number
-    label: string
-  }[][] = []
+    string: number;
+    finger: number;
+    note: string;
+    x: number;
+    y: number;
+    label: string;
+  }[][] = [];
 
-  const positionOffset = (props.position - 1) * 2
+  const positionOffset = (props.position - 1) * 2;
 
   for (let s = 0; s < openStrings.length; s++) {
-    const stringPositions: (typeof positions)[number] = []
-    const open = parseNote(openStrings[s]!)
-    const x = leftPadding + s * stringSpacing
+    const stringPositions: (typeof positions)[number] = [];
+    const open = parseNote(openStrings[s]!);
+    const x = leftPadding + s * stringSpacing;
 
     // Open string (finger 0)
     stringPositions.push({
@@ -64,12 +64,12 @@ const fingerPositions = computed(() => {
       x,
       y: topPadding - 10,
       label: transposeNote(open.note, 0),
-    })
+    });
 
     // Fingers 1-4
     for (let f = 1; f <= 4; f++) {
-      const semitones = positionOffset + f
-      const note = transposeNote(open.note, semitones)
+      const semitones = positionOffset + f;
+      const note = transposeNote(open.note, semitones);
       stringPositions.push({
         string: s,
         finger: f,
@@ -77,86 +77,88 @@ const fingerPositions = computed(() => {
         x,
         y: topPadding + f * fingerSpacing,
         label: note,
-      })
+      });
     }
 
-    positions.push(stringPositions)
+    positions.push(stringPositions);
   }
-  return positions
-})
+  return positions;
+});
 
 function isHighlighted(note: string): boolean {
-  return props.highlightedNotes.includes(note)
+  return props.highlightedNotes.includes(note);
 }
 
 function isRoot(note: string): boolean {
-  return props.rootNote === note
+  return props.rootNote === note;
 }
 
 function getActualOctave(stringIndex: number, finger: number): number {
-  const open = parseNote(openStrings[stringIndex]!)
-  const openMidi = noteToMidi(open.note, open.octave)
-  const semitones = finger === 0 ? 0 : (props.position - 1) * 2 + finger
-  return midiToNote(openMidi + semitones).octave
+  const open = parseNote(openStrings[stringIndex]!);
+  const openMidi = noteToMidi(open.note, open.octave);
+  const semitones = finger === 0 ? 0 : (props.position - 1) * 2 + finger;
+  return midiToNote(openMidi + semitones).octave;
 }
 
 function handleClick(string: number, finger: number, note: string) {
-  const octave = getActualOctave(string, finger)
-  playNote(note, octave, 'violin')
-  emit('noteClick', { note, string, finger, octave })
+  const octave = getActualOctave(string, finger);
+  playNote(note, octave, 'violin');
+  emit('noteClick', { note, string, finger, octave });
 }
 
 // Keyboard navigation handlers
 function handleKeydown(event: KeyboardEvent) {
   if (!focusedPosition.value) {
-    focusedPosition.value = { string: 0, finger: 0 }
-    return
+    focusedPosition.value = { string: 0, finger: 0 };
+    return;
   }
 
-  const { string, finger } = focusedPosition.value
-  let newString = string
-  let newFinger = finger
+  const { string, finger } = focusedPosition.value;
+  let newString = string;
+  let newFinger = finger;
 
   switch (event.key) {
     case 'ArrowRight':
-      newString = Math.min(string + 1, openStrings.length - 1)
-      break
+      newString = Math.min(string + 1, openStrings.length - 1);
+      break;
     case 'ArrowLeft':
-      newString = Math.max(string - 1, 0)
-      break
+      newString = Math.max(string - 1, 0);
+      break;
     case 'ArrowDown':
-      newFinger = Math.min(finger + 1, 4)
-      break
+      newFinger = Math.min(finger + 1, 4);
+      break;
     case 'ArrowUp':
-      newFinger = Math.max(finger - 1, 0)
-      break
+      newFinger = Math.max(finger - 1, 0);
+      break;
     case 'Enter':
     case ' ':
-      event.preventDefault()
-      const note = fingerPositions.value[string]?.find((fp: { finger: number }) => fp.finger === finger)?.note
+      event.preventDefault();
+      const note = fingerPositions.value[string]?.find(
+        (fp: { finger: number }) => fp.finger === finger,
+      )?.note;
       if (note) {
-        handleClick(string, finger, note)
+        handleClick(string, finger, note);
       }
-      return
+      return;
     default:
-      return
+      return;
   }
 
-  event.preventDefault()
-  focusedPosition.value = { string: newString, finger: newFinger }
+  event.preventDefault();
+  focusedPosition.value = { string: newString, finger: newFinger };
 }
 
 function isFocused(string: number, finger: number): boolean {
-  return focusedPosition.value?.string === string && focusedPosition.value?.finger === finger
+  return focusedPosition.value?.string === string && focusedPosition.value?.finger === finger;
 }
 
 function getPositionLabel(string: number, finger: number): string {
-  const fp = fingerPositions.value[string]?.find((p: { finger: number }) => p.finger === finger)
-  if (!fp) return ''
-  const octave = getActualOctave(string, finger)
-  const stringName = stringLabels[string]
-  const fingerLabel = finger === 0 ? 'open' : `finger ${finger}`
-  return `${fp.note}${octave} - ${stringName} string, ${fingerLabel}`
+  const fp = fingerPositions.value[string]?.find((p: { finger: number }) => p.finger === finger);
+  if (!fp) return '';
+  const octave = getActualOctave(string, finger);
+  const stringName = stringLabels[string];
+  const fingerLabel = finger === 0 ? 'open' : `finger ${finger}`;
+  return `${fp.note}${octave} - ${stringName} string, ${fingerLabel}`;
 }
 </script>
 
@@ -281,7 +283,9 @@ function getPositionLabel(string: number, finger: number): string {
           font-size="10"
           font-weight="bold"
           :fill="
-            isRoot(fp.note) || isHighlighted(fp.note) ? 'var(--color-on-highlight)' : 'var(--color-note-label)'
+            isRoot(fp.note) || isHighlighted(fp.note)
+              ? 'var(--color-on-highlight)'
+              : 'var(--color-note-label)'
           "
           :class="{ 'hover-text': !isHighlighted(fp.note) && !isRoot(fp.note) }"
         >
@@ -313,12 +317,17 @@ g:hover .hover-text {
 }
 
 @keyframes focus-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 /* Ensure focused elements are visible */
-g[tabindex="0"]:focus {
+g[tabindex='0']:focus {
   outline: none;
 }
 </style>

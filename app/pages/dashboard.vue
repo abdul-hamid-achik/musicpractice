@@ -1,35 +1,35 @@
 <script setup lang="ts">
-import type { PracticeSession } from '#shared/types/practice'
+import type { PracticeSession } from '#shared/types/practice';
 
-definePageMeta({ middleware: 'auth' })
+definePageMeta({ middleware: 'auth' });
 
-const practiceStore = usePracticeStore()
-const { formatTime } = usePracticeSession()
+const practiceStore = usePracticeStore();
+const { formatTime } = usePracticeSession();
 
 const weeklyMinutes = computed(() => {
   const totalSeconds = practiceStore.sessionsThisWeek.reduce(
     (sum: number, s: PracticeSession) => sum + (s.durationSeconds || 0),
     0,
-  )
-  return Math.floor(totalSeconds / 60)
-})
+  );
+  return Math.floor(totalSeconds / 60);
+});
 
 const weeklyFormatted = computed(() => {
-  const h = Math.floor(weeklyMinutes.value / 60)
-  const m = weeklyMinutes.value % 60
-  return `${h}h ${m.toString().padStart(2, '0')}m`
-})
+  const h = Math.floor(weeklyMinutes.value / 60);
+  const m = weeklyMinutes.value % 60;
+  return `${h}h ${m.toString().padStart(2, '0')}m`;
+});
 
 const quickStartItems = [
   { label: 'Guitar', emoji: '🎸', to: '/instruments/guitar' },
   { label: 'Bass', emoji: '🎸', to: '/instruments/bass' },
   { label: 'Piano', emoji: '🎹', to: '/instruments/piano' },
   { label: 'Violin', emoji: '🎻', to: '/instruments/violin' },
-]
+];
 
 onMounted(() => {
-  practiceStore.fetchSessions()
-})
+  practiceStore.fetchSessions();
+});
 </script>
 
 <template>
@@ -44,13 +44,19 @@ onMounted(() => {
       <StreakCounter />
     </div>
 
-    <StaggeredList v-if="!practiceStore.isLoading" tag="div" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+    <StaggeredList
+      v-if="!practiceStore.isLoading"
+      tag="div"
+      class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
+    >
       <!-- This Week's Practice -->
       <NordCard title="This Week's Practice">
         <div class="text-center py-4">
           <div class="text-4xl font-bold text-primary">{{ weeklyFormatted }}</div>
           <p class="text-text-muted mt-2">
-            {{ practiceStore.sessionsThisWeek.length }} session{{ practiceStore.sessionsThisWeek.length !== 1 ? 's' : '' }}
+            {{ practiceStore.sessionsThisWeek.length }} session{{
+              practiceStore.sessionsThisWeek.length !== 1 ? 's' : ''
+            }}
           </p>
         </div>
       </NordCard>

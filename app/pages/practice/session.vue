@@ -1,155 +1,177 @@
 <script setup lang="ts">
-definePageMeta({ layout: 'fullscreen' })
+definePageMeta({ layout: 'fullscreen' });
 
-const router = useRouter()
-const route = useRoute()
-const settingsStore = useSettingsStore()
-const instrumentStore = useInstrumentStore()
+const router = useRouter();
+const route = useRoute();
+const settingsStore = useSettingsStore();
+const instrumentStore = useInstrumentStore();
 const {
-  isActive, isPaused, elapsed,
-  startSession, pauseSession, resumeSession, stopSession, saveSession,
-  restoreSession, getStoredSession, getSessionRecoveryInfo, clearStaleSessions, clearStorage, formatTime, formatDuration,
-} = usePracticeSession()
+  isActive,
+  isPaused,
+  elapsed,
+  startSession,
+  pauseSession,
+  resumeSession,
+  stopSession,
+  saveSession,
+  restoreSession,
+  getStoredSession,
+  getSessionRecoveryInfo,
+  clearStaleSessions,
+  clearStorage,
+  formatTime,
+  formatDuration,
+} = usePracticeSession();
 
-const selectedInstrumentId = ref('')
-const selectedSongId = ref('')
-const songs = ref<Array<{ id: string; title: string; artist: string | null; instrumentType: string }>>([])
-const sessionNotes = ref('')
-const tagsInput = ref('')
-const sessionStarted = ref(false)
-const showEndConfirm = ref(false)
-const showRecovery = ref(false)
-const recoveredSession = ref<Awaited<ReturnType<typeof getStoredSession>>>(null)
-const sessionRecoveryInfo = ref<Awaited<ReturnType<typeof getSessionRecoveryInfo>>>(null)
-const targetBpm = ref(140)
-const metronomeRef = ref<{ setBpm: (bpm: number) => void; adjustBpm: (delta: number) => void; togglePlayback: () => void } | null>(null)
+const selectedInstrumentId = ref('');
+const selectedSongId = ref('');
+const songs = ref<
+  Array<{ id: string; title: string; artist: string | null; instrumentType: string }>
+>([]);
+const sessionNotes = ref('');
+const tagsInput = ref('');
+const sessionStarted = ref(false);
+const showEndConfirm = ref(false);
+const showRecovery = ref(false);
+const recoveredSession = ref<Awaited<ReturnType<typeof getStoredSession>>>(null);
+const sessionRecoveryInfo = ref<Awaited<ReturnType<typeof getSessionRecoveryInfo>>>(null);
+const targetBpm = ref(140);
+const metronomeRef = ref<{
+  setBpm: (bpm: number) => void;
+  adjustBpm: (delta: number) => void;
+  togglePlayback: () => void;
+} | null>(null);
 
 const tags = computed(() =>
   tagsInput.value
     .split(',')
     .map((t) => t.trim())
     .filter(Boolean),
-)
+);
 
 function removeTag(index: number) {
-  const arr = tags.value.slice()
-  arr.splice(index, 1)
-  tagsInput.value = arr.join(', ')
+  const arr = tags.value.slice();
+  arr.splice(index, 1);
+  tagsInput.value = arr.join(', ');
 }
 
 const filteredSongs = computed(() => {
-  if (!selectedInstrumentId.value) return songs.value
-  const inst = instrumentStore.instruments.find((i) => i.id === selectedInstrumentId.value)
-  if (!inst) return songs.value
-  return songs.value.filter((s) => s.instrumentType === inst.type)
-})
+  if (!selectedInstrumentId.value) return songs.value;
+  const inst = instrumentStore.instruments.find((i) => i.id === selectedInstrumentId.value);
+  if (!inst) return songs.value;
+  return songs.value.filter((s) => s.instrumentType === inst.type);
+});
 
 const selectedSongTitle = computed(() => {
-  if (!selectedSongId.value) return null
-  const song = songs.value.find((s) => s.id === selectedSongId.value)
-  return song ? `${song.title}${song.artist ? ` - ${song.artist}` : ''}` : null
-})
+  if (!selectedSongId.value) return null;
+  const song = songs.value.find((s) => s.id === selectedSongId.value);
+  return song ? `${song.title}${song.artist ? ` - ${song.artist}` : ''}` : null;
+});
 
 function handleStart() {
-  if (!selectedInstrumentId.value) return
-  startSession(selectedInstrumentId.value, settingsStore.defaultTempo, selectedSongId.value || undefined)
-  sessionStarted.value = true
-  targetBpm.value = settingsStore.defaultTempo + 20
+  if (!selectedInstrumentId.value) return;
+  startSession(
+    selectedInstrumentId.value,
+    settingsStore.defaultTempo,
+    selectedSongId.value || undefined,
+  );
+  sessionStarted.value = true;
+  targetBpm.value = settingsStore.defaultTempo + 20;
 }
 
 function handleEndClick() {
-  showEndConfirm.value = true
+  showEndConfirm.value = true;
 }
 
 async function handleConfirmEnd() {
-  showEndConfirm.value = false
-  await saveSession(sessionNotes.value || undefined, tags.value.length ? tags.value : undefined)
-  router.push('/practice/history')
+  showEndConfirm.value = false;
+  await saveSession(sessionNotes.value || undefined, tags.value.length ? tags.value : undefined);
+  router.push('/practice/history');
 }
 
 function handleCancelEnd() {
-  showEndConfirm.value = false
+  showEndConfirm.value = false;
 }
 
 function handleTempoChange(bpm: number) {
-  metronomeRef.value?.setBpm(bpm)
+  metronomeRef.value?.setBpm(bpm);
 }
 
 function togglePause() {
   if (isPaused.value) {
-    resumeSession()
+    resumeSession();
   } else {
-    pauseSession()
+    pauseSession();
   }
 }
 
 function handleRecoveryResume() {
   if (recoveredSession.value) {
-    restoreSession(recoveredSession.value)
-    selectedInstrumentId.value = recoveredSession.value.instrumentId
-    sessionStarted.value = true
-    targetBpm.value = (recoveredSession.value.tempoBpm || settingsStore.defaultTempo) + 20
+    restoreSession(recoveredSession.value);
+    selectedInstrumentId.value = recoveredSession.value.instrumentId;
+    sessionStarted.value = true;
+    targetBpm.value = (recoveredSession.value.tempoBpm || settingsStore.defaultTempo) + 20;
   }
-  showRecovery.value = false
-  recoveredSession.value = null
+  showRecovery.value = false;
+  recoveredSession.value = null;
 }
 
 function handleRecoveryDiscard() {
-  clearStorage()
-  showRecovery.value = false
-  recoveredSession.value = null
+  clearStorage();
+  showRecovery.value = false;
+  recoveredSession.value = null;
 }
 
 // Keyboard shortcuts
 useKeyboardShortcuts({
   onToggleMetronome: () => {
-    metronomeRef.value?.togglePlayback()
+    metronomeRef.value?.togglePlayback();
   },
   onBpmAdjust: (delta: number) => {
-    metronomeRef.value?.adjustBpm(delta)
+    metronomeRef.value?.adjustBpm(delta);
   },
   onTogglePause: () => {
     if (sessionStarted.value) {
-      togglePause()
+      togglePause();
     }
   },
-})
+});
 
 onMounted(async () => {
   if (instrumentStore.instruments.length === 0) {
-    await instrumentStore.fetchInstruments()
+    await instrumentStore.fetchInstruments();
   }
 
   // Fetch songs for the song selector
   try {
-    const res = await $fetch<{ data: typeof songs.value }>('/api/songs')
-    songs.value = res.data
+    const res = await $fetch<{ data: typeof songs.value }>('/api/songs');
+    songs.value = res.data;
   } catch {
-    songs.value = []
+    songs.value = [];
   }
 
   // Read instrument type from query param and resolve to UUID
-  const queryInstrument = route.query.instrument as string | undefined
-  const instrumentType = queryInstrument || settingsStore.defaultInstrument
-  const matched = instrumentStore.instruments.find((i) => i.type === instrumentType)
+  const queryInstrument = route.query.instrument as string | undefined;
+  const instrumentType = queryInstrument || settingsStore.defaultInstrument;
+  const matched = instrumentStore.instruments.find((i) => i.type === instrumentType);
   if (matched) {
-    selectedInstrumentId.value = matched.id
+    selectedInstrumentId.value = matched.id;
   }
 
   // Pre-select song from query param
-  const querySong = route.query.song as string | undefined
+  const querySong = route.query.song as string | undefined;
   if (querySong) {
-    selectedSongId.value = querySong
+    selectedSongId.value = querySong;
   }
 
   // Check for recoverable session with age information
-  const recoveryInfo = getSessionRecoveryInfo()
+  const recoveryInfo = getSessionRecoveryInfo();
   if (recoveryInfo) {
-    recoveredSession.value = recoveryInfo.session
-    sessionRecoveryInfo.value = recoveryInfo
-    showRecovery.value = true
+    recoveredSession.value = recoveryInfo.session;
+    sessionRecoveryInfo.value = recoveryInfo;
+    showRecovery.value = true;
   }
-})
+});
 </script>
 
 <template>
@@ -186,15 +208,20 @@ onMounted(async () => {
     <!-- Active session -->
     <template v-else>
       <!-- Sticky mobile controls -->
-      <div class="sticky top-12 z-30 bg-surface border-b border-border p-3 flex items-center justify-between lg:hidden -mx-4 -mt-6 mb-2">
+      <div
+        class="sticky top-12 z-30 bg-surface border-b border-border p-3 flex items-center justify-between lg:hidden -mx-4 -mt-6 mb-2"
+      >
         <span class="text-xl font-mono font-bold text-primary">{{ formatTime(elapsed) }}</span>
         <div class="flex gap-2">
-          <NordButton v-if="isActive" size="sm" :variant="isPaused ? 'primary' : 'ghost'" @click="togglePause">
+          <NordButton
+            v-if="isActive"
+            size="sm"
+            :variant="isPaused ? 'primary' : 'ghost'"
+            @click="togglePause"
+          >
             {{ isPaused ? 'Resume' : 'Pause' }}
           </NordButton>
-          <NordButton variant="danger" size="sm" @click="handleEndClick">
-            End
-          </NordButton>
+          <NordButton variant="danger" size="sm" @click="handleEndClick"> End </NordButton>
         </div>
       </div>
 
@@ -255,7 +282,6 @@ onMounted(async () => {
         </div>
       </div>
 
-
       <!-- Notes & Tags -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <NordCard title="Session Notes">
@@ -289,9 +315,7 @@ onMounted(async () => {
 
       <!-- End Session -->
       <div class="hidden lg:flex justify-center pb-8">
-        <NordButton variant="danger" size="lg" @click="handleEndClick">
-          End Session
-        </NordButton>
+        <NordButton variant="danger" size="lg" @click="handleEndClick"> End Session </NordButton>
       </div>
     </template>
 
@@ -312,14 +336,18 @@ onMounted(async () => {
         <p class="text-text-muted">
           You have an unfinished practice session. Would you like to resume where you left off?
         </p>
-        
+
         <!-- Session age display -->
         <div v-if="sessionRecoveryInfo" class="bg-surface-alt border border-border rounded-md p-4">
           <div class="flex items-center justify-between mb-2">
             <span class="text-sm font-medium text-text">Session Details:</span>
-            <span 
+            <span
               class="text-xs px-2 py-1 rounded-full"
-              :class="sessionRecoveryInfo.isStale ? 'bg-warning/20 text-warning' : 'bg-success/20 text-success'"
+              :class="
+                sessionRecoveryInfo.isStale
+                  ? 'bg-warning/20 text-warning'
+                  : 'bg-success/20 text-success'
+              "
             >
               {{ sessionRecoveryInfo.isStale ? 'Stale Session' : 'Recent Session' }}
             </span>
@@ -339,26 +367,31 @@ onMounted(async () => {
             </div>
             <div class="flex justify-between">
               <span class="text-text-muted">Time elapsed:</span>
-              <span class="text-text font-mono">{{ formatTime(sessionRecoveryInfo.session.accumulatedSeconds) }}</span>
+              <span class="text-text font-mono">{{
+                formatTime(sessionRecoveryInfo.session.accumulatedSeconds)
+              }}</span>
             </div>
             <div v-if="sessionRecoveryInfo.session.isPaused" class="flex justify-between">
               <span class="text-text-muted">Status:</span>
               <span class="text-text">Paused</span>
             </div>
           </div>
-          
+
           <!-- Warning for stale sessions -->
-          <div v-if="sessionRecoveryInfo.isStale" class="mt-3 p-3 bg-warning/10 border border-warning rounded-md">
+          <div
+            v-if="sessionRecoveryInfo.isStale"
+            class="mt-3 p-3 bg-warning/10 border border-warning rounded-md"
+          >
             <p class="text-sm text-warning">
               This session is over 24 hours old. Consider discarding and starting fresh.
             </p>
           </div>
         </div>
-        
+
         <div class="flex justify-end gap-3">
-          <NordButton 
-            v-if="sessionRecoveryInfo?.isStale" 
-            variant="ghost" 
+          <NordButton
+            v-if="sessionRecoveryInfo?.isStale"
+            variant="ghost"
             @click="handleRecoveryDiscard"
           >
             Discard Old Session

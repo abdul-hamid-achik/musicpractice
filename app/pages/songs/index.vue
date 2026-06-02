@@ -1,99 +1,97 @@
 <script setup lang="ts">
-import type { Song } from '#shared/types/notation'
-import type { ApiResponse } from '#shared/types/server'
+import type { Song } from '#shared/types/notation';
+import type { ApiResponse } from '#shared/types/server';
 
-const showAddModal = ref(false)
-const isLoading = ref(false)
+const showAddModal = ref(false);
+const isLoading = ref(false);
 
 // Search and filters
-const searchQuery = ref('')
-const instrumentTypeFilter = ref<string>('')
-const difficultyFilter = ref<string>('')
+const searchQuery = ref('');
+const instrumentTypeFilter = ref<string>('');
+const difficultyFilter = ref<string>('');
 
 // Debounced search (300ms delay)
-const debouncedSearch = useDebounce(searchQuery, 300)
+const debouncedSearch = useDebounce(searchQuery, 300);
 
 // Pagination
-const currentPage = ref(1)
-const pageSize = ref(20)
+const currentPage = ref(1);
+const pageSize = ref(20);
 
 // Songs data
-const songsData = ref<Song[]>([])
-const totalSongs = ref(0)
-const totalPages = ref(0)
+const songsData = ref<Song[]>([]);
+const totalSongs = ref(0);
+const totalPages = ref(0);
 
 // Build query params for API call
 function buildQueryParams() {
   const params: Record<string, string> = {
     page: String(currentPage.value),
     limit: String(pageSize.value),
-  }
+  };
 
   if (debouncedSearch.value) {
-    params.search = debouncedSearch.value
+    params.search = debouncedSearch.value;
   }
   if (instrumentTypeFilter.value) {
-    params.instrumentType = instrumentTypeFilter.value
+    params.instrumentType = instrumentTypeFilter.value;
   }
   if (difficultyFilter.value) {
-    params.difficulty = difficultyFilter.value
+    params.difficulty = difficultyFilter.value;
   }
 
-  return params
+  return params;
 }
 
 // Fetch songs from API
 async function fetchSongs() {
-  isLoading.value = true
+  isLoading.value = true;
   try {
-    const params = buildQueryParams()
+    const params = buildQueryParams();
     const queryString = Object.entries(params)
       .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
-      .join('&')
+      .join('&');
 
-    const response = await apiGet<ApiResponse<Song[]>>(
-      `/api/songs?${queryString}`,
-      { suppressError: true },
-    )
+    const response = await apiGet<ApiResponse<Song[]>>(`/api/songs?${queryString}`, {
+      suppressError: true,
+    });
 
-    songsData.value = response.data
-    totalSongs.value = response.total ?? 0
-    currentPage.value = response.page ?? 1
-    totalPages.value = Math.ceil((response.total ?? 0) / (response.limit ?? pageSize.value))
-  } catch (error) {
-    console.error('Failed to fetch songs:', error)
-    songsData.value = []
-    totalSongs.value = 0
+    songsData.value = response.data;
+    totalSongs.value = response.total ?? 0;
+    currentPage.value = response.page ?? 1;
+    totalPages.value = Math.ceil((response.total ?? 0) / (response.limit ?? pageSize.value));
+  } catch {
+    songsData.value = [];
+    totalSongs.value = 0;
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
 }
 
 // Watch for changes and refetch
 watch([debouncedSearch, instrumentTypeFilter, difficultyFilter], () => {
-  currentPage.value = 1 // Reset to first page when filters change
-  fetchSongs()
-})
+  currentPage.value = 1; // Reset to first page when filters change
+  fetchSongs();
+});
 
 watch(currentPage, () => {
-  fetchSongs()
-})
+  fetchSongs();
+});
 
 // Initial fetch
-await fetchSongs()
+await fetchSongs();
 
 // Clear all filters
 function clearFilters() {
-  searchQuery.value = ''
-  instrumentTypeFilter.value = ''
-  difficultyFilter.value = ''
-  currentPage.value = 1
+  searchQuery.value = '';
+  instrumentTypeFilter.value = '';
+  difficultyFilter.value = '';
+  currentPage.value = 1;
 }
 
 // Check if any filters are active
 const hasActiveFilters = computed(() => {
-  return debouncedSearch.value || instrumentTypeFilter.value || difficultyFilter.value
-})
+  return debouncedSearch.value || instrumentTypeFilter.value || difficultyFilter.value;
+});
 
 // Add song form
 const newSong = ref({
@@ -103,15 +101,22 @@ const newSong = ref({
   difficulty: 'beginner',
   format: 'alphatex',
   notationData: '',
-})
+});
 
 async function submitSong() {
   await apiPost('/api/songs', newSong.value, {
     successMessage: 'Song added successfully',
-  })
-  showAddModal.value = false
-  newSong.value = { title: '', artist: '', instrumentType: 'guitar', difficulty: 'beginner', format: 'alphatex', notationData: '' }
-  fetchSongs()
+  });
+  showAddModal.value = false;
+  newSong.value = {
+    title: '',
+    artist: '',
+    instrumentType: 'guitar',
+    difficulty: 'beginner',
+    format: 'alphatex',
+    notationData: '',
+  };
+  fetchSongs();
 }
 
 const difficultyColors: Record<string, string> = {
@@ -119,7 +124,7 @@ const difficultyColors: Record<string, string> = {
   intermediate: 'bg-nord13/20 text-nord13',
   advanced: 'bg-nord12/20 text-nord12',
   expert: 'bg-nord11/20 text-nord11',
-}
+};
 </script>
 
 <template>
@@ -167,6 +172,8 @@ const difficultyColors: Record<string, string> = {
               stroke-width="2"
               stroke-linecap="round"
               stroke-linejoin="round"
+              role="button"
+              aria-label="Clear search"
               @click="searchQuery = ''"
             >
               <path d="M18 6 6 18" />
@@ -208,13 +215,22 @@ const difficultyColors: Record<string, string> = {
       <div v-if="hasActiveFilters" class="flex items-center justify-between">
         <span class="text-sm text-text-muted">
           Active filters:
-          <span v-if="debouncedSearch" class="inline-flex items-center gap-1 ml-1 px-2 py-0.5 bg-primary/20 text-primary rounded-full text-xs">
+          <span
+            v-if="debouncedSearch"
+            class="inline-flex items-center gap-1 ml-1 px-2 py-0.5 bg-primary/20 text-primary rounded-full text-xs"
+          >
             Search: "{{ debouncedSearch }}"
           </span>
-          <span v-if="instrumentTypeFilter" class="inline-flex items-center gap-1 ml-1 px-2 py-0.5 bg-primary/20 text-primary rounded-full text-xs capitalize">
+          <span
+            v-if="instrumentTypeFilter"
+            class="inline-flex items-center gap-1 ml-1 px-2 py-0.5 bg-primary/20 text-primary rounded-full text-xs capitalize"
+          >
             {{ instrumentTypeFilter }}
           </span>
-          <span v-if="difficultyFilter" class="inline-flex items-center gap-1 ml-1 px-2 py-0.5 bg-primary/20 text-primary rounded-full text-xs capitalize">
+          <span
+            v-if="difficultyFilter"
+            class="inline-flex items-center gap-1 ml-1 px-2 py-0.5 bg-primary/20 text-primary rounded-full text-xs capitalize"
+          >
             {{ difficultyFilter }}
           </span>
         </span>
@@ -228,18 +244,18 @@ const difficultyColors: Record<string, string> = {
     </div>
 
     <!-- Loading State with Skeleton Cards -->
-    <div v-if="isLoading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" aria-busy="true" aria-label="Loading songs...">
+    <div
+      v-if="isLoading"
+      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+      aria-busy="true"
+      aria-label="Loading songs..."
+    >
       <SkeletonCard v-for="i in 6" :key="i" variant="card" height="140px" />
     </div>
 
     <!-- Song List -->
     <StaggeredList v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      <NuxtLink
-        v-for="song in songsData"
-        :key="song.id"
-        :to="`/songs/${song.id}`"
-        class="block"
-      >
+      <NuxtLink v-for="song in songsData" :key="song.id" :to="`/songs/${song.id}`" class="block">
         <NordCard>
           <h3 class="text-lg font-semibold text-text mb-1">{{ song.title }}</h3>
           <p v-if="song.artist" class="text-text-muted text-sm mb-3">{{ song.artist }}</p>
@@ -261,7 +277,15 @@ const difficultyColors: Record<string, string> = {
 
     <!-- Empty State -->
     <div v-if="!isLoading && songsData.length === 0" class="text-center py-16">
-      <svg class="w-16 h-16 mx-auto text-text-muted/50 mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <svg
+        class="w-16 h-16 mx-auto text-text-muted/50 mb-4"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
         <path d="M9 18V5l12-2v13" />
         <circle cx="6" cy="18" r="3" />
         <circle cx="18" cy="16" r="3" />
@@ -270,41 +294,27 @@ const difficultyColors: Record<string, string> = {
         {{ hasActiveFilters ? 'No songs match your filters' : 'Your song library is empty' }}
       </p>
       <p class="text-sm text-text-muted mb-6">
-        {{ hasActiveFilters ? 'Try adjusting your search or filters' : 'Add your first song to start building your personal library.' }}
+        {{
+          hasActiveFilters
+            ? 'Try adjusting your search or filters'
+            : 'Add your first song to start building your personal library.'
+        }}
       </p>
-      <NordButton
-        v-if="hasActiveFilters"
-        variant="secondary"
-        @click="clearFilters"
-      >
+      <NordButton v-if="hasActiveFilters" variant="secondary" @click="clearFilters">
         Clear Filters
       </NordButton>
-      <NordButton
-        v-else
-        variant="primary"
-        @click="showAddModal = true"
-      >
+      <NordButton v-else variant="primary" @click="showAddModal = true">
         Add Your First Song
       </NordButton>
     </div>
 
     <!-- Pagination -->
     <div v-if="!isLoading && totalPages > 1" class="flex justify-center items-center gap-2 mt-8">
-      <NordButton
-        variant="ghost"
-        :disabled="currentPage <= 1"
-        @click="currentPage--"
-      >
+      <NordButton variant="ghost" :disabled="currentPage <= 1" @click="currentPage--">
         Previous
       </NordButton>
-      <span class="text-text-muted">
-        Page {{ currentPage }} of {{ totalPages }}
-      </span>
-      <NordButton
-        variant="ghost"
-        :disabled="currentPage >= totalPages"
-        @click="currentPage++"
-      >
+      <span class="text-text-muted"> Page {{ currentPage }} of {{ totalPages }} </span>
+      <NordButton variant="ghost" :disabled="currentPage >= totalPages" @click="currentPage++">
         Next
       </NordButton>
     </div>
@@ -382,7 +392,9 @@ const difficultyColors: Record<string, string> = {
         </div>
 
         <div class="flex justify-end gap-3 pt-2">
-          <NordButton variant="ghost" type="button" @click="showAddModal = false">Cancel</NordButton>
+          <NordButton variant="ghost" type="button" @click="showAddModal = false"
+            >Cancel</NordButton
+          >
           <NordButton variant="primary" type="submit">Add Song</NordButton>
         </div>
       </form>
