@@ -1,0 +1,84 @@
+version: "3"
+
+# Cairntrace behavioral automations for the MusicPractice app.
+#
+# Prereqs:
+#   - the musicpractice dev server running on http://localhost:3000
+#     (`bun run dev` in another terminal)
+#   - `cairn` on PATH (verified via `cairn doctor`)
+#   - the test-user env vars exported (see `task setup` below)
+#
+# Quick start:
+#   task              # list tasks
+#   task setup        # print suggested MP_E2E_NEW_* values
+#   task test         # run every flow in flows/ sequentially
+#   task run FLOW=flows/auth_register_login.yml
+#                     # run a single flow
+#   task cleanup      # kill orphaned agent-browser/Chrome (free memory)
+#
+# Pass extra cairn flags after `--`, e.g.   task test -- --md
+#                                           task run FLOW=flows/foo.yml -- --headed
+
+vars:
+  CONFIG: "{{.TASKFILE_DIR}}/cairntrace.config.yml"
+  BASE_URL: '{{.BASE_URL | default "http://localhost:3000"}}'
+
+tasks:
+  default:
+    cmds: [task --list]
+    silent: true
+
+  doctor:
+    desc: "Verify cairn / node / agent-browser are all installed."
+    cmds:
+      - cairn doctor
+
+  setup:
+    desc: "Print suggested MP_E2E_NEW_* values for the register path. Copy/paste into your shell."
+    cmds:
+      - |
+        STAMP=$(date +%s)
+        cat <<EOF
+        # Paste into your shell — register a fresh user named "cairn${STAMP}":
+        export MP_E2E_NEW_NAME="Cairn Test User"
+        export MP_E2E_NEW_EMAIL="cairn${STAMP}@e2e.musicpractice.local"
+        export MP_E2E_NEW_USERNAME="cairn${STAMP}"
+        export MP_E2E_NEW_PASSWORD="CairnPass!${STAMP}"
+        export MP_E2E_ACCOUNT_NEW_PASSWORD="CairnPass2!${STAMP}"
+
+        # OR, if you already have a seeded test user, set:
+        # export MP_E2E_EMAIL='...'
+        # export MP_E2E_PASSWORD='...'
+        EOF
+
+  run:
+    desc: "Run a single flow. Usage: task run FLOW=flows/<name>.yml"
+    requires:
+      vars: [FLOW]
+    cmds:
+      - cairn run {{.FLOW}} --config {{.CONFIG}} --cold-start --json
+
+  test:
+    desc: "Run every flow in flows/ sequentially. One browser at a time, cleanup between."
+    cmds:
+      - |
+        cleanup() { pkill -f "agent-browser" 2>/dev/null || true; pkill -f "headless_shell" 2>/dev/null || true; }
+        trap cleanup EXIT INT TERM
+        shopt -s nullglob
+        for f in flows/*.yml; do
+          echo "=== $f ==="
+          cairn run "$f" --config {{.CONFIG}} --cold-start --json || { echo "FAILED: $f"; cleanup; exit 1; }
+          cleanup
+        done
+
+  perf:
+    desc: "Run only the performance baseline spec."
+    cmds:
+      - cairn run flows/perf_landing_dashboard.yml --config {{.CONFIG}} --cold-start --json
+
+  cleanup:
+    desc: "Kill orphaned agent-browser / headless_shell processes to free memory."
+    cmds:
+      - pkill -f "agent-browser" 2>/dev/null || true
+      - pkill -f "headless_shell" 2>/dev/null || true
+      - echo "cleanup done"

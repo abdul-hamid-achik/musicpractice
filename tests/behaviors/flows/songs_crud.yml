@@ -1,0 +1,176 @@
+# Cairntrace behavioral spec — full CRUD cycle on a song.
+#
+# Creates a song via the Add Song modal in /songs, asserts the row appears
+# in the songs list, edits the title, asserts the edit is visible, then
+# deletes it and asserts the list is empty. The API+UI path is exercised
+# together so any drift between what the UI sends and what the API expects
+# fails this spec.
+version: 1
+name: songs_crud
+intent: >
+  WHAT THIS VALIDATES: a signed-in user can create a song (via the
+  Add Song modal in /songs), see it appear in the list, edit its title,
+  see the edit reflected, delete it, and have it disappear from the list.
+  POST/PUT/DELETE /api/songs all return 2xx with no auth leakage.
+
+  REGRESSION GUARDED: songs/index.vue fetches via fetch() in onMounted;
+  if the API path / response shape changes (e.g. flat {songs:[]} vs
+  {data:[]}), the songs table would silently render empty. The
+  "song_visible_after_create" outcome catches that.
+
+  The edit step renames the song to "<name> edited" so the same row
+  can be tracked across reloads without depending on a unique string.
+environment: local
+mode: normal
+metadata:
+  feature: songs
+  priority: high
+  tags: [songs, crud, hybrid]
+imports:
+  - ../actions/register_musicpractice.yml
+outcomes:
+  - id: create_song_api_ok
+    description: POST /api/songs returns 2xx
+    verify:
+      network:
+        method: POST
+        urlContains: /api/songs
+        status:
+          in: [200, 201, 204]
+  - id: song_visible_after_create
+    description: the new song title appears in the songs list
+    verify:
+      text:
+        contains: ${vars.songTitle}
+  - id: edit_song_api_ok
+    description: PUT /api/songs/<id> returns 2xx
+    verify:
+      network:
+        method: PUT
+        urlContains: /api/songs/
+        status:
+          in: [200, 201, 204]
+  - id: edited_title_visible
+    description: the edited title is rendered in the list
+    verify:
+      text:
+        contains: ${vars.songEditedTitle}
+  - id: delete_song_api_ok
+    description: DELETE /api/songs/<id> returns 2xx
+    verify:
+      network:
+        method: DELETE
+        urlContains: /api/songs/
+        status:
+          in: [200, 201, 204]
+  - id: song_gone_after_delete
+    description: the song title no longer appears in the songs list
+    verify:
+      notText:
+        contains: ${vars.songEditedTitle}
+  - id: no_console_errors
+    description: no console errors during the CRUD cycle
+    verify:
+      console:
+        errorsMax: 0
+steps:
+  - id: bootstrap_auth
+    use: register_musicpractice
+  - id: open_songs
+    open: ${vars.songsPath}
+  - id: wait_songs_page
+    wait:
+      text: Songs
+      timeoutMs: 15000
+  - id: open_add_song_modal
+    click:
+      by: role
+      role: button
+      name: Add Song
+  - id: wait_add_song_modal
+    wait:
+      text: New song
+      timeoutMs: 10000
+  - id: fill_song_title
+    fill:
+      by: label
+      name: Title
+      value: ${vars.songTitle}
+  - id: fill_song_artist
+    fill:
+      by: label
+      name: Artist
+      value: ${vars.songArtist}
+  - id: fill_song_bpm
+    fill:
+      by: label
+      name: BPM
+      value: '120'
+  - id: submit_add_song
+    click:
+      by: role
+      role: button
+      name: Save
+  - id: wait_song_appears
+    wait:
+      text: ${vars.songTitle}
+      timeoutMs: 15000
+  - id: snapshot_with_song
+    snapshot:
+      interactive: true
+      label: Songs list with new song visible
+  - id: open_song_actions
+    click:
+      by: role
+      role: button
+      name: Actions
+  - id: click_edit
+    click:
+      by: role
+      role: menuitem
+      name: Edit
+  - id: wait_edit_form
+    wait:
+      text: Edit song
+      timeoutMs: 10000
+  - id: fill_new_title
+    fill:
+      by: label
+      name: Title
+      value: ${vars.songEditedTitle}
+  - id: submit_edit
+    click:
+      by: role
+      role: button
+      name: Save
+  - id: wait_edit_visible
+    wait:
+      text: ${vars.songEditedTitle}
+      timeoutMs: 15000
+  - id: open_song_actions_for_delete
+    click:
+      by: role
+      role: button
+      name: Actions
+  - id: click_delete
+    click:
+      by: role
+      role: menuitem
+      name: Delete
+  - id: confirm_delete
+    when: text:Are you sure
+    click:
+      by: role
+      role: button
+      name: Delete
+  - id: wait_song_gone
+    wait:
+      notText: ${vars.songEditedTitle}
+      timeoutMs: 15000
+artifacts:
+  capture:
+    screenshots: always
+    snapshots: on-failure
+    console: always
+    network: always
+    trace: on-failure

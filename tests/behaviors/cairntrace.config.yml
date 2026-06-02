@@ -1,0 +1,39 @@
+version: 1
+project: musicpractice-behaviors
+defaultEnvironment: local
+artifactRoot: ./runs
+
+environments:
+  local:
+    baseUrl: http://localhost:3000
+    vars:
+      # Auth routes
+      registerPath: /auth/register
+      loginPath: /auth/login
+      logoutPath: /api/auth/logout
+      # App routes
+      homePath: /
+      dashboardPath: /dashboard
+      songsPath: /songs
+      practiceSessionPath: /practice/session
+      practiceHistoryPath: /practice/history
+      settingsPath: /settings
+      accountPath: /account
+      # Per-flow test data (set once, reused by the flows that read them).
+      # These are placeholders; the Taskfile `task run FLOW=...` accepts
+      # overrides via the env, e.g. `SONG_TITLE='My custom song' task run FLOW=...`
+      songTitle: "Cairn test song"
+      songArtist: "Cairntrace"
+      songEditedTitle: "Cairn test song (edited)"
+
+secrets:
+  provider: env
+  required: []
+  # Any env var can be referenced as ${secrets.NAME} — they are looked
+  # up via the `env` provider. The list below is documentation, not a
+  # schema constraint:
+  #   - MP_E2E_EMAIL, MP_E2E_PASSWORD          (login path)
+  #   - MP_E2E_NEW_NAME, MP_E2E_NEW_EMAIL,
+  #     MP_E2E_NEW_USERNAME, MP_E2E_NEW_PASSWORD
+  #                                            (register path; default)
+  #   - MP_E2E_ACCOUNT_NEW_PASSWORD           (account_change_password)

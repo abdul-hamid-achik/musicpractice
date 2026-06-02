@@ -1,0 +1,112 @@
+# Cairntrace behavioral spec — full practice session lifecycle.
+#
+# Starts a session on /practice/session, lets the timer run for a real
+# interval, saves the session, then confirms it appears in /practice/history.
+# The session is created via the UI; the history list fetches /api/sessions.
+version: 1
+name: practice_session_log_to_history
+intent: >
+  WHAT THIS VALIDATES: a signed-in user can start a practice session on
+  /practice/session, let the timer run, save the session, and see the
+  saved row in /practice/history. POST /api/sessions returns 2xx and
+  GET /api/sessions returns the new row.
+
+  REGRESSION GUARDED: a previous bug surfaced in the log: the sessions
+  error path used the wrong userId, so server logs mis-attributed
+  failures. The API outcomes here catch any 5xx during the round trip.
+
+  Timing note: the timer is real wall-clock. The spec waits a few seconds
+  with the page open, then saves. Don't shorten the wait below 3s or the
+  saved duration can be 0 (and the history row may not render).
+environment: local
+mode: normal
+metadata:
+  feature: practice
+  priority: high
+  tags: [practice, sessions, history, hybrid]
+imports:
+  - ../actions/register_musicpractice.yml
+outcomes:
+  - id: session_post_api_ok
+    description: POST /api/sessions returns 2xx when the session is saved
+    verify:
+      network:
+        method: POST
+        urlContains: /api/sessions
+        status:
+          in: [200, 201, 204]
+  - id: history_list_loaded
+    description: GET /api/sessions returns 2xx when the history page loads
+    verify:
+      network:
+        method: GET
+        urlContains: /api/sessions
+        status:
+          in: [200, 201, 204]
+  - id: no_console_errors
+    description: no console errors during the practice flow
+    verify:
+      console:
+        errorsMax: 0
+steps:
+  - id: bootstrap_auth
+    use: register_musicpractice
+  - id: open_practice_session
+    open: ${vars.practiceSessionPath}
+  - id: wait_session_page
+    wait:
+      text: Start session
+      timeoutMs: 15000
+  - id: snapshot_before_start
+    snapshot:
+      interactive: true
+      label: Practice session page before start
+  - id: start_session
+    click:
+      by: role
+      role: button
+      name: Start session
+  - id: wait_for_timer
+    wait:
+      load: networkidle
+      timeoutMs: 8000
+  - id: snapshot_timer_running
+    snapshot:
+      interactive: true
+      label: Timer running, mid-session
+  - id: stop_session
+    click:
+      by: role
+      role: button
+      name: Stop
+  - id: wait_for_end_modal
+    when: text:Save session
+    wait:
+      text: Save session
+      timeoutMs: 10000
+  - id: save_session
+    click:
+      by: role
+      role: button
+      name: Save session
+  - id: wait_after_save
+    wait:
+      load: networkidle
+      timeoutMs: 15000
+  - id: open_history
+    open: ${vars.practiceHistoryPath}
+  - id: wait_history_page
+    wait:
+      text: History
+      timeoutMs: 15000
+  - id: history_has_a_row
+    snapshot:
+      interactive: true
+      label: History page should now have at least one row
+artifacts:
+  capture:
+    screenshots: always
+    snapshots: on-failure
+    console: always
+    network: always
+    trace: on-failure

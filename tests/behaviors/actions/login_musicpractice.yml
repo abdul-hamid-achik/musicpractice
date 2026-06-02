@@ -1,0 +1,36 @@
+# Reusable action: log in as the configured user.
+# Reads secrets.MP_E2E_EMAIL / MP_E2E_PASSWORD from the env. Guarded so it
+# only fires when on the login page (so it can be called speculatively after
+# an open: as a "make sure we're logged in" hook).
+version: 1
+name: login_musicpractice
+steps:
+  - id: open_login
+    when: text:Sign in to your account
+    open: ${vars.loginPath}
+  - id: wait_login_form
+    when: text:Sign in to your account
+    wait:
+      text: Email or username
+      timeoutMs: 15000
+  - id: fill_identifier
+    when: text:Sign in to your account
+    fill:
+      by: label
+      name: Email or username
+      value: "${secrets.MP_E2E_EMAIL}"
+  - id: fill_password
+    when: text:Sign in to your account
+    fill:
+      by: label
+      name: Password
+      value: "${secrets.MP_E2E_PASSWORD}"
+  - id: submit_login
+    when: text:Sign in to your account
+    click:
+      by: selector
+      selector: button[type="submit"]
+  - id: wait_dashboard
+    wait:
+      text: Dashboard
+      timeoutMs: 15000

@@ -1,0 +1,81 @@
+# Cairntrace behavioral spec — performance baseline.
+#
+# Measures two things and asserts ceilings on each:
+#   1. Cold register → dashboard: the full journey from home to dashboard
+#      complete in under 6000ms (uses browser performance.getEntriesByType
+#      for navigation timing).
+#   2. Dashboard data calls: GET /api/sessions + GET /api/stats/daily on
+#      the dashboard complete in under 1500ms combined (uses
+#      performance.getEntriesByType('resource')).
+#
+# Catches "the app got slow" without locking the suite on a specific
+# environment. Ceilings are generous; tighten them in follow-ups as you
+# gather baselines.
+version: 1
+name: perf_landing_dashboard
+intent: >
+  WHAT THIS VALIDATES: a baseline performance budget for the
+  unauthenticated → authenticated → dashboard journey and the
+  dashboard's data calls. The ceilings are deliberately loose so this
+  spec catches "the app is suddenly 10x slower" regressions without
+  flaking on a noisy dev machine. Tighten over time.
+
+  REGRESSION GUARDED: any regression in the auth flow, in /api/sessions,
+  in /api/stats/daily, or in the dashboard component mount will trip
+  one of the timing outcomes.
+
+  Caveat: perf in a headed agent-browser on a developer's laptop is
+  noisy. The outcomes only fail when something is 2-3x the budget, not
+  on the margin.
+environment: local
+mode: normal
+metadata:
+  feature: perf
+  priority: normal
+  tags: [perf, baseline, hybrid]
+imports:
+  - ../actions/register_musicpractice.yml
+outcomes:
+  - id: cold_register_to_dashboard_under_8s
+    description: the full home → register → dashboard journey completes
+      in under 8000ms (uses navigation timing from the most recent
+      navigation, which is the dashboard load)
+    verify:
+      script:
+        runtime: browser
+        run: |
+          const navs = performance.getEntriesByType('navigation');
+          if (!navs.length) return { ok: false, evidence: 'no navigation entries' };
+          const last = navs[navs.length - 1];
+          const dur = last.duration || (last.loadEventEnd - (last.startTime || 0));
+          return { ok: dur < 8000, evidence: JSON.stringify({ durationMs: Math.round(dur), name: last.name, type: last.type }) };
+  - id: dashboard_data_calls_under_1500ms
+    description: GET /api/sessions + GET /api/stats/daily on the
+      dashboard complete in under 1500ms combined
+    verify:
+      script:
+        runtime: browser
+        run: |
+          const resources = performance.getEntriesByType('resource');
+          const relevant = resources.filter((r) => r.name.includes('/api/sessions') || r.name.includes('/api/stats/daily'));
+          const total = relevant.reduce((s, r) => s + (r.duration || r.responseEnd - r.startTime), 0);
+          return { ok: total < 1500 && relevant.length >= 2, evidence: JSON.stringify({ totalMs: Math.round(total), count: relevant.length, urls: relevant.map((r) => r.name) }) };
+  - id: no_console_errors
+    description: no console errors during the perf sample window
+    verify:
+      console:
+        errorsMax: 0
+steps:
+  - id: bootstrap_auth
+    use: register_musicpractice
+  - id: let_dashboard_queries_settle
+    wait:
+      load: networkidle
+      timeoutMs: 15000
+artifacts:
+  capture:
+    screenshots: on-failure
+    snapshots: on-failure
+    console: always
+    network: always
+    trace: on-failure

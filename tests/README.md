@@ -1,11 +1,18 @@
 # Tests
 
-This directory holds the Vitest suite for MusicPractice. The suite covers
+This directory holds the Vitest suite for MusicPractice **and** the
+Cairntrace behavioral automation suite. The Vitest suite covers
 client-side code (Vue components, composables, Pinia stores) and
 server-side code (Nitro route handlers, server utilities, env
-validation). All tests run in the same `vitest` process under
-`happy-dom`, with shared globals stubbed in `tests/setup.ts` so each
-file only has to set up the state it actually exercises.
+validation) in isolation. The Cairntrace suite under `behaviors/`
+covers the **real app through a real browser** — middleware redirects,
+cookie round-trips, network shape contracts, page rendering, perf
+budgets. Both are needed; neither replaces the other. See
+`behaviors/README.md` for the browser suite.
+
+All Vitest tests run in the same `vitest` process under `happy-dom`,
+with shared globals stubbed in `tests/setup.ts` so each file only has to
+set up the state it actually exercises.
 
 ## Running the suite
 
@@ -57,6 +64,21 @@ tests/
 │       ├── settings.test.ts
 │       ├── theory.test.ts
 │       └── toast.test.ts
+├── behaviors/                     # Cairntrace browser E2E (see behaviors/README.md)
+│   ├── cairntrace.config.yml
+│   ├── Taskfile.yml
+│   ├── README.md
+│   ├── actions/
+│   │   ├── login_musicpractice.yml
+│   │   └── register_musicpractice.yml
+│   └── flows/
+│       ├── auth_register_login.yml
+│       ├── dashboard_loads_with_streak.yml
+│       ├── songs_crud.yml
+│       ├── practice_session_log_to_history.yml
+│       ├── account_change_password.yml
+│       ├── settings_theme_persists.yml
+│       └── perf_landing_dashboard.yml
 └── ../server/                     # Server tests live next to the code
     ├── api/
     │   └── auth/register.post.test.ts

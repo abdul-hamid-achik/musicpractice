@@ -13,3 +13,4 @@ coverage
 .mavis
 .opencode
 auto-imports.d.ts
+tests/behaviors/runs/

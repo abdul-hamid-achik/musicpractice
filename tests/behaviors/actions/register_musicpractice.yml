@@ -1,0 +1,43 @@
+# Reusable action: register a fresh throwaway user.
+# Reads MP_E2E_NEW_NAME / MP_E2E_NEW_EMAIL / MP_E2E_NEW_USERNAME /
+# MP_E2E_NEW_PASSWORD from env. All four must be set for the register path
+# to work. Suggested setup: derive them once via the npm script
+# `bun run behaviors:setup` (see Taskfile / README) which prints the
+# values to copy.
+version: 1
+name: register_musicpractice
+steps:
+  - id: open_register
+    open: ${vars.registerPath}
+  - id: wait_register_form
+    wait:
+      text: Create your account
+      timeoutMs: 15000
+  - id: fill_name
+    fill:
+      by: label
+      name: Full name
+      value: "${secrets.MP_E2E_NEW_NAME}"
+  - id: fill_email
+    fill:
+      by: label
+      name: Email
+      value: "${secrets.MP_E2E_NEW_EMAIL}"
+  - id: fill_username
+    fill:
+      by: label
+      name: Username
+      value: "${secrets.MP_E2E_NEW_USERNAME}"
+  - id: fill_password
+    fill:
+      by: label
+      name: Password
+      value: "${secrets.MP_E2E_NEW_PASSWORD}"
+  - id: submit_register
+    click:
+      by: selector
+      selector: button[type="submit"]
+  - id: wait_dashboard_after_register
+    wait:
+      text: Dashboard
+      timeoutMs: 15000

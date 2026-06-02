@@ -1,0 +1,97 @@
+# Cairntrace behavioral spec — settings theme toggle persists across reload.
+#
+# Toggles the theme on /settings, reloads the page, confirms the toggle
+# is in the new state and that the documentElement has the .light class
+# (which app.vue uses to set the data-theme). The settings are stored in
+# localStorage; the verifier reads them back to confirm persistence.
+version: 1
+name: settings_theme_persists
+intent: >
+  WHAT THIS VALIDATES: toggling the dark/light theme on /settings writes
+  to localStorage and the new value survives a full page reload. The
+  pre-mount script in app.vue reads the same localStorage key to apply
+  the theme before the first paint, so we also check the
+  <html> .light class to guard against a regression where the pre-mount
+  script gets removed.
+
+  REGRESSION GUARDED: a known earlier issue was that the settings store
+  re-saved the default on every load, clobbering the user's choice. The
+  "theme_survives_reload" outcome guards against that.
+environment: local
+mode: normal
+metadata:
+  feature: settings
+  priority: normal
+  tags: [settings, theme, localStorage, hybrid]
+imports:
+  - ../actions/register_musicpractice.yml
+outcomes:
+  - id: theme_was_toggled
+    description: after a single toggle the toggle control reflects the
+      new state
+    verify:
+      script:
+        runtime: browser
+        run: |
+          const t = localStorage.getItem('musicpractice-settings');
+          if (!t) return { ok: false, evidence: 'no localStorage settings' };
+          const parsed = JSON.parse(t);
+          return { ok: !!parsed.theme, evidence: JSON.stringify(parsed) };
+  - id: theme_survives_reload
+    description: after a full page reload, the theme value is unchanged
+      AND <html> has the .light class matching
+    verify:
+      script:
+        runtime: browser
+        run: |
+          const t = localStorage.getItem('musicpractice-settings');
+          const parsed = t ? JSON.parse(t) : null;
+          if (!parsed?.theme) return { ok: false, evidence: 'no theme after reload' };
+          const html = document.documentElement;
+          const expected = parsed.theme === 'light' ? 'light' : 'dark';
+          const isLight = html.classList.contains('light');
+          return { ok: (expected === 'light') === isLight, evidence: JSON.stringify({ stored: parsed.theme, isLight }) };
+  - id: no_console_errors
+    description: no console errors during the toggle + reload
+    verify:
+      console:
+        errorsMax: 0
+steps:
+  - id: bootstrap_auth
+    use: register_musicpractice
+  - id: open_settings
+    open: ${vars.settingsPath}
+  - id: wait_settings_page
+    wait:
+      text: App Settings
+      timeoutMs: 15000
+  - id: capture_initial_theme
+    snapshot:
+      interactive: true
+      label: settings — initial theme
+  - id: toggle_theme
+    click:
+      by: role
+      role: switch
+      name: Dark Mode
+  - id: wait_after_toggle
+    wait:
+      load: networkidle
+      timeoutMs: 2000
+  - id: reload_settings
+    open: ${vars.settingsPath}
+  - id: wait_after_reload
+    wait:
+      text: App Settings
+      timeoutMs: 15000
+  - id: snapshot_after_reload
+    snapshot:
+      interactive: true
+      label: settings — after reload
+artifacts:
+  capture:
+    screenshots: always
+    snapshots: on-failure
+    console: always
+    network: on-failure
+    trace: on-failure

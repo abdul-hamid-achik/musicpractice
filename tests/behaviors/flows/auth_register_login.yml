@@ -1,0 +1,86 @@
+# Cairntrace behavioral spec — auth happy path: register, log out, log back in.
+#
+# Uses the hybrid auth pattern: if MP_E2E_EMAIL/PASSWORD are set in the env,
+# `login_musicpractice` is used; otherwise `register_musicpractice` self-creates
+# a throwaway user. Then we log out and log back in to prove the cookie round
+# trip.
+#
+# Outcomes are the contract; steps are repairable hints.
+version: 1
+name: auth_register_login
+intent: >
+  WHAT THIS VALIDATES: a user can register a new account, land on the
+  dashboard, log out from the account menu, and log back in with the same
+  credentials. This guards the auth middleware + cookie round trip + login
+  + register pages + dashboard redirect.
+
+  REGRESSION GUARDED: a previous version of `app/middleware/auth.ts` only
+  checked for cookie presence, not validity, so a stale/empty cookie let
+  the dashboard render for unauthenticated requests. The current middleware
+  validates via `/api/auth/me` (useRequestFetch); this spec confirms a
+  real session is required end to end.
+
+  HYBRID AUTH: the `ensure_auth` action picks login (when
+  MP_E2E_EMAIL/PASSWORD are present in env) or registration (when absent).
+  Spec then logs out and logs back in to exercise both surfaces.
+environment: local
+mode: normal
+metadata:
+  feature: auth
+  priority: high
+  tags: [auth, register, login, logout, hybrid]
+imports:
+  - ../actions/register_musicpractice.yml
+  - ../actions/login_musicpractice.yml
+outcomes:
+  - id: dashboard_renders_after_auth
+    description: after a successful auth, the dashboard route renders
+    verify:
+      text:
+        contains: Dashboard
+  - id: no_console_errors_during_auth
+    description: no console errors leak through register/login/logout
+    verify:
+      console:
+        errorsMax: 0
+  - id: logout_returns_to_home
+    description: after logout the user lands on a non-authenticated page
+    verify:
+      url:
+        matches: '^http://localhost:3000/?$|^http://localhost:3000/auth/login$'
+  - id: re_login_lands_on_dashboard
+    description: logging in again lands on the dashboard, proving the
+      session can be re-established
+    verify:
+      text:
+        contains: Dashboard
+steps:
+  - id: bootstrap_auth_via_hybrid
+    use: register_musicpractice
+  - id: open_account_menu
+    open: ${vars.accountPath}
+  - id: wait_account_page
+    wait:
+      text: Account
+      timeoutMs: 15000
+  - id: find_logout_button
+    snapshot:
+      label: account page — locate logout control
+  - id: click_logout
+    click:
+      by: role
+      role: button
+      name: Log out
+  - id: wait_after_logout
+    wait:
+      load: networkidle
+      timeoutMs: 15000
+  - id: log_back_in
+    use: login_musicpractice
+artifacts:
+  capture:
+    screenshots: always
+    snapshots: on-failure
+    console: always
+    network: on-failure
+    trace: on-failure

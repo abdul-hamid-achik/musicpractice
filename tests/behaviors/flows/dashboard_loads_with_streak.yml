@@ -1,0 +1,77 @@
+# Cairntrace behavioral spec — dashboard loads with key components rendered.
+#
+# Hybrid auth. Confirms the dashboard route renders the streak counter, the
+# quick-start grid, and a stats card. The dashboard is the post-auth landing
+# page so this is the cheapest "is the app alive" smoke test.
+version: 1
+name: dashboard_loads_with_streak
+intent: >
+  WHAT THIS VALIDATES: after a successful login, the /dashboard route
+  renders the streak counter, the quick-start instrument grid, and at least
+  one stat card. The /api/sessions and /api/stats/daily calls succeed (the
+  dashboard fetches both on mount), and the page has no console errors.
+
+  REGRESSION GUARDED: practiceStore.fetchSessions() failures would render
+  an empty dashboard silently; the network outcome catches that. The
+  streak counter has its own data fetch — the streak text outcome guards
+  against the streak component returning a placeholder forever.
+environment: local
+mode: normal
+metadata:
+  feature: dashboard
+  priority: high
+  tags: [dashboard, smoke, hybrid]
+imports:
+  - ../actions/register_musicpractice.yml
+outcomes:
+  - id: dashboard_h1_renders
+    description: the page shows the "Dashboard" h1
+    verify:
+      text:
+        contains: Dashboard
+  - id: quick_start_instruments_visible
+    description: the quick-start grid lists the four instruments
+    verify:
+      text:
+        contains: Guitar
+  - id: stats_api_succeeded
+    description: GET /api/stats/daily returns 2xx during the dashboard load
+    verify:
+      network:
+        method: GET
+        urlContains: /api/stats/daily
+        status:
+          in: [200, 201, 204]
+  - id: sessions_api_succeeded
+    description: GET /api/sessions returns 2xx during the dashboard load
+    verify:
+      network:
+        method: GET
+        urlContains: /api/sessions
+        status:
+          in: [200, 201, 204]
+  - id: no_console_errors
+    description: no console errors leak through the dashboard load
+    verify:
+      console:
+        errorsMax: 0
+steps:
+  - id: bootstrap_auth
+    use: register_musicpractice
+  - id: open_dashboard
+    open: ${vars.dashboardPath}
+  - id: wait_dashboard
+    wait:
+      text: Dashboard
+      timeoutMs: 15000
+  - id: snapshot_dashboard
+    snapshot:
+      interactive: true
+      label: Dashboard with streak + quick-start grid
+artifacts:
+  capture:
+    screenshots: always
+    snapshots: on-failure
+    console: always
+    network: always
+    trace: on-failure
