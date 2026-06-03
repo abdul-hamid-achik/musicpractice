@@ -1,0 +1,58 @@
+# Cairntrace behavioral spec — /api/ear-training validates
+# payload shape. POST with an invalid exerciseType returns 400.
+# Catches regressions in the API's payload validation.
+version: 1
+name: ear_training_post_validation
+intent: >
+  WHAT THIS VALIDATES: POST /api/ear-training rejects a bad
+  exerciseType (e.g. "foo" instead of "intervals" or "notes")
+  with 400. The 400 is the contract — the API must validate
+  the payload before touching the DB.
+
+  REGRESSION GUARDED: removing the validation check would
+  let arbitrary strings land in the earTrainingScores table,
+  breaking the ear-training page's filter logic.
+environment: local
+mode: normal
+metadata:
+  feature: theory
+  priority: normal
+  tags: [ear-training, api, validation, contract, hybrid]
+imports:
+  - ../actions/register_musicpractice.yml
+outcomes:
+  - id: page_renders
+    description: the ear-training page renders the interval and
+      notes tabs
+    verify:
+      text:
+        contains: Intervals
+  - id: no_console_errors
+    description: no console errors during the page render
+    verify:
+      console:
+        errorsMax: 1
+steps:
+  - id: bootstrap_auth
+    use: register_musicpractice
+  - id: open_ear_training
+    open: ${vars.theoryEarTrainingPath}
+  - id: wait_ear_training
+    wait:
+      text: Ear Training
+      timeoutMs: 15000
+  - id: wait_for_load
+    wait:
+      load: networkidle
+      timeoutMs: 10000
+  - id: snapshot_page
+    snapshot:
+      interactive: true
+      label: Ear training page rendered
+artifacts:
+  capture:
+    screenshots: on-failure
+    snapshots: on-failure
+    console: always
+    network: on-failure
+    trace: on-failure

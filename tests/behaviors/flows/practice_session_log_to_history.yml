@@ -52,14 +52,33 @@ steps:
   - id: bootstrap_auth
     use: register_musicpractice
   - id: open_practice_session
-    # Pass ?instrument=guitar so the page pre-selects an instrument and
-    # the Start Session button is enabled on first paint (the page's
-    # onMounted reads the query param and calls setActiveInstrument for us).
-    open: ${vars.practiceSessionPath}?instrument=guitar
+    # Don't pass ?instrument=... — the URL param sometimes doesn't
+    # trigger Vue's reactive update reliably. Instead, click the
+    # instrument button explicitly.
+    open: ${vars.practiceSessionPath}
   - id: wait_session_page
     wait:
       text: Start Session
       timeoutMs: 20000
+  - id: wait_for_instruments
+    # Wait for the InstrumentSelector to render (the page fetches
+    # instruments on mount). Look for "Standard Guitar" text.
+    wait:
+      text: Standard Guitar
+      timeoutMs: 15000
+  - id: select_instrument
+    # Click the first Standard Guitar button (there are duplicates
+    # because the seed has 3 rows per instrument type).
+    click:
+      by: role
+      role: button
+      name: Standard Guitar
+  - id: wait_for_button_enabled
+    # Give Vue a tick to reactively update the disabled state of
+    # the Start Session button.
+    wait:
+      load: networkidle
+      timeoutMs: 2000
   - id: snapshot_before_start
     snapshot:
       interactive: true

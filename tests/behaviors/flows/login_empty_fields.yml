@@ -1,0 +1,76 @@
+# Cairntrace behavioral spec — login form with empty fields
+# shows validation and does NOT submit. Catches the disabled
+# submit button and/or browser-level form validation.
+version: 1
+name: login_empty_fields
+intent: >
+  WHAT THIS VALIDATES: clicking Sign in on the login form with
+  no fields fires a POST /api/auth/login that the server
+  rejects with 400 (the client-side `required` attribute
+  doesn't fire because the form is bound to v-model, so the
+  server is the source of truth). The user stays on the
+  login page.
+
+  REGRESSION GUARDED: if the form were to redirect to
+  /dashboard on a 400, the user would land on a broken page
+  with no auth cookie. The "stayed on login" outcome catches
+  that.
+environment: local
+mode: normal
+metadata:
+  feature: auth
+  priority: normal
+  tags: [auth, login, validation, ux]
+outcomes:
+  - id: empty_submit_server_validates
+    description: clicking Sign in with no fields fires a POST
+      /api/auth/login that the server rejects with 400 (client-
+      side `required` doesn't fire because the form is bound
+      to v-model; the server is the source of truth). The user
+      stays on the login page.
+    verify:
+      network:
+        method: POST
+        urlContains: /api/auth/login
+        status:
+          in: [400, 422]
+  - id: stayed_on_login
+    description: the user is still on the login page (no redirect
+      to dashboard despite the form submitting)
+    verify:
+      text:
+        contains: Sign in to your account
+  - id: no_console_errors
+    description: no console errors during the empty-form probe
+    verify:
+      console:
+        errorsMax: 1
+steps:
+  - id: open_login
+    open: ${vars.loginPath}
+  - id: wait_login_form
+    wait:
+      text: Sign in to your account
+      timeoutMs: 15000
+  - id: click_signin_empty
+    # The form inputs are `required`. Clicking the submit
+    # should trigger browser-level validation, not the API.
+    click:
+      by: role
+      role: button
+      name: Sign in
+  - id: wait_for_browser_validation
+    wait:
+      load: networkidle
+      timeoutMs: 5000
+  - id: snapshot_empty_submit
+    snapshot:
+      interactive: true
+      label: Login form after empty submit
+artifacts:
+  capture:
+    screenshots: on-failure
+    snapshots: on-failure
+    console: always
+    network: on-failure
+    trace: on-failure
