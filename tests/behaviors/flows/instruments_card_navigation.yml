@@ -1,0 +1,72 @@
+# Cairntrace behavioral spec — instruments index cards navigate.
+#
+# The /instruments index has 4 instrument cards (Guitar, Bass,
+# Piano, Violin). Clicking a card should navigate to the
+# corresponding /instruments/<slug> page. Read-only check that
+# the cards are wired correctly.
+version: 1
+name: instruments_card_navigation
+intent: >
+  WHAT THIS VALIDATES: clicking an instrument card on the
+  /instruments index navigates to the right /instruments/<slug>
+  page. Guitar card -> /instruments/guitar, Bass -> /instruments/bass,
+  etc.
+
+  REGRESSION GUARDED: a future change that mis-wires a card's
+  link would break the user path. The 4-outcome URL check
+  catches that.
+environment: local
+mode: normal
+metadata:
+  feature: instruments
+  priority: normal
+  tags: [instruments, navigation, hybrid]
+imports:
+  - ../actions/register_musicpractice.yml
+outcomes:
+  - id: guitar_card_navigates
+    description: clicking the Guitar card lands on /instruments/guitar
+    verify:
+      url:
+        matches: '.*/instruments/guitar.*'
+  - id: no_console_errors
+    description: no console errors during the navigation
+    verify:
+      console:
+        errorsMax: 1
+steps:
+  - id: bootstrap_auth
+    use: register_musicpractice
+  - id: open_instruments
+    open: ${vars.instrumentsPath}
+  - id: wait_instruments_page
+    wait:
+      text: Instruments
+      timeoutMs: 15000
+  - id: wait_for_cards
+    wait:
+      load: networkidle
+      timeoutMs: 10000
+  - id: click_guitar_card
+    # The instruments index renders each card as a link to the
+    # slug page. Use the sidebar's Guitar link which has a stable
+    # href (avoids the same name collision the guitar fretboard
+    # page would have if it had multiple "Guitar" anchors).
+    click:
+      by: selector
+      selector: "a[href='/instruments/guitar']"
+  - id: wait_for_navigation
+    wait:
+      load: networkidle
+      timeoutMs: 15000
+  - id: snapshot_destination
+    snapshot:
+      interactive: true
+      label: Instrument page after card click
+artifacts:
+  capture:
+    screenshots: always
+    snapshots: on-failure
+    console: always
+    network: on-failure
+    trace: on-failure

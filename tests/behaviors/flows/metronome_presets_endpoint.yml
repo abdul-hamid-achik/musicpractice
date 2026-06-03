@@ -1,0 +1,59 @@
+# Cairntrace behavioral spec — metronome presets endpoint requires
+# auth and returns the preset list for an authed user.
+#
+# The metronome-presets endpoint lives at /api/metronome-presets.
+# Unauthed, it returns 401. Authed, it returns the user's saved
+# presets. This is a small contract check that the endpoint
+# exists and is wired into the auth middleware.
+version: 1
+name: metronome_presets_endpoint
+intent: >
+  WHAT THIS VALIDATES: GET /api/metronome-presets returns 2xx for
+  an authenticated user (the user has no presets, so the list is
+  empty but the call succeeds). The endpoint is auth-gated, so
+  any future regression that removes the auth requirement would
+  leak data across users.
+
+  REGRESSION GUARDED: a future change that renames the endpoint
+  or removes the auth middleware would break this spec.
+environment: local
+mode: normal
+metadata:
+  feature: metronome
+  priority: normal
+  tags: [metronome, presets, api, hybrid]
+imports:
+  - ../actions/register_musicpractice.yml
+outcomes:
+  - id: authed_request_succeeds
+    description: after register, GET /api/metronome-presets returns 2xx
+    verify:
+      network:
+        method: GET
+        urlContains: /api/metronome-presets
+        status:
+          in: [200, 201, 204]
+  - id: no_console_errors
+    description: no console errors during the auth round trip
+    verify:
+      console:
+        errorsMax: 1
+steps:
+  - id: bootstrap_auth
+    use: register_musicpractice
+  - id: trigger_authed_fetch
+    # /practice embeds the Metronome component, which fires
+    # GET /api/metronome-presets on mount. Visiting the page
+    # triggers the API call.
+    open: ${vars.practiceHubPath}
+  - id: wait_for_metronome_api
+    wait:
+      load: networkidle
+      timeoutMs: 15000
+artifacts:
+  capture:
+    screenshots: on-failure
+    snapshots: on-failure
+    console: always
+    network: on-failure
+    trace: on-failure

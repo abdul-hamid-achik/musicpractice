@@ -1,0 +1,81 @@
+# Cairntrace behavioral spec — bass fretboard page renders.
+#
+# /instruments/bass is the 4/5/6-string bass fretboard. The page
+# fetches /api/scales + /api/chords, picks a tuning, and renders
+# the fretboard SVG. Audio playback is intentionally not exercised.
+version: 1
+name: instruments_bass_load
+intent: >
+  WHAT THIS VALIDATES: the /instruments/bass page renders the
+  BassFretboard component, the scales + chords data calls
+  return 2xx, the page contains the bass heading, and a tuning
+  selector is visible.
+
+  REGRESSION GUARDED: a regression that breaks the bass page's
+  data fetch would render an empty fretboard. The data outcomes
+  catch that.
+environment: local
+mode: normal
+metadata:
+  feature: instruments
+  priority: normal
+  tags: [instruments, bass, read, hybrid, no-audio]
+imports:
+  - ../actions/register_musicpractice.yml
+outcomes:
+  - id: scales_api_ok
+    description: GET /api/scales returns 2xx during the page load
+    verify:
+      network:
+        method: GET
+        urlContains: /api/scales
+        status:
+          in: [200, 201, 204]
+  - id: chords_api_ok
+    description: GET /api/chords returns 2xx during the page load
+    verify:
+      network:
+        method: GET
+        urlContains: /api/chords
+        status:
+          in: [200, 201, 204]
+  - id: page_renders
+    description: the bass page heading renders
+    verify:
+      text:
+        contains: Bass
+  - id: fretboard_svg_present
+    description: an SVG fretboard is rendered on the page
+    verify:
+      count:
+        selector: "svg"
+        atLeast: 1
+  - id: no_console_errors
+    description: no console errors during the page load
+    verify:
+      console:
+        errorsMax: 1
+steps:
+  - id: bootstrap_auth
+    use: register_musicpractice
+  - id: open_bass
+    open: ${vars.instrumentsPath}/bass
+  - id: wait_bass_page
+    wait:
+      text: Bass
+      timeoutMs: 20000
+  - id: wait_for_data
+    wait:
+      load: networkidle
+      timeoutMs: 15000
+  - id: snapshot_bass
+    snapshot:
+      interactive: true
+      label: Bass fretboard page — SVG rendered
+artifacts:
+  capture:
+    screenshots: always
+    snapshots: on-failure
+    console: always
+    network: on-failure
+    trace: on-failure

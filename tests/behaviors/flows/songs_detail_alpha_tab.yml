@@ -1,0 +1,73 @@
+# Cairntrace behavioral spec — alpha tab viewer renders on songs
+# detail. The detail page embeds AlphaTabViewer to render
+# notation. The SVG container should be present even when the
+# song has no notation data (the component renders an empty
+# state).
+version: 1
+name: songs_detail_alpha_tab
+intent: >
+  WHAT THIS VALIDATES: the songs detail page embeds the
+  AlphaTabViewer component, and the viewer container (a div
+  with id alphatab-container or similar) renders. The actual
+  notation is fragile to automate (canvas + WebGL); we just
+  assert the container is present.
+
+  REGRESSION GUARDED: a refactor that drops the AlphaTabViewer
+  import on the detail page would leave a missing notation
+  surface. The container check catches that.
+environment: local
+mode: normal
+metadata:
+  feature: songs
+  priority: low
+  tags: [songs, alpha-tab, render, hybrid]
+imports:
+  - ../actions/register_musicpractice.yml
+outcomes:
+  - id: alpha_tab_container_renders
+    description: the AlphaTabViewer container is in the DOM
+    verify:
+      count:
+        selector: "#alphaTab, [data-alpha-tab], .alpha-tab-container, .at-surface"
+        atLeast: 1
+  - id: detail_api_ok
+    description: GET /api/songs/<id> returns 2xx
+    verify:
+      network:
+        method: GET
+        urlContains: '/api/songs/'
+        status:
+          in: [200, 201, 204]
+  - id: no_console_errors
+    description: no console errors on the detail page
+    verify:
+      console:
+        errorsMax: 1
+steps:
+  - id: bootstrap_auth
+    use: register_musicpractice
+  - id: open_songs
+    open: ${vars.songsPath}
+  - id: wait_for_songs_data
+    wait:
+      load: networkidle
+      timeoutMs: 10000
+  - id: click_first_song
+    click:
+      by: selector
+      selector: "h3.text-lg"
+  - id: wait_for_detail
+    wait:
+      load: networkidle
+      timeoutMs: 15000
+  - id: snapshot_detail
+    snapshot:
+      interactive: true
+      label: Songs detail with AlphaTab container
+artifacts:
+  capture:
+    screenshots: always
+    snapshots: on-failure
+    console: always
+    network: on-failure
+    trace: on-failure

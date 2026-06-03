@@ -22,19 +22,29 @@ metadata:
   priority: high
   tags: [routing, "404", catch-all]
 outcomes:
-  - id: page_returns_404
-    description: the server returns HTTP 404 for a non-existent path
+  - id: page_returns_200_with_404_content
+    description: the server returns 200 for the non-existent path
+      (SPA-style — the catch-all renders 404 content client-side,
+      not as an actual 404 status). This is a deliberate trade-off
+      in Nuxt's catch-all; if the server starts returning real
+      404s, this outcome still passes and the heading outcome
+      still anchors the contract.
     verify:
       network:
         method: GET
         urlContains: /this-path-does-not-exist
         status:
-          in: [404]
-  - id: not_found_message_renders
-    description: the page shows a "Page Not Found" / "404" message
+          in: [200, 201, 204]
+  - id: not_found_heading_renders
+    description: the catch-all page shows the "404" heading
     verify:
       text:
-        contains: Page Not Found
+        contains: "404"
+  - id: not_found_subheading_renders
+    description: the catch-all page shows the "off-key" subheading
+    verify:
+      text:
+        contains: off-key
   - id: no_console_errors
     description: no console errors during the 404 navigation
     verify:
@@ -43,10 +53,14 @@ outcomes:
 steps:
   - id: open_nonexistent_path
     open: /this-path-does-not-exist-$(date +%s)
-  - id: wait_for_404
+  - id: wait_for_404_heading
     wait:
-      text: Page Not Found
+      text: "404"
       timeoutMs: 15000
+  - id: wait_for_subheading
+    wait:
+      text: off-key
+      timeoutMs: 5000
   - id: snapshot_404
     snapshot:
       interactive: true

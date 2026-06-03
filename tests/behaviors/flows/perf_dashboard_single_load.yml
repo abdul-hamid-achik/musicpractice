@@ -1,0 +1,74 @@
+# Cairntrace behavioral spec — perf baseline for the dashboard
+# cold-load. Asserts a single cold dashboard load completes
+# within a generous budget. This is a "smoke" perf test; the
+# hard p95 + cold/warm breakdown is done in a separate script
+# that runs this spec N times and computes the percentile.
+version: 1
+name: perf_dashboard_single_load
+intent: >
+  WHAT THIS VALIDATES: a cold browser navigating from the auth
+  middleware redirect (login) through register, then to the
+  dashboard, completes in under 25s. This is a deliberately
+  loose single-run budget to catch "the app is suddenly 10x
+  slower" regressions, not micro-perf.
+
+  REGRESSION GUARDED: a future change that introduces an N+1
+  query or a slow import on the dashboard would trip this
+  budget. The /api/sessions and /api/stats/daily calls must
+  both succeed within the budget.
+environment: local
+mode: normal
+metadata:
+  feature: perf
+  priority: normal
+  tags: [perf, baseline, single-run, hybrid]
+imports:
+  - ../actions/register_musicpractice.yml
+outcomes:
+  - id: cold_dashboard_under_25s
+    description: the navigation timing for the dashboard load
+      (last entry) is under 25000ms
+    verify:
+      script:
+        runtime: browser
+        run: |
+          const navs = performance.getEntriesByType('navigation');
+          if (!navs.length) return { ok: false, evidence: 'no navigation entries' };
+          const last = navs[navs.length - 1];
+          const dur = last.duration || (last.loadEventEnd - (last.startTime || 0));
+          return { ok: dur < 25000, evidence: JSON.stringify({ durationMs: Math.round(dur), type: last.type }) };
+  - id: sessions_api_ok
+    description: GET /api/sessions returns 2xx
+    verify:
+      network:
+        method: GET
+        urlContains: /api/sessions
+        status:
+          in: [200, 201, 204]
+  - id: stats_daily_api_ok
+    description: GET /api/stats/daily returns 2xx
+    verify:
+      network:
+        method: GET
+        urlContains: /api/stats/daily
+        status:
+          in: [200, 201, 204]
+  - id: no_console_errors
+    description: no console errors during the perf sample
+    verify:
+      console:
+        errorsMax: 1
+steps:
+  - id: bootstrap_auth
+    use: register_musicpractice
+  - id: let_dashboard_queries_settle
+    wait:
+      load: networkidle
+      timeoutMs: 15000
+artifacts:
+  capture:
+    screenshots: on-failure
+    snapshots: on-failure
+    console: always
+    network: on-failure
+    trace: on-failure

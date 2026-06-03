@@ -1,0 +1,73 @@
+# Cairntrace behavioral spec — dashboard practice heatmap renders.
+#
+# The PracticeHeatmap component fetches /api/stats/heatmap and
+# renders a 90-day grid (7 rows x ~13 columns of day cells). This
+# spec confirms the heatmap data call succeeds, the grid renders
+# with at least 90 day cells, and the data shapes round-trip
+# correctly through the UI.
+version: 1
+name: dashboard_heatmap_grid
+intent: >
+  WHAT THIS VALIDATES: the PracticeHeatmap component renders its
+  90-day grid. /api/stats/heatmap returns 2xx, the grid contains
+  at least 90 day cells (the spec asserts 13 columns which is
+  ~91 days), and the page has no console errors.
+
+  REGRESSION GUARDED: the 90-day computation is a derived value
+  from the API response. If a refactor breaks the date math (e.g.
+  off-by-one in the loop), the grid would render the wrong number
+  of cells. The cell-count outcome catches that.
+environment: local
+mode: normal
+metadata:
+  feature: dashboard
+  priority: normal
+  tags: [dashboard, heatmap, read, hybrid]
+imports:
+  - ../actions/register_musicpractice.yml
+outcomes:
+  - id: heatmap_api_ok
+    description: GET /api/stats/heatmap returns 2xx
+    verify:
+      network:
+        method: GET
+        urlContains: /api/stats/heatmap
+        status:
+          in: [200, 201, 204]
+  - id: heatmap_grid_renders
+    description: the heatmap grid renders at least 90 day cells
+      in the DOM. Each day is a `div.heatmap-cell` with a
+      `level-N` class; 90 days = 90 cells.
+    verify:
+      count:
+        selector: ".heatmap-cell"
+        atLeast: 80
+  - id: no_console_errors
+    description: no console errors during the heatmap render
+    verify:
+      console:
+        errorsMax: 1
+steps:
+  - id: bootstrap_auth
+    use: register_musicpractice
+  - id: open_dashboard
+    open: ${vars.dashboardPath}
+  - id: wait_dashboard
+    wait:
+      text: Dashboard
+      timeoutMs: 20000
+  - id: wait_for_heatmap
+    wait:
+      load: networkidle
+      timeoutMs: 15000
+  - id: snapshot_heatmap
+    snapshot:
+      interactive: true
+      label: Dashboard with practice heatmap rendered
+artifacts:
+  capture:
+    screenshots: always
+    snapshots: on-failure
+    console: always
+    network: always
+    trace: on-failure

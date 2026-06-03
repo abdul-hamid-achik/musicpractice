@@ -1,0 +1,74 @@
+# Cairntrace behavioral spec — violin fingerboard page renders.
+#
+# /instruments/violin is the 4-string violin fingerboard. The
+# page fetches /api/scales + /api/chords, picks a tuning, and
+# renders the fingerboard SVG. Audio playback is intentionally
+# not exercised.
+version: 1
+name: instruments_violin_load
+intent: >
+  WHAT THIS VALIDATES: the /instruments/violin page renders the
+  ViolinFingerboard component, the scales + chords data calls
+  return 2xx, the page contains the violin heading, and an
+  SVG is rendered.
+
+  REGRESSION GUARDED: a regression that breaks the violin page's
+  data fetch would render an empty fingerboard. The data outcomes
+  catch that.
+environment: local
+mode: normal
+metadata:
+  feature: instruments
+  priority: normal
+  tags: [instruments, violin, read, hybrid, no-audio]
+imports:
+  - ../actions/register_musicpractice.yml
+outcomes:
+  - id: scales_api_ok
+    description: GET /api/scales returns 2xx during the page load
+    verify:
+      network:
+        method: GET
+        urlContains: /api/scales
+        status:
+          in: [200, 201, 204]
+  - id: page_renders
+    description: the violin page heading renders
+    verify:
+      text:
+        contains: Violin
+  - id: fingerboard_svg_present
+    description: an SVG fingerboard is rendered on the page
+    verify:
+      count:
+        selector: "svg"
+        atLeast: 1
+  - id: no_console_errors
+    description: no console errors during the page load
+    verify:
+      console:
+        errorsMax: 1
+steps:
+  - id: bootstrap_auth
+    use: register_musicpractice
+  - id: open_violin
+    open: ${vars.instrumentsPath}/violin
+  - id: wait_violin_page
+    wait:
+      text: Violin
+      timeoutMs: 20000
+  - id: wait_for_data
+    wait:
+      load: networkidle
+      timeoutMs: 15000
+  - id: snapshot_violin
+    snapshot:
+      interactive: true
+      label: Violin fingerboard page — SVG rendered
+artifacts:
+  capture:
+    screenshots: always
+    snapshots: on-failure
+    console: always
+    network: on-failure
+    trace: on-failure

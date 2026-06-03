@@ -1,0 +1,53 @@
+# Cairntrace behavioral spec — songs detail with an invalid id
+# does not 500. The page should handle the API error gracefully
+# (showing an empty state or a 404-style message) without crashing.
+version: 1
+name: songs_invalid_id_handling
+intent: >
+  WHAT THIS VALIDATES: navigating to /songs/<not-a-real-id>
+  doesn't throw a 5xx. The /api/songs/[id] call fails (404 or
+  500), the useAsyncData error path catches it, and the page
+  renders an empty state instead of crashing.
+
+  REGRESSION GUARDED: an unhandled rejection in useAsyncData
+  would crash the page. The "no 5xx responses" outcome catches
+  that the server doesn't itself 500 either.
+environment: local
+mode: normal
+metadata:
+  feature: songs
+  priority: normal
+  tags: [songs, error-handling, hybrid]
+imports:
+  - ../actions/register_musicpractice.yml
+outcomes:
+  - id: no_5xx_responses
+    description: no 5xx responses on the failed detail load — the
+      server must not itself 500 when given an invalid song id
+    verify:
+      noFailedRequests:
+        urlContains: /api/songs/not-a-real-id
+  - id: no_console_errors
+    description: no console errors on the failed detail page
+    verify:
+      console:
+        errorsMax: 1
+steps:
+  - id: bootstrap_auth
+    use: register_musicpractice
+  - id: open_invalid_detail
+    open: ${vars.songsPath}/not-a-real-id
+  - id: wait_for_load
+    wait:
+      load: networkidle
+      timeoutMs: 15000
+  - id: snapshot_failed_detail
+    snapshot:
+      label: Songs detail with invalid id — error state
+artifacts:
+  capture:
+    screenshots: on-failure
+    snapshots: on-failure
+    console: always
+    network: on-failure
+    trace: on-failure

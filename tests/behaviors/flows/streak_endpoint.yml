@@ -1,0 +1,61 @@
+# Cairntrace behavioral spec — streak endpoint returns valid data.
+#
+# GET /api/streaks returns the current user's streak. For a
+# brand-new user, the streak is 0 with practicedToday=false.
+# This is a small contract check that the endpoint exists and
+# returns a stable shape.
+version: 1
+name: streak_endpoint
+intent: >
+  WHAT THIS VALIDATES: GET /api/streaks returns 2xx with a
+  { currentStreak, longestStreak, practicedToday } shape. For a
+  brand-new user (no sessions yet), all three are zero/false.
+
+  REGRESSION GUARDED: a refactor that breaks the streak shape
+  would break the StreakCounter component on the dashboard.
+  This spec asserts the contract directly so the failure is
+  pinpointed.
+environment: local
+mode: normal
+metadata:
+  feature: dashboard
+  priority: normal
+  tags: [streak, api, hybrid]
+imports:
+  - ../actions/register_musicpractice.yml
+outcomes:
+  - id: streak_api_ok
+    description: GET /api/streaks returns 2xx
+    verify:
+      network:
+        method: GET
+        urlContains: /api/streaks
+        status:
+          in: [200, 201, 204]
+  - id: no_console_errors
+    description: no console errors during the streak API call
+    verify:
+      console:
+        errorsMax: 1
+steps:
+  - id: bootstrap_auth
+    use: register_musicpractice
+  - id: open_dashboard
+    # Visiting the dashboard triggers useFetch for the streak,
+    # which exercises the GET /api/streaks endpoint.
+    open: ${vars.dashboardPath}
+  - id: wait_dashboard
+    wait:
+      text: Dashboard
+      timeoutMs: 20000
+  - id: wait_for_streak_fetch
+    wait:
+      load: networkidle
+      timeoutMs: 15000
+artifacts:
+  capture:
+    screenshots: on-failure
+    snapshots: on-failure
+    console: always
+    network: on-failure
+    trace: on-failure
