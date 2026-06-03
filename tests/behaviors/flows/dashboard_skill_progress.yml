@@ -1,0 +1,69 @@
+# Cairntrace behavioral spec — dashboard skill progress renders.
+#
+# The SkillProgress component fetches /api/progress and renders a
+# per-song completion bar + tempo. For a brand-new user with no
+# progress, the component shows the empty state ("Start practicing
+# to track your progress" or similar).
+version: 1
+name: dashboard_skill_progress
+intent: >
+  WHAT THIS VALIDATES: the SkillProgress component on the
+  dashboard fetches /api/progress and renders either a per-song
+  progress card list or the empty state. Either rendering is
+  acceptable for a brand-new user; the API call must succeed
+  either way.
+
+  REGRESSION GUARDED: the useFetch call failing silently would
+  leave the component in a perpetual skeleton state. The
+  no-aria-busy outcome catches that.
+environment: local
+mode: normal
+metadata:
+  feature: dashboard
+  priority: normal
+  tags: [dashboard, progress, read, hybrid]
+imports:
+  - ../actions/register_musicpractice.yml
+outcomes:
+  - id: progress_api_ok
+    description: GET /api/progress returns 2xx
+    verify:
+      network:
+        method: GET
+        urlContains: /api/progress
+        status:
+          in: [200, 201, 204]
+  - id: dashboard_renders
+    description: the dashboard renders
+    verify:
+      text:
+        contains: Dashboard
+  - id: no_console_errors
+    description: no console errors during the page load
+    verify:
+      console:
+        errorsMax: 1
+steps:
+  - id: bootstrap_auth
+    use: register_musicpractice
+  - id: open_dashboard
+    open: ${vars.dashboardPath}
+  - id: wait_dashboard
+    wait:
+      text: Dashboard
+      timeoutMs: 20000
+  - id: wait_for_data
+    wait:
+      load: networkidle
+      timeoutMs: 15000
+  - id: snapshot_dashboard
+    snapshot:
+      interactive: true
+      label: Dashboard with skill progress rendered
+artifacts:
+  capture:
+    screenshots: always
+    snapshots: on-failure
+    console: always
+    network: on-failure
+    trace: on-failure

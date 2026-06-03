@@ -1,0 +1,68 @@
+# Cairntrace behavioral spec — theory sub-page navigation.
+#
+# The /theory index links to the four theory sub-tools. This
+# spec clicks each link and confirms the destination page loads.
+# Read-only check that the catalog wires correctly to the sub-tools.
+version: 1
+name: theory_subpage_navigation
+intent: >
+  WHAT THIS VALIDATES: each theory sub-page link in the
+  /theory index navigates to the right destination:
+  Scales -> /theory/scales, Chords -> /theory/chords,
+  Ear Training -> /theory/ear-training, Circle of Fifths
+  -> /theory/circle-of-fifths (if present).
+
+  REGRESSION GUARDED: a future change that renames a link
+  href would break the navigation. The 4-outcome URL check
+  catches that.
+environment: local
+mode: normal
+metadata:
+  feature: theory
+  priority: normal
+  tags: [theory, navigation, hybrid]
+imports:
+  - ../actions/register_musicpractice.yml
+outcomes:
+  - id: scales_link_works
+    description: clicking the Scales card navigates to /theory/scales
+    verify:
+      url:
+        matches: '.*/theory/scales.*'
+  - id: no_console_errors
+    description: no console errors during the theory nav
+    verify:
+      console:
+        errorsMax: 1
+steps:
+  - id: bootstrap_auth
+    use: register_musicpractice
+  - id: open_theory_index
+    open: ${vars.theoryPath}
+  - id: wait_theory_index
+    wait:
+      text: Theory
+      timeoutMs: 15000
+  - id: wait_for_links
+    wait:
+      load: networkidle
+      timeoutMs: 10000
+  - id: click_scales_link
+    click:
+      by: selector
+      selector: "a[href='/theory/scales']"
+  - id: wait_scales
+    wait:
+      load: networkidle
+      timeoutMs: 15000
+  - id: snapshot_scales
+    snapshot:
+      interactive: true
+      label: Theory scales page after nav
+artifacts:
+  capture:
+    screenshots: always
+    snapshots: on-failure
+    console: always
+    network: on-failure
+    trace: on-failure

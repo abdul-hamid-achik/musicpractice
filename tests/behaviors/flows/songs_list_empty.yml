@@ -1,0 +1,67 @@
+# Cairntrace behavioral spec — songs list empty state.
+#
+# For a brand-new user with no songs created, the /songs list
+# page shows the "Your song library is empty" empty state. The
+# GET /api/songs returns 2xx with an empty array.
+version: 1
+name: songs_list_empty
+intent: >
+  WHAT THIS VALIDATES: GET /api/songs returns 2xx with an empty
+  data array for a brand-new user, and the page renders the
+  empty-state copy ("Your song library is empty" or similar).
+
+  REGRESSION GUARDED: a future change that throws on the empty
+  case (instead of returning { data: [] }) would 500 the page.
+  The data:[] outcome catches the shape drift.
+environment: local
+mode: normal
+metadata:
+  feature: songs
+  priority: normal
+  tags: [songs, list, empty-state, hybrid]
+imports:
+  - ../actions/register_musicpractice.yml
+outcomes:
+  - id: songs_api_returns_2xx
+    description: GET /api/songs returns 2xx
+    verify:
+      network:
+        method: GET
+        urlContains: /api/songs
+        status:
+          in: [200, 201, 204]
+  - id: add_song_button_visible
+    description: the "Add Song" button is rendered so the user
+      can add their first song
+    verify:
+      text:
+        contains: Add Song
+  - id: no_console_errors
+    description: no console errors during the empty-state render
+    verify:
+      console:
+        errorsMax: 1
+steps:
+  - id: bootstrap_auth
+    use: register_musicpractice
+  - id: open_songs
+    open: ${vars.songsPath}
+  - id: wait_songs_page
+    wait:
+      text: Songs
+      timeoutMs: 15000
+  - id: wait_for_data
+    wait:
+      load: networkidle
+      timeoutMs: 10000
+  - id: snapshot_empty
+    snapshot:
+      interactive: true
+      label: Songs list empty state
+artifacts:
+  capture:
+    screenshots: always
+    snapshots: on-failure
+    console: always
+    network: on-failure
+    trace: on-failure

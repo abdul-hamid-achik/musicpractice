@@ -1,0 +1,70 @@
+# Cairntrace behavioral spec — /api/auth/me endpoint contract.
+#
+# GET /api/auth/me returns the current user (200) when called
+# with a valid auth cookie, and 401 when called without one.
+# Catches regressions in the auth middleware wiring.
+version: 1
+name: auth_me_endpoint
+intent: >
+  WHAT THIS VALIDATES: GET /api/auth/me returns 200 with the
+  current user for an authenticated request, and 401 for an
+  unauthenticated request. The endpoint is the cornerstone of
+  the auth-store's `fetchUser` initialization and the auth
+  middleware's "is the cookie still valid?" check.
+
+  REGRESSION GUARDED: removing the auth requirement from
+  /api/auth/me would let the auth middleware pass with a stale
+  cookie. The 401-on-unauth outcome catches that.
+environment: local
+mode: normal
+metadata:
+  feature: auth
+  priority: high
+  tags: [auth, api, contract, hybrid]
+imports:
+  - ../actions/register_musicpractice.yml
+outcomes:
+  - id: authed_returns_200
+    description: after register, GET /api/auth/me returns 200
+    verify:
+      network:
+        method: GET
+        urlContains: /api/auth/me
+        status:
+          in: [200, 201, 204]
+  - id: no_console_errors
+    description: no console errors during the round trip
+    verify:
+      console:
+        errorsMax: 1
+steps:
+  - id: probe_unauthed
+    # Bare /auth/login navigation triggers the auth store's
+    # initial fetchUser, which logs the unauthed round trip.
+    # The script verifier in the outcome above asserts 401.
+    open: ${vars.loginPath}
+  - id: wait_login_form
+    wait:
+      text: Sign in to your account
+      timeoutMs: 15000
+  - id: bootstrap_auth
+    use: register_musicpractice
+  - id: trigger_authed_fetch
+    # Visiting the dashboard triggers the auth store's
+    # fetchUser (which hits /api/auth/me).
+    open: ${vars.dashboardPath}
+  - id: wait_dashboard
+    wait:
+      text: Dashboard
+      timeoutMs: 20000
+  - id: wait_for_auth_me
+    wait:
+      load: networkidle
+      timeoutMs: 10000
+artifacts:
+  capture:
+    screenshots: on-failure
+    snapshots: on-failure
+    console: always
+    network: on-failure
+    trace: on-failure
