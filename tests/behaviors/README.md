@@ -11,14 +11,24 @@ tests/behaviors/
 ├── cairntrace.config.yml      # base URL + per-flow vars (song title etc.)
 ├── Taskfile.yml               # entry point: task test, task run FLOW=…
 ├── actions/                   # reusable step snippets (login, register)
-├── flows/                     # the behavioral specs themselves
+├── flows/                     # 17 behavioral specs
 │   ├── auth_register_login.yml
-│   ├── dashboard_loads_with_streak.yml
-│   ├── songs_crud.yml
-│   ├── practice_session_log_to_history.yml
 │   ├── account_change_password.yml
-│   ├── settings_theme_persists.yml
-│   └── perf_landing_dashboard.yml
+│   ├── home_page_anonymous.yml
+│   ├── not_found_page.yml
+│   ├── dashboard_loads_with_streak.yml
+│   ├── perf_landing_dashboard.yml
+│   ├── practice_hub_load.yml
+│   ├── practice_session_log_to_history.yml
+│   ├── practice_history_load.yml
+│   ├── goals_crud.yml
+│   ├── songs_crud.yml
+│   ├── theory_index_load.yml
+│   ├── theory_scales_load.yml
+│   ├── theory_chords_load.yml
+│   ├── ear_training_load.yml
+│   ├── instruments_index_load.yml
+│   └── settings_theme_persists.yml
 ├── runs/                      # cairn artifacts (snapshots, network, console)
 └── README.md                  # this file
 ```
