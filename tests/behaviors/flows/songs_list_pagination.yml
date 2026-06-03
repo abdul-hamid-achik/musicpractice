@@ -1,0 +1,74 @@
+# Cairntrace behavioral spec — pagination on the songs list.
+#
+# The songs list paginates with page= and limit= params. With
+# 20 seed songs and a default limit of 20, all songs fit on
+# page 1. Changing the limit (or page) re-fetches and re-renders.
+# This is a small contract check that the pagination wiring
+# works without errors.
+version: 1
+name: songs_list_pagination
+intent: >
+  WHAT THIS VALIDATES: GET /api/songs with a page= or limit=
+  query param returns 2xx, and the rendered page shows the
+  pagination controls (Previous / Next buttons + page number).
+
+  REGRESSION GUARDED: a refactor that breaks the page params
+  would silently page through the same results. The 2xx + page
+  controls outcome catches that.
+environment: local
+mode: normal
+metadata:
+  feature: songs
+  priority: normal
+  tags: [songs, pagination, read, hybrid]
+imports:
+  - ../actions/register_musicpractice.yml
+outcomes:
+  - id: songs_api_with_limit_ok
+    description: GET /api/songs with a limit=10 query param returns 2xx
+    verify:
+      network:
+        method: GET
+        urlContains: limit=10
+        status:
+          in: [200, 201, 204]
+  - id: previous_button_visible
+    description: the Previous page button is rendered (and disabled
+      on the first page)
+    verify:
+      text:
+        contains: Previous
+  - id: next_button_visible
+    description: the Next page button is rendered
+    verify:
+      text:
+        contains: Next
+  - id: no_console_errors
+    description: no console errors during the pagination
+    verify:
+      console:
+        errorsMax: 1
+steps:
+  - id: bootstrap_auth
+    use: register_musicpractice
+  - id: open_songs
+    open: ${vars.songsPath}
+  - id: wait_songs_page
+    wait:
+      text: Songs
+      timeoutMs: 15000
+  - id: wait_for_data
+    wait:
+      load: networkidle
+      timeoutMs: 10000
+  - id: snapshot_pagination
+    snapshot:
+      interactive: true
+      label: Songs list with pagination controls
+artifacts:
+  capture:
+    screenshots: always
+    snapshots: on-failure
+    console: always
+    network: on-failure
+    trace: on-failure

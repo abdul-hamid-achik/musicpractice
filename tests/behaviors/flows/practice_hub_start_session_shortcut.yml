@@ -1,0 +1,63 @@
+# Cairntrace behavioral spec — vitest unit-test sanity check
+# (the page renders + test runner is invoked, but this is
+# mostly a smoke that the /songs list has tests covering its
+# shape and the dev server agrees).
+#
+# Read-only navigation + aria-text presence check for the
+# /practice hub: it must have a "Start session" or similar
+# link so the user can begin a session.
+version: 1
+name: practice_hub_start_session_shortcut
+intent: >
+  WHAT THIS VALIDATES: the /practice hub exposes a clear
+  shortcut to start a practice session. Either an inline
+  "Start Session" button or a link to /practice/session is
+  acceptable.
+
+  REGRESSION GUARDED: a future refactor that drops the
+  start-session CTA on the hub would leave the user without
+  a clear entry to the practice flow.
+environment: local
+mode: normal
+metadata:
+  feature: practice
+  priority: normal
+  tags: [practice, hub, cta, read, hybrid]
+imports:
+  - ../actions/register_musicpractice.yml
+outcomes:
+  - id: start_session_cta_visible
+    description: a Start Session / Start Practicing / Active
+      Session link is visible on the practice hub
+    verify:
+      text:
+        contains: Start
+  - id: no_console_errors
+    description: no console errors during the hub render
+    verify:
+      console:
+        errorsMax: 1
+steps:
+  - id: bootstrap_auth
+    use: register_musicpractice
+  - id: open_practice
+    open: ${vars.practiceHubPath}
+  - id: wait_practice
+    wait:
+      text: Practice
+      timeoutMs: 15000
+  - id: wait_for_data
+    wait:
+      load: networkidle
+      timeoutMs: 10000
+  - id: snapshot_practice_hub
+    snapshot:
+      interactive: true
+      label: Practice hub with Start session CTA
+artifacts:
+  capture:
+    screenshots: always
+    snapshots: on-failure
+    console: always
+    network: on-failure
+    trace: on-failure

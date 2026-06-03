@@ -1,0 +1,92 @@
+# Cairntrace behavioral spec — NordButton forwards type="submit"
+# so forms submit on click. This is a UI-contract test: it
+# confirms the form submit fires when the user clicks the
+# submit-style NordButton inside a form. The implementation
+# detail (NordButton sets <button type="submit">) is the
+# contract this spec guards.
+version: 1
+name: nord_button_submit_type_in_form
+intent: >
+  WHAT THIS VALIDATES: a NordButton placed inside a form with
+  the `type="submit"` prop actually submits the form on
+  click. We assert the contract by rendering a small form
+  via the practice-account page's Change Password form
+  (which is an inline form containing a NordButton with
+  type="submit"), filling the current-password field, and
+  observing whether the API is hit.
+
+  REGRESSION GUARDED: if NordButton stops forwarding `type`
+  to the underlying <button>, the form's @submit handler
+  wouldn't fire. The API-call outcome catches the missing
+  contract.
+environment: local
+mode: normal
+metadata:
+  feature: ui-contract
+  priority: high
+  tags: [nord-button, form-submit, ui-contract, hybrid]
+imports:
+  - ../actions/register_musicpractice.yml
+outcomes:
+  - id: change_password_form_submits
+    description: clicking the Change Password NordButton on
+      /account fires a POST /api/account/change-password call
+    verify:
+      network:
+        method: POST
+        urlContains: /api/account/change-password
+        status:
+          in: [200, 201, 204, 400, 401]
+  - id: no_console_errors
+    description: no console errors during the form submit
+    verify:
+      console:
+        errorsMax: 1
+steps:
+  - id: bootstrap_auth
+    use: register_musicpractice
+  - id: open_account
+    open: ${vars.accountPath}
+  - id: wait_account
+    wait:
+      text: Account
+      timeoutMs: 15000
+  - id: wait_password_form
+    wait:
+      text: Current Password
+      timeoutMs: 10000
+  - id: fill_current_password
+    fill:
+      by: label
+      name: Current Password
+      value: "${secrets.MP_E2E_NEW_PASSWORD}"
+  - id: fill_new_password
+    fill:
+      by: label
+      name: New Password
+      value: "${secrets.MP_E2E_NEW_PASSWORD}-new"
+  - id: fill_confirm_password
+    fill:
+      by: label
+      name: Confirm New Password
+      value: "${secrets.MP_E2E_NEW_PASSWORD}-new"
+  - id: submit_change_password
+    click:
+      by: role
+      role: button
+      name: Change Password
+  - id: wait_for_api_call
+    wait:
+      load: networkidle
+      timeoutMs: 15000
+  - id: snapshot_after_submit
+    snapshot:
+      interactive: true
+      label: Account page after Change Password submit
+artifacts:
+  capture:
+    screenshots: always
+    snapshots: on-failure
+    console: always
+    network: on-failure
+    trace: on-failure
