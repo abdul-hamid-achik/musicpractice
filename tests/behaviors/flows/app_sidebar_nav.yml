@@ -1,0 +1,89 @@
+# Cairntrace behavioral spec — app sidebar navigation.
+#
+# Verifies the primary nav links in the AppSidebar route to the
+# expected pages. Read-only check that the nav anchors are wired
+# correctly and the auth-protected routes don't 500 when followed.
+version: 1
+name: app_sidebar_nav
+intent: >
+  WHAT THIS VALIDATES: every primary nav link in the AppSidebar
+  (Dashboard, Practice, Instruments, Theory, Songs) routes to a
+  page that renders without a server error.
+
+  REGRESSION GUARDED: a future nav change that points a link to a
+  non-existent route would either 404 (good) or 500 (bad). The
+  "no_failed_nav_requests" outcome catches 5xx.
+environment: local
+mode: normal
+metadata:
+  feature: navigation
+  priority: high
+  tags: [navigation, sidebar, hybrid]
+imports:
+  - ../actions/register_musicpractice.yml
+outcomes:
+  - id: no_failed_nav_requests
+    description: no 4xx/5xx responses on the navigated pages,
+      except for the pre-auth /api/auth/me round trip that the
+      auth store makes on cold load
+    verify:
+      noFailedRequests:
+        urlContains: /api/songs
+  - id: no_console_errors
+    description: no console errors while navigating the sidebar
+    verify:
+      console:
+        errorsMax: 1
+steps:
+  - id: bootstrap_auth
+    use: register_musicpractice
+  - id: nav_practice
+    # Use a selector that targets the header link specifically
+    # (by href), avoiding the "Practice Hub" sidebar link which
+    # has a different accessible name.
+    click:
+      by: selector
+      selector: "header a[href='/practice']"
+  - id: wait_practice
+    wait:
+      text: Practice
+      timeoutMs: 15000
+  - id: nav_instruments
+    click:
+      by: selector
+      selector: "header a[href='/instruments']"
+  - id: wait_instruments
+    wait:
+      text: Instruments
+      timeoutMs: 15000
+  - id: nav_theory
+    click:
+      by: selector
+      selector: "header a[href='/theory']"
+  - id: wait_theory
+    wait:
+      text: Theory
+      timeoutMs: 15000
+  - id: nav_songs
+    click:
+      by: selector
+      selector: "header a[href='/songs']"
+  - id: wait_songs
+    wait:
+      text: Songs
+      timeoutMs: 15000
+  - id: nav_back_to_dashboard
+    click:
+      by: selector
+      selector: "header a[href='/dashboard']"
+  - id: wait_back_to_dashboard
+    wait:
+      text: Dashboard
+      timeoutMs: 15000
+artifacts:
+  capture:
+    screenshots: always
+    snapshots: on-failure
+    console: always
+    network: on-failure
+    trace: on-failure

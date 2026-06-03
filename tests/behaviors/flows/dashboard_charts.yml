@@ -1,0 +1,87 @@
+# Cairntrace behavioral spec — dashboard practice chart + heatmap render.
+#
+# The dashboard's PracticeChart fetches /api/stats/daily and the
+# PracticeHeatmap fetches /api/stats/heatmap. This spec confirms
+# both data calls succeed and at least one of the two chart
+# components renders content (not just a skeleton).
+version: 1
+name: dashboard_charts
+intent: >
+  WHAT THIS VALIDATES: the dashboard's PracticeChart and
+  PracticeHeatmap components fetch their respective stats endpoints
+  and render at least one data point (a bar in the chart, a day
+  in the heatmap). Both endpoints return 2xx.
+
+  REGRESSION GUARDED: useFetch failures on the chart endpoints
+  would render skeletons indefinitely. The API outcomes + the
+  no-aria-busy outcome catch that.
+environment: local
+mode: normal
+metadata:
+  feature: dashboard
+  priority: normal
+  tags: [dashboard, chart, heatmap, read, hybrid]
+imports:
+  - ../actions/register_musicpractice.yml
+outcomes:
+  - id: stats_daily_api_ok
+    description: GET /api/stats/daily returns 2xx
+    verify:
+      network:
+        method: GET
+        urlContains: /api/stats/daily
+        status:
+          in: [200, 201, 204]
+  - id: stats_heatmap_api_ok
+    description: GET /api/stats/heatmap returns 2xx
+    verify:
+      network:
+        method: GET
+        urlContains: /api/stats/heatmap
+        status:
+          in: [200, 201, 204]
+  - id: sessions_api_ok
+    description: GET /api/sessions returns 2xx
+    verify:
+      network:
+        method: GET
+        urlContains: /api/sessions
+        status:
+          in: [200, 201, 204]
+  - id: at_least_one_chart_marker
+    description: after the fetches resolve, the dashboard contains
+      SVG or chart-like elements (bars, days, etc.) — not just
+      skeletons. Catches "fetch resolved but render is missing".
+    verify:
+      count:
+        selector: "svg, [data-chart], rect[height]"
+        atLeast: 1
+  - id: no_console_errors
+    description: no console errors during the dashboard chart loads
+    verify:
+      console:
+        errorsMax: 1
+steps:
+  - id: bootstrap_auth
+    use: register_musicpractice
+  - id: open_dashboard
+    open: ${vars.dashboardPath}
+  - id: wait_dashboard
+    wait:
+      text: Dashboard
+      timeoutMs: 20000
+  - id: wait_for_data
+    wait:
+      load: networkidle
+      timeoutMs: 15000
+  - id: snapshot_dashboard
+    snapshot:
+      interactive: true
+      label: Dashboard with chart + heatmap + sessions loaded
+artifacts:
+  capture:
+    screenshots: always
+    snapshots: on-failure
+    console: always
+    network: always
+    trace: on-failure

@@ -1,0 +1,74 @@
+# Cairntrace behavioral spec — guitar fretboard page renders.
+#
+# Read-only check that /instruments/guitar mounts the
+# GuitarFretboard component, the tuning selector populates from
+# /api/scales, and the page loads without console errors. No
+# audio is asserted.
+version: 1
+name: instruments_guitar_load
+intent: >
+  WHAT THIS VALIDATES: the /instruments/guitar page renders the
+  GuitarFretboard component with the tuning selector populated, the
+  underlying data fetch (scales) returns 2xx, and the page has no
+  console errors.
+
+  REGRESSION GUARDED: the fretboard renders an SVG with strings +
+  frets; a regression in the data flow would render an empty
+  component. The data outcomes catch that.
+environment: local
+mode: normal
+metadata:
+  feature: instruments
+  priority: normal
+  tags: [instruments, guitar, read, hybrid, no-audio]
+imports:
+  - ../actions/register_musicpractice.yml
+outcomes:
+  - id: scales_api_ok
+    description: GET /api/scales returns 2xx during the page load
+    verify:
+      network:
+        method: GET
+        urlContains: /api/scales
+        status:
+          in: [200, 201, 204]
+  - id: page_renders
+    description: the guitar page heading renders
+    verify:
+      text:
+        contains: Guitar
+  - id: fretboard_svg_present
+    description: an SVG fretboard is rendered on the page
+    verify:
+      count:
+        selector: "svg"
+        atLeast: 1
+  - id: no_console_errors
+    description: no console errors during the page load
+    verify:
+      console:
+        errorsMax: 1
+steps:
+  - id: bootstrap_auth
+    use: register_musicpractice
+  - id: open_guitar
+    open: ${vars.instrumentsPath}/guitar
+  - id: wait_guitar_page
+    wait:
+      text: Guitar
+      timeoutMs: 20000
+  - id: wait_for_data
+    wait:
+      load: networkidle
+      timeoutMs: 15000
+  - id: snapshot_guitar
+    snapshot:
+      interactive: true
+      label: Guitar fretboard page — SVG rendered
+artifacts:
+  capture:
+    screenshots: always
+    snapshots: on-failure
+    console: always
+    network: on-failure
+    trace: on-failure

@@ -1,0 +1,70 @@
+# Cairntrace behavioral spec — dashboard streak counter renders.
+#
+# The StreakCounter component fetches /api/streaks. The spec
+# confirms the component renders, the API succeeds, and the
+# dashboard contains the streak text (either the number of days
+# or a "Start a streak" prompt for a brand-new user with no
+# sessions).
+version: 1
+name: dashboard_streak
+intent: >
+  WHAT THIS VALIDATES: the StreakCounter component on the dashboard
+  renders after a successful GET /api/streaks. The text is either
+  "0 day streak" (or similar) for a brand-new user, or the actual
+  count for a returning user.
+
+  REGRESSION GUARDED: a useFetch that fails silently would leave the
+  component in a perpetual skeleton state. The API outcome + the
+  no-pending-loaders outcome catch that.
+environment: local
+mode: normal
+metadata:
+  feature: dashboard
+  priority: normal
+  tags: [dashboard, streak, read, hybrid]
+imports:
+  - ../actions/register_musicpractice.yml
+outcomes:
+  - id: streaks_api_ok
+    description: GET /api/streaks returns 2xx during the dashboard load
+    verify:
+      network:
+        method: GET
+        urlContains: /api/streaks
+        status:
+          in: [200, 201, 204]
+  - id: streak_text_renders
+    description: the streak text ("day streak" or "Start a streak")
+      renders on the page
+    verify:
+      text:
+        contains: streak
+  - id: no_console_errors
+    description: no console errors during the streak fetch
+    verify:
+      console:
+        errorsMax: 1
+steps:
+  - id: bootstrap_auth
+    use: register_musicpractice
+  - id: open_dashboard_route
+    open: ${vars.dashboardPath}
+  - id: wait_dashboard
+    wait:
+      text: Dashboard
+      timeoutMs: 20000
+  - id: wait_for_streak_fetch
+    wait:
+      load: networkidle
+      timeoutMs: 15000
+  - id: snapshot_streak
+    snapshot:
+      interactive: true
+      label: Dashboard with StreakCounter rendered
+artifacts:
+  capture:
+    screenshots: always
+    snapshots: on-failure
+    console: always
+    network: always
+    trace: on-failure

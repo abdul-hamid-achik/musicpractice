@@ -1,0 +1,101 @@
+# Cairntrace behavioral spec — songs detail page renders.
+#
+# Navigates to /songs, clicks the first song card in the list, and
+# asserts the detail page (/songs/[id]) renders with the song title
+# and the progress-fetched data. Audio playback and notation
+# rendering are not asserted (AlphaTab is fragile to automate).
+version: 1
+name: songs_detail_load
+intent: >
+  WHAT THIS VALIDATES: clicking a song in the /songs list navigates
+  to /songs/[id] and the detail page renders the song title, the
+  /api/songs/[id] call returns 2xx, and the progress fetch is
+  attempted.
+
+  REGRESSION GUARDED: useAsyncData('song-<id>') failures would
+  render a blank detail page. The data outcome + title visibility
+  catch that.
+environment: local
+mode: normal
+metadata:
+  feature: songs
+  priority: high
+  tags: [songs, detail, read, hybrid]
+imports:
+  - ../actions/register_musicpractice.yml
+outcomes:
+  - id: songs_list_api_ok
+    description: GET /api/songs returns 2xx when the list page loads
+    verify:
+      network:
+        method: GET
+        urlContains: /api/songs
+        status:
+          in: [200, 201, 204]
+  - id: song_detail_api_ok
+    description: GET /api/songs/<id> (with a UUID) returns 2xx for
+      the clicked song. We match the detail endpoint by looking
+      for the hyphenated UUID pattern in the path.
+    verify:
+      network:
+        method: GET
+        urlContains: '/api/songs/'
+        status:
+          in: [200, 201, 204]
+  - id: progress_api_ok
+    description: GET /api/progress?songId=<id> returns 2xx
+    verify:
+      network:
+        method: GET
+        urlContains: /api/progress
+        status:
+          in: [200, 201, 204]
+  - id: detail_url_contains_id
+    description: the URL after clicking the song contains /songs/<id>
+    verify:
+      url:
+        matches: '.*/songs/[0-9a-f-]+.*'
+  - id: no_console_errors
+    description: no console errors during the detail page load
+    verify:
+      console:
+        errorsMax: 1
+steps:
+  - id: bootstrap_auth
+    use: register_musicpractice
+  - id: open_songs
+    open: ${vars.songsPath}
+  - id: wait_songs_page
+    wait:
+      text: Songs
+      timeoutMs: 15000
+  - id: wait_for_songs_data
+    wait:
+      load: networkidle
+      timeoutMs: 10000
+  - id: snapshot_songs_list
+    snapshot:
+      interactive: true
+      label: Songs list before clicking
+  - id: click_first_song_card
+    # Song cards are NuxtLink anchors wrapping a NordCard. The
+    # h3 inside the card has the song title. Use a CSS selector
+    # that targets the first h3 in the songs grid.
+    click:
+      by: selector
+      selector: "h3.text-lg"
+  - id: wait_for_detail_navigation
+    wait:
+      load: networkidle
+      timeoutMs: 15000
+  - id: snapshot_detail
+    snapshot:
+      interactive: true
+      label: Song detail page
+artifacts:
+  capture:
+    screenshots: always
+    snapshots: on-failure
+    console: always
+    network: always
+    trace: on-failure

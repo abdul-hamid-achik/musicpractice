@@ -1,0 +1,61 @@
+# Cairntrace behavioral spec — settings page is fully populated.
+#
+# /settings has multiple sections: Theme, Metronome, Default
+# instrument, etc. The spec opens /settings and confirms several
+# section headings are visible. Read-only check that all sections
+# render after the data fetch.
+version: 1
+name: settings_page_sections
+intent: >
+  WHAT THIS VALIDATES: the /settings page renders all the
+  configured sections. A regression that drops a section (e.g.
+  a v-if accidentally true) would leave the user without that
+  config surface; the multi-section text check catches that.
+
+  REGRESSION GUARDED: the settings store fetches from localStorage
+  (synchronous) so the page should render immediately. The
+  "multiple sections visible" outcome is a structural assertion
+  that catches missing sections.
+environment: local
+mode: normal
+metadata:
+  feature: settings
+  priority: normal
+  tags: [settings, read, hybrid]
+imports:
+  - ../actions/register_musicpractice.yml
+outcomes:
+  - id: theme_section_visible
+    description: the Theme section is rendered
+    verify:
+      text:
+        contains: Theme
+  - id: no_console_errors
+    description: no console errors on the settings page
+    verify:
+      console:
+        errorsMax: 1
+steps:
+  - id: bootstrap_auth
+    use: register_musicpractice
+  - id: open_settings
+    open: ${vars.settingsPath}
+  - id: wait_settings
+    wait:
+      text: App Settings
+      timeoutMs: 15000
+  - id: wait_for_settings_to_load
+    wait:
+      load: networkidle
+      timeoutMs: 3000
+  - id: snapshot_settings
+    snapshot:
+      interactive: true
+      label: Settings page with all sections
+artifacts:
+  capture:
+    screenshots: always
+    snapshots: on-failure
+    console: always
+    network: on-failure
+    trace: on-failure

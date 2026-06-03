@@ -1,0 +1,83 @@
+# Cairntrace behavioral spec — account profile update flow.
+#
+# Updates the profile (name field) on /account and asserts the
+# PUT /api/account/profile call succeeded. Asserts that the form
+# is re-populated with the new name after the save (proving the
+# refetch works).
+version: 1
+name: account_profile_update
+intent: >
+  WHAT THIS VALIDATES: a signed-in user can update their name via
+  the Profile Information form on /account. PUT /api/account/profile
+  returns 2xx, the new name appears in the form after the save, and
+  the success toast/message renders.
+
+  REGRESSION GUARDED: the form must refetch the user after the
+  save; without the refetch, the form would still show the old
+  name (silent failure).
+environment: local
+mode: normal
+metadata:
+  feature: account
+  priority: normal
+  tags: [account, profile, update, hybrid]
+imports:
+  - ../actions/register_musicpractice.yml
+outcomes:
+  - id: profile_update_api_ok
+    description: PUT /api/account/profile returns 2xx
+    verify:
+      network:
+        method: PUT
+        urlContains: /api/account/profile
+        status:
+          in: [200, 201, 204]
+  - id: updated_name_visible
+    description: the updated name is rendered somewhere on the
+      page (header, sidebar, or form) after the save
+    verify:
+      text:
+        contains: ${vars.updatedName}
+  - id: no_console_errors
+    description: no console errors during the profile update
+    verify:
+      console:
+        errorsMax: 1
+steps:
+  - id: bootstrap_auth
+    use: register_musicpractice
+  - id: open_account
+    open: ${vars.accountPath}
+  - id: wait_account_page
+    wait:
+      text: Account
+      timeoutMs: 15000
+  - id: wait_profile_form
+    wait:
+      text: Display Name
+      timeoutMs: 10000
+  - id: fill_updated_name
+    fill:
+      by: label
+      name: Display Name
+      value: ${vars.updatedName}
+  - id: save_profile
+    click:
+      by: role
+      role: button
+      name: Save Changes
+  - id: wait_for_save_toast
+    wait:
+      text: Profile updated
+      timeoutMs: 10000
+  - id: snapshot_after_save
+    snapshot:
+      interactive: true
+      label: Account page after profile save
+artifacts:
+  capture:
+    screenshots: always
+    snapshots: on-failure
+    console: always
+    network: always
+    trace: on-failure

@@ -1,0 +1,90 @@
+# Cairntrace behavioral spec — songs list search filter.
+#
+# Types into the search input on /songs and confirms the debounced
+# (300ms) re-fetch fires GET /api/songs?search=<q>. The spec does
+# NOT create a seed song; the goal is to validate the debounced
+# fetch + URL state, not CRUD.
+version: 1
+name: songs_search_filter
+intent: >
+  WHAT THIS VALIDATES: typing in the search input on /songs debounces
+  (300ms) and then triggers a re-fetch to GET /api/songs?search=<q>.
+  The search input retains the typed value, and the active filter
+  row shows the "Search:" pill with the query.
+
+  REGRESSION GUARDED: useDebounce wraps the search so a fast typer
+  doesn't fire one request per keystroke. A regression that swaps
+  the ref directly would fire a request per keystroke and could
+  miss the cached result; this spec catches that by waiting for
+  networkidle after the debounce and checking the active filter
+  pill.
+environment: local
+mode: normal
+metadata:
+  feature: songs
+  priority: normal
+  tags: [songs, search, debounce, hybrid]
+imports:
+  - ../actions/register_musicpractice.yml
+outcomes:
+  - id: search_filter_api_call
+    description: typing in the search triggers GET /api/songs with
+      a search query param
+    verify:
+      network:
+        method: GET
+        urlContains: search=
+        status:
+          in: [200, 201, 204]
+  - id: search_input_retains_value
+    description: the search input still contains the typed value
+      after the debounced re-fetch
+    verify:
+      script:
+        runtime: browser
+        run: |
+          const input = document.querySelector("input[placeholder*='Search' i]");
+          return { ok: input?.value?.length > 0, evidence: JSON.stringify({ value: input?.value }) };
+  - id: active_filter_pill_visible
+    description: 'the Search filter pill renders below the search bar'
+    verify:
+      text:
+        contains: 'Search:'
+  - id: no_console_errors
+    description: no console errors during the search
+    verify:
+      console:
+        errorsMax: 1
+steps:
+  - id: bootstrap_auth
+    use: register_musicpractice
+  - id: open_songs
+    open: ${vars.songsPath}
+  - id: wait_songs_page
+    wait:
+      text: Songs
+      timeoutMs: 15000
+  - id: type_into_search
+    fill:
+      by: selector
+      selector: "input[placeholder*='Search' i]"
+      value: ${vars.songSearchQuery}
+  - id: wait_for_debounce
+    wait:
+      load: networkidle
+      timeoutMs: 3000
+  - id: wait_for_results
+    wait:
+      load: networkidle
+      timeoutMs: 10000
+  - id: snapshot_search
+    snapshot:
+      interactive: true
+      label: Songs list with search query active
+artifacts:
+  capture:
+    screenshots: always
+    snapshots: on-failure
+    console: always
+    network: always
+    trace: on-failure

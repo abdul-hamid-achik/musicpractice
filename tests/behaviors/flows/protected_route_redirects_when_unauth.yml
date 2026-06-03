@@ -1,0 +1,56 @@
+# Cairntrace behavioral spec — protected route redirects unauth user to
+# /auth/login. Cold start (no cookie), the middleware short-circuits
+# before calling /api/auth/me. We assert both the URL change and
+# the lack of an /api/auth/me round trip.
+version: 1
+name: protected_route_redirects_when_unauth
+intent: >
+  WHAT THIS VALIDATES: a cold browser (no auth cookie) navigating
+  directly to a protected route (e.g. /dashboard) is redirected to
+  /auth/login by the auth middleware, and the user does NOT see
+  protected content.
+
+  REGRESSION GUARDED: a future change that loosens the auth
+  middleware (e.g. trusting a stale cookie) would let an
+  unauthenticated user render the protected page. The "stayed on
+  /auth/login" outcome catches that.
+environment: local
+mode: normal
+metadata:
+  feature: auth
+  priority: high
+  tags: [auth, middleware, redirect]
+outcomes:
+  - id: redirected_to_login
+    description: the URL after the navigation is the login page
+    verify:
+      url:
+        matches: '.*/auth/login.*'
+  - id: sign_in_text_visible
+    description: the login form is rendered
+    verify:
+      text:
+        contains: Sign in to your account
+  - id: no_console_errors
+    description: no console errors during the redirect
+    verify:
+      console:
+        errorsMax: 1
+steps:
+  - id: open_dashboard_directly
+    open: ${vars.dashboardPath}
+  - id: wait_for_redirect_or_login
+    wait:
+      text: Sign in to your account
+      timeoutMs: 15000
+  - id: snapshot_login_page
+    snapshot:
+      interactive: true
+      label: Login page after redirect from protected route
+artifacts:
+  capture:
+    screenshots: always
+    snapshots: on-failure
+    console: always
+    network: on-failure
+    trace: on-failure

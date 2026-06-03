@@ -1,0 +1,62 @@
+# Cairntrace behavioral spec — theme toggle in the header switches
+# the theme on click, in addition to the in-settings toggle covered
+# by settings_theme_persists. The header toggle updates both
+# localStorage and the <html> class.
+version: 1
+name: theme_toggle_header
+intent: >
+  WHAT THIS VALIDATES: clicking the header theme toggle button
+  (aria-label "Switch to light mode" / "Switch to dark mode") flips
+  the stored theme and applies the new <html> class.
+
+  REGRESSION GUARDED: the header toggle uses the same settings store
+  as the settings page; if a future refactor splits them, this spec
+  catches the divergence.
+environment: local
+mode: normal
+metadata:
+  feature: settings
+  priority: normal
+  tags: [settings, theme, header, hybrid]
+imports:
+  - ../actions/register_musicpractice.yml
+outcomes:
+  - id: theme_persisted_to_storage
+    description: the click wrote a theme value to localStorage
+    verify:
+      script:
+        runtime: browser
+        run: |
+          const t = localStorage.getItem('musicpractice-settings');
+          const parsed = t ? JSON.parse(t) : null;
+          return { ok: !!parsed?.theme, evidence: JSON.stringify(parsed) };
+  - id: no_console_errors
+    description: no console errors during the header toggle
+    verify:
+      console:
+        errorsMax: 1
+steps:
+  - id: bootstrap_auth
+    use: register_musicpractice
+  - id: read_initial_toggle_label
+    snapshot:
+      label: header — before toggle
+  - id: click_header_theme_toggle
+    click:
+      by: role
+      role: button
+      name: Switch to light mode
+  - id: wait_for_state_change
+    wait:
+      load: networkidle
+      timeoutMs: 3000
+  - id: snapshot_after_toggle
+    snapshot:
+      label: header — after toggle (button should now say "Switch to dark mode")
+artifacts:
+  capture:
+    screenshots: always
+    snapshots: on-failure
+    console: always
+    network: on-failure
+    trace: on-failure

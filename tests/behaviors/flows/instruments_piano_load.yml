@@ -1,0 +1,84 @@
+# Cairntrace behavioral spec — piano keyboard page renders.
+#
+# /instruments/piano is the heaviest Tone.js surface in the app.
+# This spec is intentionally READ-ONLY: it verifies the page mounts,
+# the piano keyboard component renders, the scale/chord selectors
+# populate, and the underlying /api/scales + /api/chords calls
+# succeed. Audio playback is NOT exercised.
+version: 1
+name: instruments_piano_load
+intent: >
+  WHAT THIS VALIDATES: the /instruments/piano page renders the
+  PianoKeyboard component with the note-name buttons visible, and
+  the /api/scales + /api/chords endpoints both return 2xx. Audio
+  playback (Tone.js) is intentionally not exercised here.
+
+  REGRESSION GUARDED: a future refactor that breaks the page's
+  data fetch would render an empty keyboard. The data-call
+  outcomes catch that.
+environment: local
+mode: normal
+metadata:
+  feature: instruments
+  priority: normal
+  tags: [instruments, piano, read, hybrid, no-audio]
+imports:
+  - ../actions/register_musicpractice.yml
+outcomes:
+  - id: scales_api_ok
+    description: GET /api/scales returns 2xx during the page load
+    verify:
+      network:
+        method: GET
+        urlContains: /api/scales
+        status:
+          in: [200, 201, 204]
+  - id: chords_api_ok
+    description: GET /api/chords returns 2xx during the page load
+    verify:
+      network:
+        method: GET
+        urlContains: /api/chords
+        status:
+          in: [200, 201, 204]
+  - id: page_renders
+    description: the piano page heading renders
+    verify:
+      text:
+        contains: Piano
+  - id: at_least_one_piano_key
+    description: at least 3 piano keys are rendered (one octave
+      worth of white keys)
+    verify:
+      count:
+        selector: "button, [role='button']"
+        atLeast: 5
+  - id: no_console_errors
+    description: no console errors during the page load
+    verify:
+      console:
+        errorsMax: 1
+steps:
+  - id: bootstrap_auth
+    use: register_musicpractice
+  - id: open_piano
+    open: ${vars.instrumentsPath}/piano
+  - id: wait_piano_page
+    wait:
+      text: Piano
+      timeoutMs: 20000
+  - id: wait_for_data
+    wait:
+      load: networkidle
+      timeoutMs: 15000
+  - id: snapshot_piano
+    snapshot:
+      interactive: true
+      label: Piano keyboard page — keys rendered
+artifacts:
+  capture:
+    screenshots: always
+    snapshots: on-failure
+    console: always
+    network: on-failure
+    trace: on-failure

@@ -105,10 +105,11 @@ steps:
       selector: "dialog form input:not([required]):not([type='number']):not([type='email']):not([type='password'])"
       value: ${vars.songArtist}
   - id: submit_add_song
+    # The dialog form has two buttons (Cancel + Add Song); the
+    # submit is the last one.
     click:
-      by: role
-      role: button
-      name: Add Song
+      by: selector
+      selector: "dialog form button:last-of-type"
   - id: wait_song_appears
     wait:
       text: ${vars.songTitle}

@@ -31,7 +31,10 @@ environments:
       songTitle: "Cairn test song"
       songArtist: "Cairntrace"
       songEditedTitle: "Cairn test song (edited)"
+      songSearchTitle: "Cairn searchable song"
+      songSearchQuery: "searchable"
       goalTitle: "Cairn test goal"
+      updatedName: "Cairn Updated"
 
 secrets:
   provider: env

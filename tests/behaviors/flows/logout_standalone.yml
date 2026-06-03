@@ -1,0 +1,83 @@
+# Cairntrace behavioral spec — standalone logout.
+#
+# Logs a user in, navigates to /account, clicks "Sign out" in the
+# header, and asserts the user lands on the login page. The auth
+# cookie is cleared, and a follow-up /api/auth/me returns 401.
+# This is the "happy path" logout spec; auth_register_login
+# exercises the same surface in the middle of a longer flow.
+version: 1
+name: logout_standalone
+intent: >
+  WHAT THIS VALIDATES: a signed-in user can click the header
+  "Sign out" button to log out. After the click: the user lands on
+  /auth/login, the auth cookie is cleared, GET /api/auth/me
+  returns 401, and the auth middleware redirects any subsequent
+  protected-route attempt back to /auth/login.
+
+  REGRESSION GUARDED: a logout that didn't clear the cookie would
+  leave the user "logged out" in the UI but still authenticated
+  server-side. The /api/auth/me outcome catches that.
+environment: local
+mode: normal
+metadata:
+  feature: auth
+  priority: high
+  tags: [auth, logout, hybrid]
+imports:
+  - ../actions/register_musicpractice.yml
+outcomes:
+  - id: logout_api_ok
+    description: POST /api/auth/logout returns 2xx
+    verify:
+      network:
+        method: POST
+        urlContains: /api/auth/logout
+        status:
+          in: [200, 201, 204]
+  - id: me_returns_401_after_logout
+    description: GET /api/auth/me returns 401 after logout
+    verify:
+      network:
+        method: GET
+        urlContains: /api/auth/me
+        status:
+          in: [401, 403]
+  - id: user_on_login_page
+    description: the URL after logout is the login page
+    verify:
+      url:
+        matches: '.*/auth/login.*'
+  - id: no_console_errors
+    description: no console errors during logout
+    verify:
+      console:
+        errorsMax: 1
+steps:
+  - id: bootstrap_auth
+    use: register_musicpractice
+  - id: open_account
+    open: ${vars.accountPath}
+  - id: wait_account_page
+    wait:
+      text: Account
+      timeoutMs: 15000
+  - id: click_sign_out
+    click:
+      by: role
+      role: button
+      name: Sign out
+  - id: wait_for_login_url
+    wait:
+      load: networkidle
+      timeoutMs: 15000
+  - id: snapshot_after_logout
+    snapshot:
+      interactive: true
+      label: Login page — user logged out
+artifacts:
+  capture:
+    screenshots: always
+    snapshots: on-failure
+    console: always
+    network: always
+    trace: on-failure

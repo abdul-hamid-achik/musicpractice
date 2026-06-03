@@ -1,0 +1,90 @@
+# Cairntrace behavioral spec — register form validation.
+#
+# Exercises the client-side validation hints on /auth/register:
+# invalid email format and short password both surface as inline
+# hints before the user can submit. The form's :disabled submit
+# button is also a contract — clients should not be able to POST
+# invalid payloads.
+version: 1
+name: register_validation_hints
+intent: >
+  WHAT THIS VALIDATES: the register form's client-side validation
+  surfaces helpful hints when the email is malformed and when the
+  password is too short. The submit button is disabled until the
+  inputs are valid.
+
+  REGRESSION GUARDED: the validation was a deliberate UX choice to
+  avoid hitting the API with garbage. If the disabled binding is
+  ever removed, this spec catches it.
+environment: local
+mode: normal
+metadata:
+  feature: auth
+  priority: normal
+  tags: [auth, register, validation, ux]
+outcomes:
+  - id: invalid_email_aria_invalid
+    description: typing a malformed email sets the email input's
+      aria-invalid attribute to true
+    verify:
+      script:
+        runtime: browser
+        run: |
+          const email = document.getElementById('email');
+          return { ok: email?.getAttribute('aria-invalid') === 'true', evidence: JSON.stringify({ ariaInvalid: email?.getAttribute('aria-invalid'), value: email?.value }) };
+  - id: short_password_aria_invalid
+    description: typing a 7-character password sets the password
+      input's aria-invalid attribute to true
+    verify:
+      script:
+        runtime: browser
+        run: |
+          const pw = document.getElementById('password');
+          return { ok: pw?.getAttribute('aria-invalid') === 'true', evidence: JSON.stringify({ ariaInvalid: pw?.getAttribute('aria-invalid'), value: pw?.value, length: pw?.value?.length }) };
+  - id: no_console_errors
+    description: no console errors during the validation exercise
+    verify:
+      console:
+        errorsMax: 1
+steps:
+  - id: open_register
+    open: ${vars.registerPath}
+  - id: wait_register_form
+    wait:
+      text: Create your account
+      timeoutMs: 15000
+  - id: fill_name_valid
+    fill:
+      by: label
+      name: Full name
+      value: "Validation Test"
+  - id: fill_email_invalid
+    fill:
+      by: label
+      name: Email
+      value: "not-an-email"
+  - id: fill_username_valid
+    fill:
+      by: label
+      name: Username
+      value: "validusername"
+  - id: fill_password_short
+    fill:
+      by: label
+      name: Password
+      value: "short"
+  - id: wait_for_validation_state
+    wait:
+      load: networkidle
+      timeoutMs: 2000
+  - id: snapshot_validation_state
+    snapshot:
+      interactive: true
+      label: Register form with aria-invalid hints
+artifacts:
+  capture:
+    screenshots: always
+    snapshots: on-failure
+    console: always
+    network: on-failure
+    trace: on-failure

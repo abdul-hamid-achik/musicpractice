@@ -1,0 +1,102 @@
+# Cairntrace behavioral spec — account delete-account warning flow.
+#
+# This is a non-destructive test: it opens the Danger Zone delete
+# modal, verifies the warning copy is present, and CANCELS. The
+# account must still exist after the cancel. A separate (manual)
+# test would type "DELETE" to confirm the destructive path.
+version: 1
+name: account_delete_warning
+intent: >
+  WHAT THIS VALIDATES: the Danger Zone on /account opens a
+  confirmation modal that lists the data the user is about to lose
+  (sessions, goals, progress, scores, presets) and requires the
+  user to type "DELETE" before the destructive action fires.
+  Cancelling the modal leaves the account intact and the user still
+  authenticated.
+
+  REGRESSION GUARDED: a destructive action that fired without a
+  confirmation would nuke the user's data on a stray click. The
+  modal + "type DELETE" gate is the safety belt.
+environment: local
+mode: normal
+metadata:
+  feature: account
+  priority: high
+  tags: [account, delete, safety, hybrid]
+imports:
+  - ../actions/register_musicpractice.yml
+outcomes:
+  - id: delete_modal_warning_visible
+    description: the delete modal lists the data that would be
+      deleted (sessions, goals, etc.)
+    verify:
+      text:
+        contains: All practice sessions
+  - id: confirm_input_placeholder_visible
+    description: the modal has a confirmation input that asks the
+      user to type "DELETE"
+    verify:
+      text:
+        contains: DELETE
+  - id: cancelled_modal_keeps_account
+    description: after cancelling, /api/account still returns the
+      current user (the user is still authenticated)
+    verify:
+      network:
+        method: GET
+        urlContains: /api/account
+        status:
+          in: [200, 201, 204]
+  - id: no_console_errors
+    description: no console errors during the warning flow
+    verify:
+      console:
+        errorsMax: 1
+steps:
+  - id: bootstrap_auth
+    use: register_musicpractice
+  - id: open_account
+    open: ${vars.accountPath}
+  - id: wait_account_page
+    wait:
+      text: Account
+      timeoutMs: 15000
+  - id: scroll_to_danger_zone
+    wait:
+      text: Danger Zone
+      timeoutMs: 10000
+  - id: open_delete_modal
+    click:
+      by: role
+      role: button
+      name: Delete Account
+  - id: wait_for_modal
+    # "Type DELETE in the box below" only appears in the modal, not
+    # in the Danger Zone static list.
+    wait:
+      text: Type DELETE in the box below
+      timeoutMs: 10000
+  - id: snapshot_delete_modal
+    snapshot:
+      interactive: true
+      label: Delete account modal — warning + confirmation input
+  - id: close_modal
+    # The Cancel button in the delete modal.
+    click:
+      by: text
+      text: Cancel
+  - id: wait_after_cancel
+    wait:
+      load: networkidle
+      timeoutMs: 5000
+  - id: verify_account_still_loads
+    snapshot:
+      interactive: true
+      label: Account page after cancel — user is still logged in
+artifacts:
+  capture:
+    screenshots: always
+    snapshots: on-failure
+    console: always
+    network: always
+    trace: on-failure
