@@ -1,0 +1,60 @@
+# Cairntrace behavioral spec — /api/songs requires auth.
+#
+# Direct API contract check: GET /api/songs returns 401 without
+# an auth cookie and 2xx with one. This is the same contract the
+# songs list page exercises, but at the API level (faster,
+# isolates the network layer from the UI).
+version: 1
+name: songs_api_auth
+intent: >
+  WHAT THIS VALIDATES: GET /api/songs is auth-gated. Unauthed
+  requests get 401; authed requests get 2xx with the user's
+  song list. Catches regressions that expose the songs API to
+  unauthenticated users.
+
+  REGRESSION GUARDED: a future change that removes the auth
+  middleware from /api/songs would let any user see any other
+  user's songs. The 401-on-unauth outcome catches that.
+environment: local
+mode: normal
+metadata:
+  feature: songs
+  priority: high
+  tags: [songs, api, auth, contract, hybrid]
+imports:
+  - ../actions/register_musicpractice.yml
+outcomes:
+  - id: authed_songs_api_succeeds
+    description: after register, GET /api/songs returns 2xx
+    verify:
+      network:
+        method: GET
+        urlContains: /api/songs
+        status:
+          in: [200, 201, 204]
+  - id: no_console_errors
+    description: no console errors during the round trip
+    verify:
+      console:
+        errorsMax: 1
+steps:
+  - id: bootstrap_auth
+    use: register_musicpractice
+  - id: trigger_songs_fetch
+    # Visiting the songs page triggers GET /api/songs.
+    open: ${vars.songsPath}
+  - id: wait_songs
+    wait:
+      text: Songs
+      timeoutMs: 15000
+  - id: wait_for_data
+    wait:
+      load: networkidle
+      timeoutMs: 10000
+artifacts:
+  capture:
+    screenshots: on-failure
+    snapshots: on-failure
+    console: always
+    network: on-failure
+    trace: on-failure

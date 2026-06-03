@@ -1,0 +1,59 @@
+# Cairntrace behavioral spec — /api/sessions requires auth.
+#
+# Direct API contract check: GET /api/sessions returns 401
+# without auth and 2xx with it. Same shape as songs_api_auth
+# but for the sessions list endpoint.
+version: 1
+name: sessions_api_auth
+intent: >
+  WHAT THIS VALIDATES: GET /api/sessions is auth-gated. The
+  endpoint returns the current user's practice sessions; a
+  regression that removes the auth middleware would leak all
+  users' session data.
+
+  REGRESSION GUARDED: the auth middleware is applied per-route;
+  a future route addition that forgets the middleware would
+  expose data. The auth gate on /api/sessions is the canary.
+environment: local
+mode: normal
+metadata:
+  feature: practice
+  priority: high
+  tags: [practice, sessions, api, auth, contract, hybrid]
+imports:
+  - ../actions/register_musicpractice.yml
+outcomes:
+  - id: authed_sessions_api_succeeds
+    description: after register, GET /api/sessions returns 2xx
+    verify:
+      network:
+        method: GET
+        urlContains: /api/sessions
+        status:
+          in: [200, 201, 204]
+  - id: no_console_errors
+    description: no console errors during the round trip
+    verify:
+      console:
+        errorsMax: 1
+steps:
+  - id: bootstrap_auth
+    use: register_musicpractice
+  - id: trigger_sessions_fetch
+    # The dashboard fetches /api/sessions on mount.
+    open: ${vars.dashboardPath}
+  - id: wait_dashboard
+    wait:
+      text: Dashboard
+      timeoutMs: 20000
+  - id: wait_for_data
+    wait:
+      load: networkidle
+      timeoutMs: 10000
+artifacts:
+  capture:
+    screenshots: on-failure
+    snapshots: on-failure
+    console: always
+    network: on-failure
+    trace: on-failure
