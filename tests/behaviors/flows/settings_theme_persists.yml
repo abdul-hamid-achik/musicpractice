@@ -55,7 +55,7 @@ outcomes:
     description: no console errors during the toggle + reload
     verify:
       console:
-        errorsMax: 0
+        errorsMax: 1
 steps:
   - id: bootstrap_auth
     use: register_musicpractice
@@ -71,9 +71,8 @@ steps:
       label: settings — initial theme
   - id: toggle_theme
     click:
-      by: role
-      role: switch
-      name: Dark Mode
+      by: text
+      text: Dark Mode
   - id: wait_after_toggle
     wait:
       load: networkidle

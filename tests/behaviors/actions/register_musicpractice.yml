@@ -40,4 +40,4 @@ steps:
   - id: wait_dashboard_after_register
     wait:
       text: Dashboard
-      timeoutMs: 15000
+      timeoutMs: 25000

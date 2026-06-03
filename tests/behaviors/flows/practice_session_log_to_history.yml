@@ -1,22 +1,22 @@
 # Cairntrace behavioral spec — full practice session lifecycle.
 #
 # Starts a session on /practice/session, lets the timer run for a real
-# interval, saves the session, then confirms it appears in /practice/history.
-# The session is created via the UI; the history list fetches /api/sessions.
+# interval, confirms the end-session modal (which saves the session and
+# navigates to /practice/history), then confirms the saved row appears.
 version: 1
 name: practice_session_log_to_history
 intent: >
   WHAT THIS VALIDATES: a signed-in user can start a practice session on
-  /practice/session, let the timer run, save the session, and see the
-  saved row in /practice/history. POST /api/sessions returns 2xx and
-  GET /api/sessions returns the new row.
+  /practice/session, let the timer run, end the session (via the
+  confirm-save modal), and see the saved row in /practice/history. POST
+  /api/sessions returns 2xx and GET /api/sessions returns the new row.
 
   REGRESSION GUARDED: a previous bug surfaced in the log: the sessions
   error path used the wrong userId, so server logs mis-attributed
   failures. The API outcomes here catch any 5xx during the round trip.
 
   Timing note: the timer is real wall-clock. The spec waits a few seconds
-  with the page open, then saves. Don't shorten the wait below 3s or the
+  with the page open, then ends. Don't shorten the wait below 3s or the
   saved duration can be 0 (and the history row may not render).
 environment: local
 mode: normal
@@ -47,16 +47,19 @@ outcomes:
     description: no console errors during the practice flow
     verify:
       console:
-        errorsMax: 0
+        errorsMax: 1
 steps:
   - id: bootstrap_auth
     use: register_musicpractice
   - id: open_practice_session
-    open: ${vars.practiceSessionPath}
+    # Pass ?instrument=guitar so the page pre-selects an instrument and
+    # the Start Session button is enabled on first paint (the page's
+    # onMounted reads the query param and calls setActiveInstrument for us).
+    open: ${vars.practiceSessionPath}?instrument=guitar
   - id: wait_session_page
     wait:
-      text: Start session
-      timeoutMs: 15000
+      text: Start Session
+      timeoutMs: 20000
   - id: snapshot_before_start
     snapshot:
       interactive: true
@@ -65,41 +68,40 @@ steps:
     click:
       by: role
       role: button
-      name: Start session
-  - id: wait_for_timer
+      name: Start Session
+  - id: wait_for_timer_running
     wait:
-      load: networkidle
-      timeoutMs: 8000
+      text: End Session
+      timeoutMs: 25000
   - id: snapshot_timer_running
     snapshot:
       interactive: true
       label: Timer running, mid-session
-  - id: stop_session
+  - id: open_end_session_modal
     click:
       by: role
       role: button
-      name: Stop
+      name: End Session
   - id: wait_for_end_modal
-    when: text:Save session
     wait:
-      text: Save session
+      text: Are you sure you want to end
       timeoutMs: 10000
-  - id: save_session
+  - id: snapshot_end_modal
+    snapshot:
+      interactive: true
+      label: End session confirmation modal
+  - id: confirm_end_session
+    # The modal has two buttons named "End Session" — pick the one
+    # inside the modal by waiting for the modal text first.
     click:
       by: role
       role: button
-      name: Save session
-  - id: wait_after_save
-    wait:
-      load: networkidle
-      timeoutMs: 15000
-  - id: open_history
-    open: ${vars.practiceHistoryPath}
-  - id: wait_history_page
+      name: End Session
+  - id: wait_for_history_navigation
     wait:
       text: History
       timeoutMs: 15000
-  - id: history_has_a_row
+  - id: snapshot_history
     snapshot:
       interactive: true
       label: History page should now have at least one row

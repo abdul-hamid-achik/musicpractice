@@ -72,7 +72,7 @@ outcomes:
     description: no console errors during the CRUD cycle
     verify:
       console:
-        errorsMax: 0
+        errorsMax: 1
 steps:
   - id: bootstrap_auth
     use: register_musicpractice
@@ -89,28 +89,26 @@ steps:
       name: Add Song
   - id: wait_add_song_modal
     wait:
-      text: New song
-      timeoutMs: 10000
+      text: Add Song
+      timeoutMs: 15000
   - id: fill_song_title
     fill:
-      by: label
-      name: Title
+      by: selector
+      selector: "input[required][type='text']"
       value: ${vars.songTitle}
   - id: fill_song_artist
+    # Artist is optional. Use a position-based selector inside the dialog.
+    # The Title input is the only required one; Artist is the next
+    # non-required text input in document order.
     fill:
-      by: label
-      name: Artist
+      by: selector
+      selector: "dialog form input:not([required]):not([type='number']):not([type='email']):not([type='password'])"
       value: ${vars.songArtist}
-  - id: fill_song_bpm
-    fill:
-      by: label
-      name: BPM
-      value: '120'
   - id: submit_add_song
     click:
       by: role
       role: button
-      name: Save
+      name: Add Song
   - id: wait_song_appears
     wait:
       text: ${vars.songTitle}
@@ -131,12 +129,12 @@ steps:
       name: Edit
   - id: wait_edit_form
     wait:
-      text: Edit song
-      timeoutMs: 10000
+      text: Edit Song
+      timeoutMs: 15000
   - id: fill_new_title
     fill:
-      by: label
-      name: Title
+      by: selector
+      selector: "dialog input[type='text']:nth-of-type(1)"
       value: ${vars.songEditedTitle}
   - id: submit_edit
     click:

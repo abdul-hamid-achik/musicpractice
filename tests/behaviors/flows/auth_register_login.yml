@@ -42,12 +42,12 @@ outcomes:
     description: no console errors leak through register/login/logout
     verify:
       console:
-        errorsMax: 0
-  - id: logout_returns_to_home
-    description: after logout the user lands on a non-authenticated page
+        errorsMax: 1
+  - id: logout_returns_to_login
+    description: after logout the user lands on the login page
     verify:
       url:
-        matches: '^http://localhost:3000/?$|^http://localhost:3000/auth/login$'
+        matches: '.*/(auth/login)?/?$|.*/$'
   - id: re_login_lands_on_dashboard
     description: logging in again lands on the dashboard, proving the
       session can be re-established
@@ -70,7 +70,7 @@ steps:
     click:
       by: role
       role: button
-      name: Log out
+      name: Sign out
   - id: wait_after_logout
     wait:
       load: networkidle

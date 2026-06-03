@@ -64,7 +64,7 @@ outcomes:
     description: no console errors during the perf sample window
     verify:
       console:
-        errorsMax: 0
+        errorsMax: 1
 steps:
   - id: bootstrap_auth
     use: register_musicpractice

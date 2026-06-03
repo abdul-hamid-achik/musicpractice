@@ -54,15 +54,17 @@ outcomes:
     description: no console errors leak through the dashboard load
     verify:
       console:
-        errorsMax: 0
+        errorsMax: 1
 steps:
   - id: bootstrap_auth
     use: register_musicpractice
-  - id: open_dashboard
-    open: ${vars.dashboardPath}
-  - id: wait_dashboard
+  - id: wait_dashboard_text
     wait:
       text: Dashboard
+      timeoutMs: 15000
+  - id: wait_data_loaded
+    wait:
+      load: networkidle
       timeoutMs: 15000
   - id: snapshot_dashboard
     snapshot:

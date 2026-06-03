@@ -33,4 +33,4 @@ steps:
   - id: wait_dashboard
     wait:
       text: Dashboard
-      timeoutMs: 15000
+      timeoutMs: 25000

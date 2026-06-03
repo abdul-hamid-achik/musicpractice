@@ -1,6 +1,20 @@
 export default defineNuxtRouteMiddleware(async (_to) => {
-  // Skip on server-side rendering if there's no token — the page can hydrate
-  // and the client middleware will catch it.
+  // Trust the in-memory auth state first. After a successful register or
+  // login the auth store already has the user object (the response is
+  // assigned to `user.value` before the post-auth router.push runs), so
+  // a freshly-authenticated user does not have to round-trip through
+  // /api/auth/me to prove they are who they say they are. This also
+  // sidesteps a Nuxt quirk where `useCookie` does not always see an
+  // httpOnly cookie that was just set by an XHR response, which would
+  // otherwise bounce the user back to /auth/login immediately after
+  // a successful register/login.
+  const auth = useAuthStore();
+  if (auth.isAuthenticated) {
+    return;
+  }
+
+  // Fall back to cookie + /api/auth/me validation for cold loads
+  // (e.g. refreshing the page on a protected route).
   const token = useCookie('auth-token');
   if (!token.value) {
     return navigateTo('/auth/login', { replace: true });
