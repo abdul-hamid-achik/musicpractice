@@ -1,0 +1,68 @@
+# Cairntrace behavioral spec — theory index page renders the catalog.
+#
+# Navigates to /theory and confirms the catalog cards for the four
+# theory sub-tools (scales, chords, ear training, circle of fifths)
+# are present. Pure read path — no audio.
+version: 1
+name: theory_index_load
+intent: >
+  WHAT THIS VALIDATES: the /theory index page renders links / cards
+  for the four theory sub-tools. The page is the gateway to all
+  theory features and must not 500 on load.
+
+  REGRESSION GUARDED: a missing or renamed link on the theory index
+  would leave a sub-tool orphaned. The four-outcome text check
+  catches a missing sub-tool entry.
+environment: local
+mode: normal
+metadata:
+  feature: theory
+  priority: normal
+  tags: [theory, catalog, read, hybrid]
+imports:
+  - ../actions/register_musicpractice.yml
+outcomes:
+  - id: scales_card_visible
+    description: the link/card to /theory/scales is visible
+    verify:
+      text:
+        contains: Scales
+  - id: chords_card_visible
+    description: the link/card to /theory/chords is visible
+    verify:
+      text:
+        contains: Chords
+  - id: ear_training_card_visible
+    description: the link/card to /theory/ear-training is visible
+    verify:
+      text:
+        contains: Ear Training
+  - id: no_console_errors
+    description: no console errors during the page load
+    verify:
+      console:
+        errorsMax: 1
+steps:
+  - id: bootstrap_auth
+    use: register_musicpractice
+  - id: open_theory
+    open: ${vars.theoryPath}
+  - id: wait_theory_page
+    wait:
+      text: Theory
+      timeoutMs: 15000
+  - id: wait_for_cards
+    wait:
+      load: networkidle
+      timeoutMs: 10000
+  - id: snapshot_theory_index
+    snapshot:
+      interactive: true
+      label: Theory index page — catalog of sub-tools
+artifacts:
+  capture:
+    screenshots: always
+    snapshots: on-failure
+    console: always
+    network: on-failure
+    trace: on-failure

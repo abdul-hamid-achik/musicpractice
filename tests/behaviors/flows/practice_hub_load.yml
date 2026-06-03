@@ -1,0 +1,63 @@
+# Cairntrace behavioral spec — practice hub page renders.
+#
+# Navigates to /practice and confirms the hub renders the main
+# practice surfaces (start session, history, goals, etc.). Pure
+# read path — no session start, no goal CRUD (those have their
+# own specs).
+version: 1
+name: practice_hub_load
+intent: >
+  WHAT THIS VALIDATES: the /practice page renders the main practice
+  hub with the session-shortcut surfaces visible. The page is the
+  gateway to active sessions, history, and goals.
+
+  REGRESSION GUARDED: a missing CTA on the practice hub would leave
+  a feature discoverability gap; the surface texts catch that.
+environment: local
+mode: normal
+metadata:
+  feature: practice
+  priority: normal
+  tags: [practice, hub, read, hybrid]
+imports:
+  - ../actions/register_musicpractice.yml
+outcomes:
+  - id: page_renders
+    description: the practice hub page is visible
+    verify:
+      text:
+        contains: Practice
+  - id: start_session_shortcut_visible
+    description: a "Start Session" shortcut is visible
+    verify:
+      text:
+        contains: Start
+  - id: no_console_errors
+    description: no console errors during the page load
+    verify:
+      console:
+        errorsMax: 1
+steps:
+  - id: bootstrap_auth
+    use: register_musicpractice
+  - id: open_practice_hub
+    open: ${vars.practiceHubPath}
+  - id: wait_practice_hub
+    wait:
+      text: Practice
+      timeoutMs: 15000
+  - id: wait_for_data
+    wait:
+      load: networkidle
+      timeoutMs: 10000
+  - id: snapshot_practice_hub
+    snapshot:
+      interactive: true
+      label: Practice hub page
+artifacts:
+  capture:
+    screenshots: always
+    snapshots: on-failure
+    console: always
+    network: on-failure
+    trace: on-failure

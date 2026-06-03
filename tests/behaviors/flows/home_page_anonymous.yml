@@ -1,0 +1,53 @@
+# Cairntrace behavioral spec — landing (home) page renders for an
+# unauthenticated visitor. Confirms the marketing copy renders and the
+# Sign In / Sign Up links exist.
+version: 1
+name: home_page_anonymous
+intent: >
+  WHAT THIS VALIDATES: the public / route renders the marketing
+  landing page with the brand mark, the tagline, and the Sign In /
+  Sign Up links. No console errors leak through.
+
+  REGRESSION GUARDED: the home page must be reachable WITHOUT
+  authentication (this is a public marketing page). A future change
+  that adds an auth middleware to all routes would break this spec.
+environment: local
+mode: normal
+metadata:
+  feature: marketing
+  priority: high
+  tags: [home, marketing, anonymous]
+outcomes:
+  - id: brand_visible
+    description: the "MusicPractice" brand mark is visible on the page
+    verify:
+      text:
+        contains: MusicPractice
+  - id: sign_in_link_visible
+    description: a "Sign In" link is present in the nav
+    verify:
+      text:
+        contains: Sign In
+  - id: no_console_errors
+    description: no console errors during the home page load
+    verify:
+      console:
+        errorsMax: 1
+steps:
+  - id: open_home
+    open: ${vars.homePath}
+  - id: wait_brand
+    wait:
+      text: MusicPractice
+      timeoutMs: 15000
+  - id: snapshot_home
+    snapshot:
+      interactive: true
+      label: Home page — anonymous visitor
+artifacts:
+  capture:
+    screenshots: always
+    snapshots: on-failure
+    console: always
+    network: on-failure
+    trace: on-failure

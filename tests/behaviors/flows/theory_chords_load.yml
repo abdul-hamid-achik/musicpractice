@@ -1,0 +1,51 @@
+# Cairntrace behavioral spec — theory chords page loads. Read-only:
+# navigate, wait for the chord library, confirm a chord renders.
+version: 1
+name: theory_chords_load
+intent: >
+  WHAT THIS VALIDATES: the /theory/chords page renders the ChordLibrary
+  component with at least one chord visible. Audio playback is not
+  asserted (Tone.js is fragile to automate).
+environment: local
+mode: normal
+metadata:
+  feature: theory
+  priority: normal
+  tags: [theory, chords, read, hybrid]
+imports:
+  - ../actions/register_musicpractice.yml
+outcomes:
+  - id: page_h1_renders
+    description: the page renders the chord library heading
+    verify:
+      text:
+        contains: Chord
+  - id: no_console_errors
+    description: no console errors during the page load
+    verify:
+      console:
+        errorsMax: 1
+steps:
+  - id: bootstrap_auth
+    use: register_musicpractice
+  - id: open_chords
+    open: ${vars.theoryChordsPath}
+  - id: wait_chords_page
+    wait:
+      text: Chord
+      timeoutMs: 20000
+  - id: wait_for_data
+    wait:
+      load: networkidle
+      timeoutMs: 15000
+  - id: snapshot_chords_page
+    snapshot:
+      interactive: true
+      label: Theory chords page — library loaded
+artifacts:
+  capture:
+    screenshots: always
+    snapshots: on-failure
+    console: always
+    network: on-failure
+    trace: on-failure

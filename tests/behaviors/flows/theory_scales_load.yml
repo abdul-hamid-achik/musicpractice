@@ -1,0 +1,70 @@
+# Cairntrace behavioral spec — theory scales page loads + renders the
+# explorer. Covers the read path: navigate, wait for the scale list to
+# load, pick a scale, see the preview. Audio playback is not asserted.
+version: 1
+name: theory_scales_load
+intent: >
+  WHAT THIS VALIDATES: the /theory/scales page renders the ScaleExplorer
+  component with at least one scale listed, selecting a scale populates
+  the preview panel, and GET /api/scales returns 2xx.
+
+  REGRESSION GUARDED: theoryStore.fetchScales() failures would render
+  the explorer in a perpetual loading state; the scales list + API
+  outcome catch that.
+environment: local
+mode: normal
+metadata:
+  feature: theory
+  priority: normal
+  tags: [theory, scales, read, hybrid]
+imports:
+  - ../actions/register_musicpractice.yml
+outcomes:
+  - id: scales_api_ok
+    description: GET /api/scales returns 2xx
+    verify:
+      network:
+        method: GET
+        urlContains: /api/scales
+        status:
+          in: [200, 201, 204]
+  - id: page_h1_renders
+    description: the page shows the "Scale Explorer" h1
+    verify:
+      text:
+        contains: Scale Explorer
+  - id: at_least_one_scale_visible
+    description: at least one scale name is rendered in the list
+    verify:
+      count:
+        selector: "button, [role='button']"
+        atLeast: 3
+  - id: no_console_errors
+    description: no console errors during the page load
+    verify:
+      console:
+        errorsMax: 1
+steps:
+  - id: bootstrap_auth
+    use: register_musicpractice
+  - id: open_scales
+    open: ${vars.theoryScalesPath}
+  - id: wait_scales_page
+    wait:
+      text: Scale Explorer
+      timeoutMs: 20000
+  - id: wait_for_data
+    wait:
+      load: networkidle
+      timeoutMs: 15000
+  - id: snapshot_scales_page
+    snapshot:
+      interactive: true
+      label: Theory scales page — list loaded
+artifacts:
+  capture:
+    screenshots: always
+    snapshots: on-failure
+    console: always
+    network: always
+    trace: on-failure

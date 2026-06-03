@@ -15,8 +15,14 @@ environments:
       homePath: /
       dashboardPath: /dashboard
       songsPath: /songs
+      practiceHubPath: /practice
       practiceSessionPath: /practice/session
       practiceHistoryPath: /practice/history
+      theoryPath: /theory
+      theoryScalesPath: /theory/scales
+      theoryChordsPath: /theory/chords
+      theoryEarTrainingPath: /theory/ear-training
+      instrumentsPath: /instruments
       settingsPath: /settings
       accountPath: /account
       # Per-flow test data (set once, reused by the flows that read them).
@@ -25,6 +31,7 @@ environments:
       songTitle: "Cairn test song"
       songArtist: "Cairntrace"
       songEditedTitle: "Cairn test song (edited)"
+      goalTitle: "Cairn test goal"
 
 secrets:
   provider: env

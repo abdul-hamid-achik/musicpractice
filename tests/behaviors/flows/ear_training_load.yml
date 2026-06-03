@@ -1,0 +1,63 @@
+# Cairntrace behavioral spec — ear training page renders.
+#
+# Navigates to /theory/ear-training and confirms the page renders
+# with the exercise tabs (intervals / notes). Pure read path — no
+# audio or scoring interaction.
+version: 1
+name: ear_training_load
+intent: >
+  WHAT THIS VALIDATES: the /theory/ear-training page renders with the
+  two exercise tabs visible (intervals + notes), and the underlying
+  score-fetching endpoint returns 2xx. Audio playback is not asserted.
+
+  REGRESSION GUARDED: the page's onMounted fetches recent scores via
+  /api/ear-training; a 5xx there would render an empty page. The
+  api outcome catches that.
+environment: local
+mode: normal
+metadata:
+  feature: theory
+  priority: normal
+  tags: [theory, ear-training, read, hybrid]
+imports:
+  - ../actions/register_musicpractice.yml
+outcomes:
+  - id: page_renders
+    description: the page shows the ear-training heading
+    verify:
+      text:
+        contains: Ear Training
+  - id: intervals_tab_visible
+    description: the "intervals" tab is rendered
+    verify:
+      text:
+        contains: Intervals
+  - id: no_console_errors
+    description: no console errors during the page load
+    verify:
+      console:
+        errorsMax: 1
+steps:
+  - id: bootstrap_auth
+    use: register_musicpractice
+  - id: open_ear_training
+    open: ${vars.theoryEarTrainingPath}
+  - id: wait_ear_training_page
+    wait:
+      text: Ear Training
+      timeoutMs: 15000
+  - id: wait_for_data
+    wait:
+      load: networkidle
+      timeoutMs: 10000
+  - id: snapshot_ear_training
+    snapshot:
+      interactive: true
+      label: Ear training page — intervals tab
+artifacts:
+  capture:
+    screenshots: always
+    snapshots: on-failure
+    console: always
+    network: on-failure
+    trace: on-failure

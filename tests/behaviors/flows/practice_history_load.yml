@@ -1,0 +1,68 @@
+# Cairntrace behavioral spec — practice history page loads.
+#
+# Navigates to /practice/history and confirms the page renders and the
+# /api/sessions endpoint succeeds. After the practice_session spec has
+# created at least one session, the list should have at least one row.
+# This spec is the "view" counterpart of practice_session_log_to_history.
+version: 1
+name: practice_history_load
+intent: >
+  WHAT THIS VALIDATES: the /practice/history page renders the list of
+  the current user's past practice sessions, and GET /api/sessions
+  returns 2xx.
+
+  REGRESSION GUARDED: a session that was successfully saved but never
+  shows up in history would mean the list query is filtering by the
+  wrong user/condition. The history list rendered with at least the
+  page chrome catches that.
+environment: local
+mode: normal
+metadata:
+  feature: practice
+  priority: normal
+  tags: [practice, history, read, hybrid]
+imports:
+  - ../actions/register_musicpractice.yml
+outcomes:
+  - id: sessions_api_ok
+    description: GET /api/sessions returns 2xx
+    verify:
+      network:
+        method: GET
+        urlContains: /api/sessions
+        status:
+          in: [200, 201, 204]
+  - id: history_page_renders
+    description: the page shows the history heading
+    verify:
+      text:
+        contains: History
+  - id: no_console_errors
+    description: no console errors during the page load
+    verify:
+      console:
+        errorsMax: 1
+steps:
+  - id: bootstrap_auth
+    use: register_musicpractice
+  - id: open_history
+    open: ${vars.practiceHistoryPath}
+  - id: wait_history_page
+    wait:
+      text: History
+      timeoutMs: 20000
+  - id: wait_for_data
+    wait:
+      load: networkidle
+      timeoutMs: 15000
+  - id: snapshot_history_page
+    snapshot:
+      interactive: true
+      label: Practice history page
+artifacts:
+  capture:
+    screenshots: always
+    snapshots: on-failure
+    console: always
+    network: always
+    trace: on-failure

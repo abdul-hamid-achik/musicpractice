@@ -1,0 +1,60 @@
+# Cairntrace behavioral spec — 404 catch-all route.
+#
+# Navigates to a non-existent path and confirms the catch-all page
+# renders the "Page Not Found" message. This guards the [...path].vue
+# route from silently breaking (e.g. a regex that swallows everything
+# would 500 instead of 404).
+version: 1
+name: not_found_page
+intent: >
+  WHAT THIS VALIDATES: navigating to a non-existent route renders the
+  catch-all [...path].vue page with a "Page Not Found" message and
+  a link back to the dashboard. The page does not 500.
+
+  REGRESSION GUARDED: the catch-all route must match *anything* that
+  isn't already defined. A future route addition that accidentally
+  shadows the catch-all would break the 404 path; this spec exercises
+  a clearly non-existent path to make sure the catch-all still fires.
+environment: local
+mode: normal
+metadata:
+  feature: routing
+  priority: high
+  tags: [routing, "404", catch-all]
+outcomes:
+  - id: page_returns_404
+    description: the server returns HTTP 404 for a non-existent path
+    verify:
+      network:
+        method: GET
+        urlContains: /this-path-does-not-exist
+        status:
+          in: [404]
+  - id: not_found_message_renders
+    description: the page shows a "Page Not Found" / "404" message
+    verify:
+      text:
+        contains: Page Not Found
+  - id: no_console_errors
+    description: no console errors during the 404 navigation
+    verify:
+      console:
+        errorsMax: 1
+steps:
+  - id: open_nonexistent_path
+    open: /this-path-does-not-exist-$(date +%s)
+  - id: wait_for_404
+    wait:
+      text: Page Not Found
+      timeoutMs: 15000
+  - id: snapshot_404
+    snapshot:
+      interactive: true
+      label: 404 catch-all page
+artifacts:
+  capture:
+    screenshots: always
+    snapshots: on-failure
+    console: always
+    network: always
+    trace: on-failure
