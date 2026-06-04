@@ -4,17 +4,16 @@
 version: 1
 name: login_empty_fields
 intent: >
-  WHAT THIS VALIDATES: clicking Sign in on the login form with
-  no fields fires a POST /api/auth/login that the server
-  rejects with 400 (the client-side `required` attribute
-  doesn't fire because the form is bound to v-model, so the
-  server is the source of truth). The user stays on the
-  login page.
+  WHAT THIS VALIDATES: the Sign in button is disabled when
+  either the identifier or password field is empty. Clicking
+  it does NOT fire a POST /api/auth/login — the form's
+  client-side guard bails before the auth store is hit. The
+  user stays on /auth/login.
 
-  REGRESSION GUARDED: if the form were to redirect to
-  /dashboard on a 400, the user would land on a broken page
-  with no auth cookie. The "stayed on login" outcome catches
-  that.
+  REGRESSION GUARDED: a regression that removes the disabled
+  binding would let the form POST with empty fields and hit
+  the server's 400 — that's a bad UX. The "no POST to
+  /api/auth/login" outcome catches that.
 environment: local
 mode: normal
 metadata:
@@ -22,21 +21,31 @@ metadata:
   priority: normal
   tags: [auth, login, validation, ux]
 outcomes:
-  - id: empty_submit_server_validates
-    description: clicking Sign in with no fields fires a POST
-      /api/auth/login that the server rejects with 400 (client-
-      side `required` doesn't fire because the form is bound
-      to v-model; the server is the source of truth). The user
-      stays on the login page.
+  - id: button_is_disabled
+    description: the Sign in button is disabled (aria-disabled
+      is true) when the inputs are empty
     verify:
-      network:
-        method: POST
-        urlContains: /api/auth/login
-        status:
-          in: [400, 422]
+      script:
+        runtime: browser
+        run: |
+          const btn = document.querySelector("button[type='submit']");
+          const disabled = btn?.disabled === true || btn?.getAttribute('aria-disabled') === 'true';
+          return { ok: disabled, evidence: JSON.stringify({ disabled: btn?.disabled, ariaDisabled: btn?.getAttribute('aria-disabled') }) };
+  - id: no_login_post_on_empty
+    description: no POST to /api/auth/login fires when the form
+      is submitted empty (client-side guard bails)
+    verify:
+      script:
+        runtime: browser
+        run: |
+          // Inspect fetch() calls. The auth store's fetchUser
+          // makes a GET /api/auth/me on init; we want zero
+          // POSTs to /api/auth/login.
+          const perfs = performance.getEntriesByType('resource');
+          const loginPosts = perfs.filter((r) => r.name.includes('/api/auth/login') && r.initiatorType === 'fetch');
+          return { ok: loginPosts.length === 0, evidence: JSON.stringify({ count: loginPosts.length }) };
   - id: stayed_on_login
-    description: the user is still on the login page (no redirect
-      to dashboard despite the form submitting)
+    description: the user is still on the login page
     verify:
       text:
         contains: Sign in to your account
@@ -53,20 +62,22 @@ steps:
       text: Sign in to your account
       timeoutMs: 15000
   - id: click_signin_empty
-    # The form inputs are `required`. Clicking the submit
-    # should trigger browser-level validation, not the API.
+    # The Sign in button is disabled but we still click it to
+    # verify the disabled binding is in place (cairn skips
+    # disabled elements by default, which IS the behavior we
+    # want).
     click:
       by: role
       role: button
       name: Sign in
-  - id: wait_for_browser_validation
+  - id: wait_for_aria_live
     wait:
       load: networkidle
       timeoutMs: 5000
-  - id: snapshot_empty_submit
+  - id: snapshot_disabled
     snapshot:
       interactive: true
-      label: Login form after empty submit
+      label: Login form with Sign in disabled
 artifacts:
   capture:
     screenshots: on-failure
