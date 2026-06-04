@@ -109,7 +109,7 @@ async function handleLogin() {
 
           <button
             type="submit"
-            :disabled="auth.loading.value || !identifier?.value?.trim() || !password?.value"
+            :disabled="auth.loading.value || !identifier?.trim() || !password"
             class="w-full bg-primary text-on-primary font-medium py-2.5 rounded-lg hover:brightness-110 transition-all disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-card"
             :aria-busy="auth.loading.value"
           >
