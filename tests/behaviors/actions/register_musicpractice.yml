@@ -17,22 +17,22 @@ steps:
     fill:
       by: label
       name: Full name
-      value: "${secrets.MP_E2E_NEW_NAME}"
+      value: '${secrets.MP_E2E_NEW_NAME}'
   - id: fill_email
     fill:
       by: label
       name: Email
-      value: "${secrets.MP_E2E_NEW_EMAIL}"
+      value: '${secrets.MP_E2E_NEW_EMAIL}'
   - id: fill_username
     fill:
       by: label
       name: Username
-      value: "${secrets.MP_E2E_NEW_USERNAME}"
+      value: '${secrets.MP_E2E_NEW_USERNAME}'
   - id: fill_password
     fill:
       by: label
       name: Password
-      value: "${secrets.MP_E2E_NEW_PASSWORD}"
+      value: '${secrets.MP_E2E_NEW_PASSWORD}'
   - id: submit_register
     click:
       by: selector

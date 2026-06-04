@@ -327,7 +327,9 @@ describe('PracticeGoals', () => {
     // fetchMock should have been called with DELETE on the
     // specific goal ID.
     const deleteCalls = fetchMock.mock.calls.filter(
-      (c) => c[0] === '/api/goals/g-existing' && (c[1] as { method?: string } | undefined)?.method === 'DELETE',
+      (c) =>
+        c[0] === '/api/goals/g-existing' &&
+        (c[1] as { method?: string } | undefined)?.method === 'DELETE',
     );
     expect(deleteCalls).toHaveLength(1);
   });

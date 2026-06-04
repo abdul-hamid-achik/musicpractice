@@ -40,7 +40,7 @@ outcomes:
       `level-N` class; 90 days = 90 cells.
     verify:
       count:
-        selector: ".heatmap-cell"
+        selector: '.heatmap-cell'
         atLeast: 80
   - id: no_console_errors
     description: no console errors during the heatmap render

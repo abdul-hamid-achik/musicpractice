@@ -83,7 +83,7 @@ steps:
     # that targets the first h3 in the songs grid.
     click:
       by: selector
-      selector: "h3.text-lg"
+      selector: 'h3.text-lg'
   - id: wait_for_detail_navigation
     wait:
       load: networkidle

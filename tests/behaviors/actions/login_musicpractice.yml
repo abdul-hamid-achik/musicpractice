@@ -18,13 +18,13 @@ steps:
     fill:
       by: label
       name: Email or username
-      value: "${secrets.MP_E2E_EMAIL}"
+      value: '${secrets.MP_E2E_EMAIL}'
   - id: fill_password
     when: text:Sign in to your account
     fill:
       by: label
       name: Password
-      value: "${secrets.MP_E2E_PASSWORD}"
+      value: '${secrets.MP_E2E_PASSWORD}'
   - id: submit_login
     when: text:Sign in to your account
     click:

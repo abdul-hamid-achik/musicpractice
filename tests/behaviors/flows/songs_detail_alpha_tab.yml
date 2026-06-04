@@ -28,7 +28,7 @@ outcomes:
     description: the AlphaTabViewer container is in the DOM
     verify:
       count:
-        selector: "#alphaTab, [data-alpha-tab], .alpha-tab-container, .at-surface"
+        selector: '#alphaTab, [data-alpha-tab], .alpha-tab-container, .at-surface'
         atLeast: 1
   - id: detail_api_ok
     description: GET /api/songs/<id> returns 2xx
@@ -55,7 +55,7 @@ steps:
   - id: click_first_song
     click:
       by: selector
-      selector: "h3.text-lg"
+      selector: 'h3.text-lg'
   - id: wait_for_detail
     wait:
       load: networkidle

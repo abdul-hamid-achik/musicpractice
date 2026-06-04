@@ -43,7 +43,7 @@ outcomes:
       DOM (proves the scale list rendered)
     verify:
       count:
-        selector: "button"
+        selector: 'button'
         atLeast: 3
   - id: no_console_errors
     description: no console errors during the page load

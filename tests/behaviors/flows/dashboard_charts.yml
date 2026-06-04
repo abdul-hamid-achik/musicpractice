@@ -54,7 +54,7 @@ outcomes:
       skeletons. Catches "fetch resolved but render is missing".
     verify:
       count:
-        selector: "svg, [data-chart], rect[height]"
+        selector: 'svg, [data-chart], rect[height]'
         atLeast: 1
   - id: no_console_errors
     description: no console errors during the dashboard chart loads

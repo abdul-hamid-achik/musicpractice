@@ -57,22 +57,22 @@ steps:
     fill:
       by: label
       name: Full name
-      value: "Validation Test"
+      value: 'Validation Test'
   - id: fill_email_invalid
     fill:
       by: label
       name: Email
-      value: "not-an-email"
+      value: 'not-an-email'
   - id: fill_username_valid
     fill:
       by: label
       name: Username
-      value: "validusername"
+      value: 'validusername'
   - id: fill_password_short
     fill:
       by: label
       name: Password
-      value: "short"
+      value: 'short'
   - id: wait_for_validation_state
     wait:
       load: networkidle

@@ -28,14 +28,14 @@ environments:
       # Per-flow test data (set once, reused by the flows that read them).
       # These are placeholders; the Taskfile `task run FLOW=...` accepts
       # overrides via the env, e.g. `SONG_TITLE='My custom song' task run FLOW=...`
-      songTitle: "Cairn test song"
-      songArtist: "Cairntrace"
-      songEditedTitle: "Cairn test song (edited)"
-      songSearchTitle: "Cairn searchable song"
-      songSearchQuery: "searchable"
-      songApiTitle: "Cairn API song"
-      goalTitle: "Cairn test goal"
-      updatedName: "Cairn Updated"
+      songTitle: 'Cairn test song'
+      songArtist: 'Cairntrace'
+      songEditedTitle: 'Cairn test song (edited)'
+      songSearchTitle: 'Cairn searchable song'
+      songSearchQuery: 'searchable'
+      songApiTitle: 'Cairn API song'
+      goalTitle: 'Cairn test goal'
+      updatedName: 'Cairn Updated'
 
 secrets:
   provider: env

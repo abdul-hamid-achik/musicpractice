@@ -41,7 +41,7 @@ outcomes:
     description: an SVG fretboard is rendered on the page
     verify:
       count:
-        selector: "svg"
+        selector: 'svg'
         atLeast: 1
   - id: no_console_errors
     description: no console errors during the page load

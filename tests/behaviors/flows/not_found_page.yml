@@ -20,7 +20,7 @@ mode: normal
 metadata:
   feature: routing
   priority: high
-  tags: [routing, "404", catch-all]
+  tags: [routing, '404', catch-all]
 outcomes:
   - id: page_returns_200_with_404_content
     description: the server returns 200 for the non-existent path
@@ -39,7 +39,7 @@ outcomes:
     description: the catch-all page shows the "404" heading
     verify:
       text:
-        contains: "404"
+        contains: '404'
   - id: not_found_subheading_renders
     description: the catch-all page shows the "off-key" subheading
     verify:
@@ -55,7 +55,7 @@ steps:
     open: /this-path-does-not-exist-$(date +%s)
   - id: wait_for_404_heading
     wait:
-      text: "404"
+      text: '404'
       timeoutMs: 15000
   - id: wait_for_subheading
     wait:
