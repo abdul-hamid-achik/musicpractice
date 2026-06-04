@@ -2,6 +2,7 @@
 const props = defineProps<{
   open: boolean;
   title?: string;
+  testid?: string;
 }>();
 
 const emit = defineEmits<{
@@ -69,6 +70,7 @@ watch(
           role="dialog"
           aria-modal="true"
           :aria-label="title"
+          :data-testid="testid"
           class="bg-card border border-border rounded-xl max-w-lg mx-auto mt-20 p-6 animate-modal-in"
         >
           <div class="flex items-center justify-between mb-4">

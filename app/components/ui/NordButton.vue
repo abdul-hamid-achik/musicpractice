@@ -6,6 +6,7 @@ defineProps<{
   loading?: boolean;
   ariaLabel?: string;
   ariaPressed?: boolean;
+  testid?: string;
   type?: 'button' | 'submit' | 'reset';
 }>();
 
@@ -41,6 +42,7 @@ const sizeClasses: Record<string, string> = {
     :aria-label="ariaLabel"
     :aria-pressed="ariaPressed"
     :aria-busy="loading"
+    :data-testid="testid"
     @click="emit('click', $event)"
   >
     <svg

@@ -1,0 +1,86 @@
+# Cairntrace behavioral spec — sign out (logout) end to end.
+#
+# Clicking "Sign out" in the app header should:
+#   1. POST /api/auth/logout (clears the auth cookie)
+#   2. Redirect to /auth/login
+#   3. Visiting any protected page after logout should redirect to login
+#
+# This spec asserts the full sign-out flow.
+version: 1
+name: auth_sign_out
+intent: >
+  WHAT THIS VALIDATES: clicking the Sign out button in the app header
+  posts to /api/auth/logout, navigates to /auth/login, and a
+  subsequent navigation to a protected page redirects back to login.
+
+  REGRESSION GUARDED: a refactor that skips the /api/auth/logout
+  call would leave the httpOnly cookie in place. Even though the
+  client state is cleared, a refresh would silently re-authenticate
+  from the leftover cookie. This spec asserts the network call.
+environment: local
+mode: normal
+metadata:
+  feature: auth
+  priority: high
+  tags: [auth, logout, signout, hybrid]
+imports:
+  - ../actions/register_musicpractice.yml
+outcomes:
+  - id: logout_api_ok
+    description: POST /api/auth/logout returns 2xx
+    verify:
+      network:
+        method: POST
+        urlContains: /api/auth/logout
+        status:
+          in: [200, 201, 204]
+  - id: redirected_to_login
+    description: after clicking Sign out, the URL is /auth/login
+    verify:
+      script:
+        runtime: browser
+        run: |
+          const ok = window.location.pathname.startsWith('/auth/login');
+          return { ok, evidence: window.location.pathname };
+  - id: protected_page_redirects_after_logout
+    description: after logout, navigating to /dashboard redirects to
+      /auth/login
+    verify:
+      text:
+        contains: Sign in to your account
+  - id: no_console_errors
+    description: no console errors during the sign-out round trip
+    verify:
+      console:
+        errorsMax: 1
+steps:
+  - id: bootstrap_auth
+    use: register_musicpractice
+  - id: click_sign_out
+    # The Sign out button is in the AppHeader. The app layout
+    # has the header at the top. The button is plain <button>
+    # not a NordButton, so we target by text.
+    click:
+      by: text
+      text: Sign out
+  - id: wait_for_login_redirect
+    wait:
+      text: Sign in to your account
+      timeoutMs: 15000
+  - id: try_dashboard_after_logout
+    open: ${vars.dashboardPath}
+  - id: wait_dashboard_redirect_to_login
+    wait:
+      text: Sign in to your account
+      timeoutMs: 15000
+  - id: snapshot_after_logout
+    snapshot:
+      interactive: true
+      label: Login page after sign-out + dashboard re-visit
+artifacts:
+  capture:
+    screenshots: on-failure
+    snapshots: on-failure
+    console: always
+    network: on-failure
+    trace: on-failure

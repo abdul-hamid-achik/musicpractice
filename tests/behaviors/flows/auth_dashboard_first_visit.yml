@@ -1,0 +1,82 @@
+# Cairntrace behavioral spec — regression guard for the auth cookie-race fix.
+#
+# BUGGY BEHAVIOR (pre-fix): after register or login, the first
+# /dashboard navigation sometimes hit the auth middleware before the
+# Pinia auth store was hydrated. The middleware would call
+# useCookie('auth-token') which on the FIRST navigation could miss
+# the httpOnly cookie set by the just-completed XHR. Result: redirect
+# to /auth/login even though the user was just authenticated.
+#
+# FIXED BEHAVIOR (post-fix 38f694a): the middleware trusts
+# useAuthStore().isAuthenticated FIRST, only falling back to the
+# cookie + /api/auth/me round trip on miss. Combined with the
+# auth store calling fetchUser on register/login, the dashboard
+# works on the very first visit.
+#
+# This spec asserts: the FIRST navigation to /dashboard after
+# register renders the dashboard (not a redirect to login).
+version: 1
+name: auth_dashboard_first_visit
+intent: >
+  WHAT THIS VALIDATES: after a successful register, the user lands
+  on the dashboard on their first navigation. The auth cookie race
+  (middleware missing the httpOnly cookie set by the XHR) does NOT
+  cause a redirect-to-login.
+
+  REGRESSION GUARDED: a future change that reorders or removes the
+  "trust auth store first" check in app/middleware/auth.ts would
+  re-introduce the first-visit redirect. This spec asserts the
+  single-navigation behavior end-to-end.
+environment: local
+mode: normal
+metadata:
+  feature: auth
+  priority: high
+  tags: [auth, cookie, race, dashboard, regression]
+imports:
+  - ../actions/register_musicpractice.yml
+outcomes:
+  - id: dashboard_visible_after_register
+    description: the "Dashboard" heading renders on the first visit
+      (no redirect to /auth/login)
+    verify:
+      text:
+        contains: Dashboard
+  - id: dashboard_contains_known_marker
+    description: a known dashboard element (Streak or Recent Sessions
+      or the welcome) is visible
+    verify:
+      text:
+        contains: streak
+  - id: no_console_errors
+    description: no console errors during the register → dashboard
+      round trip
+    verify:
+      console:
+        errorsMax: 1
+  - id: url_is_dashboard
+    description: the current URL is the dashboard path (not /auth/login)
+    verify:
+      script:
+        runtime: browser
+        run: |
+          const ok = window.location.pathname.startsWith('/dashboard');
+          return { ok, evidence: window.location.pathname };
+steps:
+  - id: bootstrap_auth_via_register
+    use: register_musicpractice
+  - id: snapshot_dashboard_first_visit
+    snapshot:
+      interactive: true
+      label: Dashboard on first visit (no redirect to login)
+  - id: check_url_is_dashboard
+    snapshot:
+      interactive: false
+      label: Confirm URL is /dashboard not /auth/login
+artifacts:
+  capture:
+    screenshots: on-failure
+    snapshots: on-failure
+    console: always
+    network: on-failure
+    trace: on-failure
