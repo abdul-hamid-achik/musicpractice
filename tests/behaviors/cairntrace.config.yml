@@ -33,6 +33,7 @@ environments:
       songEditedTitle: "Cairn test song (edited)"
       songSearchTitle: "Cairn searchable song"
       songSearchQuery: "searchable"
+      songApiTitle: "Cairn API song"
       goalTitle: "Cairn test goal"
       updatedName: "Cairn Updated"
 
