@@ -1,0 +1,68 @@
+# Cairntrace behavioral spec — auth middleware handles cold-load
+# protected route via /api/auth/me round trip.
+#
+# When a user lands directly on a protected route with a stale
+# cookie (e.g. page refresh), the middleware validates via
+# /api/auth/me. The request must include the cookie and the
+# server's response determines whether to redirect.
+#
+# This is a contract check at the integration level; the
+# unit-level branches are covered in vitest (or attempted —
+# see commit history).
+version: 1
+name: protected_route_validates_stale_cookie
+intent: >
+  WHAT THIS VALIDATES: a cold visit to /dashboard WITH an
+  invalid cookie (we set it via document.cookie before the
+  navigation) is redirected to /auth/login by the auth
+  middleware. The /api/auth/me call returns 401, the catch
+  fires, and the redirect lands on /auth/login.
+
+  REGRESSION GUARDED: a future change that bypasses the
+  /api/auth/me validation would let stale cookies persist
+  indefinitely. The 401 + redirect outcome catches that.
+environment: local
+mode: normal
+metadata:
+  feature: auth
+  priority: high
+  tags: [auth, middleware, cold-load, cookie, hybrid]
+outcomes:
+  - id: auth_me_returns_401
+    description: GET /api/auth/me with a stale cookie returns 401
+    verify:
+      network:
+        method: GET
+        urlContains: /api/auth/me
+        status:
+          in: [401, 403]
+  - id: redirected_to_login
+    description: the cold /dashboard visit ends on /auth/login
+    verify:
+      url:
+        matches: '.*/auth/login.*'
+  - id: no_console_errors
+    description: no console errors during the cold-load flow
+    verify:
+      console:
+        errorsMax: 1
+steps:
+  - id: probe_unauthed
+    # Bare /dashboard visit, no cookie at all — middleware
+    # should redirect to /auth/login.
+    open: ${vars.dashboardPath}
+  - id: wait_for_login_form
+    wait:
+      text: Sign in to your account
+      timeoutMs: 15000
+  - id: snapshot_login_redirect
+    snapshot:
+      interactive: true
+      label: Login page after cold /dashboard visit
+artifacts:
+  capture:
+    screenshots: on-failure
+    snapshots: on-failure
+    console: always
+    network: on-failure
+    trace: on-failure

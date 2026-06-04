@@ -191,6 +191,147 @@ describe('PracticeGoals', () => {
     );
   });
 
+  it('renders Edit and Delete icon buttons for each goal', async () => {
+    // Pre-populate with one existing goal via the onMounted fetch.
+    const fetchMock = vi.fn().mockImplementation((url: string) => {
+      if (url === '/api/goals') {
+        return Promise.resolve({
+          data: [
+            {
+              id: 'g-existing',
+              title: 'Practice scales',
+              targetMinutesPerWeek: 90,
+              instrumentId: 'g-1',
+              userId: 'u1',
+              createdAt: '2026-01-01',
+              updatedAt: '2026-01-01',
+            },
+          ],
+        });
+      }
+      return Promise.resolve({ data: [] });
+    });
+    (globalThis as { $fetch: ReturnType<typeof vi.fn> }).$fetch = fetchMock;
+
+    const wrapper = mount(PracticeGoals, {
+      global: {
+        stubs: {
+          NordCard: NordCardStub,
+          NordProgressBar: NordProgressBarStub,
+          NordSkeleton: NordSkeletonStub,
+          NordButton: NordButtonStub,
+          StaggeredList: StaggeredListStub,
+        },
+      },
+    });
+    await flushPromises();
+
+    // The Edit and Delete icon buttons are not stubbed — they
+    // are plain <button> elements with title= attributes.
+    const editButton = wrapper.find('button[title="Edit goal"]');
+    const deleteButton = wrapper.find('button[title="Delete goal"]');
+
+    expect(editButton.exists()).toBe(true);
+    expect(deleteButton.exists()).toBe(true);
+  });
+
+  it('clicking the Edit icon button populates the form with the goal data', async () => {
+    const fetchMock = vi.fn().mockImplementation((url: string) => {
+      if (url === '/api/goals') {
+        return Promise.resolve({
+          data: [
+            {
+              id: 'g-existing',
+              title: 'Practice scales',
+              targetMinutesPerWeek: 90,
+              instrumentId: 'g-1',
+              userId: 'u1',
+              createdAt: '2026-01-01',
+              updatedAt: '2026-01-01',
+            },
+          ],
+        });
+      }
+      return Promise.resolve({ data: [] });
+    });
+    (globalThis as { $fetch: ReturnType<typeof vi.fn> }).$fetch = fetchMock;
+
+    const wrapper = mount(PracticeGoals, {
+      global: {
+        stubs: {
+          NordCard: NordCardStub,
+          NordProgressBar: NordProgressBarStub,
+          NordSkeleton: NordSkeletonStub,
+          NordButton: NordButtonStub,
+          StaggeredList: StaggeredListStub,
+        },
+      },
+    });
+    await flushPromises();
+
+    // Click Edit
+    await wrapper.find('button[title="Edit goal"]').trigger('click');
+    await wrapper.vm.$nextTick();
+
+    // The form should now be open with the existing values.
+    const titleInput = wrapper.find('input[type="text"]');
+    expect((titleInput.element as HTMLInputElement).value).toBe('Practice scales');
+
+    // The save button should now read "Update Goal" not "Save Goal"
+    const saveButton = wrapper.findAll('button').find((b) => b.text().includes('Update Goal'));
+    expect(saveButton).toBeTruthy();
+  });
+
+  it('clicking the Delete icon button fires DELETE /api/goals/:id and refreshes', async () => {
+    const fetchMock = vi.fn().mockImplementation((url: string, opts?: { method?: string }) => {
+      if (url === '/api/goals' && opts?.method !== 'DELETE') {
+        // GET /api/goals (initial load) and POST /api/goals (create)
+        return Promise.resolve({
+          data: [
+            {
+              id: 'g-existing',
+              title: 'Practice scales',
+              targetMinutesPerWeek: 90,
+              instrumentId: 'g-1',
+              userId: 'u1',
+              createdAt: '2026-01-01',
+              updatedAt: '2026-01-01',
+            },
+          ],
+        });
+      }
+      if (url === '/api/goals/g-existing' && opts?.method === 'DELETE') {
+        return Promise.resolve({});
+      }
+      return Promise.resolve({ data: [] });
+    });
+    (globalThis as { $fetch: ReturnType<typeof vi.fn> }).$fetch = fetchMock;
+
+    const wrapper = mount(PracticeGoals, {
+      global: {
+        stubs: {
+          NordCard: NordCardStub,
+          NordProgressBar: NordProgressBarStub,
+          NordSkeleton: NordSkeletonStub,
+          NordButton: NordButtonStub,
+          StaggeredList: StaggeredListStub,
+        },
+      },
+    });
+    await flushPromises();
+
+    // Click Delete
+    await wrapper.find('button[title="Delete goal"]').trigger('click');
+    await flushPromises();
+
+    // fetchMock should have been called with DELETE on the
+    // specific goal ID.
+    const deleteCalls = fetchMock.mock.calls.filter(
+      (c) => c[0] === '/api/goals/g-existing' && (c[1] as { method?: string } | undefined)?.method === 'DELETE',
+    );
+    expect(deleteCalls).toHaveLength(1);
+  });
+
   it('does not POST /api/goals when saving without a title', async () => {
     const fetchMock = vi.fn();
     (globalThis as { $fetch: ReturnType<typeof vi.fn> }).$fetch = fetchMock;
