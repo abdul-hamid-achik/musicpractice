@@ -11,7 +11,7 @@ tests/behaviors/
 ├── cairntrace.config.yml      # base URL + per-flow vars (song title etc.)
 ├── Taskfile.yml               # entry point: task test, task run FLOW=…
 ├── actions/                   # reusable step snippets (login, register)
-├── flows/                     # 17 behavioral specs
+├── flows/                     # 57 behavioral specs
 │   ├── auth_register_login.yml
 │   ├── account_change_password.yml
 │   ├── home_page_anonymous.yml
@@ -58,6 +58,11 @@ bun run behaviors:run -- FLOW=flows/dashboard_loads_with_streak.yml
 
 # 5. Run just the performance baseline.
 bun run behaviors:perf
+
+# 6. Run the perf baseline N times and report p50/p95/mean (default N=5).
+bun run behaviors:perf-suite
+# Or with custom N and budget:
+task --taskfile tests/behaviors/Taskfile.yml perf-suite N=10 BUDGET_MS=20000
 ```
 
 If you already have a seeded test user, set `MP_E2E_EMAIL` and

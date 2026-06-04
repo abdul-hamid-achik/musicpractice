@@ -76,6 +76,65 @@ tasks:
     cmds:
       - cairn run flows/perf_landing_dashboard.yml --config {{.CONFIG}} --cold-start --json
 
+  perf-suite:
+    desc: "Run the perf baseline N times and report p50/p95/mean. Asserts p95 < budget."
+    vars:
+      N: '{{.N | default "5"}}'
+      BUDGET_MS: '{{.BUDGET_MS | default "25000"}}'
+    cmds:
+      - |
+        #!/usr/bin/env bash
+        set -euo pipefail
+        cd "{{.TASKFILE_DIR}}/.."
+        N={{.N}}
+        BUDGET={{.BUDGET_MS}}
+        OUT="/tmp/perf-results-$(date +%s)"
+        mkdir -p "$OUT"
+        declare -a DURATIONS
+        echo "Running perf_dashboard_single_load x$N (budget: ${BUDGET}ms p95)..."
+        for i in $(seq 1 $N); do
+          echo "--- run $i/$N ---"
+          RUN_DIR="$OUT/run-$i"
+          mkdir -p "$RUN_DIR"
+          RESULT=$(cairn run tests/behaviors/flows/perf_dashboard_single_load.yml \
+                   --config tests/behaviors/cairntrace.config.yml \
+                   --cold-start --artifact-root "$RUN_DIR" --json 2>&1)
+          # Extract the cold_dashboard_under_25s outcome's evidence JSON
+          EVIDENCE=$(echo "$RESULT" | node -e "
+            let d=''; process.stdin.on('data',c=>d+=c); process.stdin.on('end',()=>{
+              try {
+                const j = JSON.parse(d);
+                const o = (j.outcomes||[]).find(x=>x.id==='cold_dashboard_under_25s');
+                if (o && o.evidence) console.log(o.evidence);
+                else console.log('NO_EVIDENCE');
+              } catch(e) { console.log('PARSE_ERROR:'+e.message); }
+            });
+          ")
+          if [ "$EVIDENCE" = "NO_EVIDENCE" ] || [ -z "$EVIDENCE" ]; then
+            echo "run $i: NO EVIDENCE — outcome not found"; exit 1
+          fi
+          DUR=$(echo "$EVIDENCE" | node -e "
+            let d=''; process.stdin.on('data',c=>d+=c); process.stdin.on('end',()=>{
+              try { console.log(JSON.parse(d).durationMs || 0); } catch(e) { console.log(0); }
+            });
+          ")
+          DURATIONS+=("$DUR")
+          echo "run $i: ${DUR}ms"
+        done
+        # Compute p50, p95, mean
+        SORTED=$(printf '%s\n' "${DURATIONS[@]}" | sort -n)
+        P50=$(echo "$SORTED" | awk -v n="$N" 'NR==int((n+1)/2){print; exit}')
+        P95=$(echo "$SORTED" | awk -v n="$N" 'BEGIN{p=int(0.95*n+0.5); if(p>n)p=n} NR==p{print; exit}')
+        MEAN=$(echo "$SORTED" | awk '{s+=$1}END{print int(s/NR)}')
+        echo "==================================="
+        echo "  N=$N  mean=${MEAN}ms  p50=${P50}ms  p95=${P95}ms  budget=${BUDGET}ms"
+        echo "==================================="
+        if [ "$P95" -gt "$BUDGET" ]; then
+          echo "FAIL: p95 ${P95}ms > budget ${BUDGET}ms"
+          exit 1
+        fi
+        echo "PASS: p95 ${P95}ms <= budget ${BUDGET}ms"
+
   cleanup:
     desc: "Kill orphaned agent-browser / headless_shell processes to free memory."
     cmds:

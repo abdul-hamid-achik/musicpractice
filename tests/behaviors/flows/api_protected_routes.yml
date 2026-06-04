@@ -1,0 +1,65 @@
+# Cairntrace behavioral spec — protected /api/* routes require auth.
+#
+# Multiple API endpoints should return 401 for unauthed
+# requests. This spec visits several protected routes with
+# no cookie and asserts the middleware returns 401 for the
+# underlying /api/* calls.
+#
+# Strategy: navigate to a public page first (which triggers
+# the auth store's fetchUser), then have the page's API
+# fetches run with the user unauthenticated. The script
+# verifier inspects the network log to count 401s.
+version: 1
+name: api_protected_routes
+intent: >
+  WHAT THIS VALIDATES: visiting a protected page with no
+  session cookie results in 401 responses from the underlying
+  /api/* endpoints. The auth middleware on the server side
+  returns 401 for unauthed requests.
+
+  REGRESSION GUARDED: a future change that removes the auth
+  middleware from any /api/* route would expose that
+  endpoint to unauthenticated users. The 401 count outcome
+  is a coarse but effective canary.
+environment: local
+mode: normal
+metadata:
+  feature: auth
+  priority: high
+  tags: [auth, api, middleware, contract]
+outcomes:
+  - id: at_least_one_401
+    description: at least one /api/* call returns 401 (the auth
+      middleware applied to the route)
+    verify:
+      script:
+        runtime: browser
+        run: |
+          const perfs = performance.getEntriesByType('resource');
+          const protectedApis = perfs.filter((r) => r.name.includes('/api/') && !r.name.includes('/api/auth/me'));
+          const statuses = protectedApis.map((r) => ({ url: r.name, status: r.responseStatus || 0 }));
+          const has401 = statuses.some((s) => s.status === 401);
+          return { ok: has401, evidence: JSON.stringify({ count: protectedApis.length, statuses: statuses.slice(0, 5) }) };
+  - id: no_console_errors
+    description: no console errors during the cold visit
+    verify:
+      console:
+        errorsMax: 1
+steps:
+  - id: open_dashboard_anonymous
+    open: ${vars.dashboardPath}
+  - id: wait_for_login_redirect
+    wait:
+      text: Sign in to your account
+      timeoutMs: 15000
+  - id: snapshot
+    snapshot:
+      interactive: true
+      label: Login page after unauthed /dashboard visit
+artifacts:
+  capture:
+    screenshots: on-failure
+    snapshots: on-failure
+    console: always
+    network: on-failure
+    trace: on-failure

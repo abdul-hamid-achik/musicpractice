@@ -20,6 +20,7 @@
     "behaviors:test": "task -d tests/behaviors test",
     "behaviors:run": "task -d tests/behaviors run",
     "behaviors:perf": "task -d tests/behaviors perf",
+    "behaviors:perf-suite": "task -d tests/behaviors perf-suite",
     "behaviors:cleanup": "task -d tests/behaviors cleanup",
     "typecheck": "nuxt typecheck",
     "db:generate": "drizzle-kit generate",
