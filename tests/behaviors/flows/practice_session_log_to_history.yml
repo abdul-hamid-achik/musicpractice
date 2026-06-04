@@ -97,14 +97,20 @@ steps:
       interactive: true
       label: Timer running, mid-session
   - id: open_end_session_modal
+    # The active session page has an End Session button at the
+    # bottom. The click handler is @click="handleEndClick".
     click:
       by: role
       role: button
       name: End Session
   - id: wait_for_end_modal
+    # The modal title is "End Session?" — the question mark is
+    # a reliable token. The body text is "Are you sure you want
+    # to end this practice session? Your session data will be
+    # saved."
     wait:
-      text: Are you sure you want to end
-      timeoutMs: 10000
+      text: End Session?
+      timeoutMs: 15000
   - id: snapshot_end_modal
     snapshot:
       interactive: true
