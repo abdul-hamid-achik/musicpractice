@@ -136,7 +136,9 @@ const difficultyColors: Record<string, string> = {
           Showing {{ songsData.length }} of {{ totalSongs }} songs
         </p>
       </div>
-      <NordButton variant="primary" @click="showAddModal = true">Add Song</NordButton>
+      <NordButton variant="primary" testid="open-add-song-modal" @click="showAddModal = true">
+        Add Song
+      </NordButton>
     </div>
 
     <!-- Search and Filters -->
@@ -320,7 +322,12 @@ const difficultyColors: Record<string, string> = {
     </div>
 
     <!-- Add Song Modal -->
-    <NordModal :open="showAddModal" title="Add Song" @close="showAddModal = false">
+    <NordModal
+      :open="showAddModal"
+      title="Add Song"
+      testid="add-song-modal"
+      @close="showAddModal = false"
+    >
       <form class="space-y-4" @submit.prevent="submitSong">
         <div>
           <label class="block text-sm text-text-muted mb-1">Title</label>
@@ -328,6 +335,7 @@ const difficultyColors: Record<string, string> = {
             v-model="newSong.title"
             type="text"
             required
+            data-testid="add-song-title"
             class="w-full bg-surface-alt text-text border border-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </div>
@@ -337,6 +345,7 @@ const difficultyColors: Record<string, string> = {
           <input
             v-model="newSong.artist"
             type="text"
+            data-testid="add-song-artist"
             class="w-full bg-surface-alt text-text border border-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </div>
@@ -395,7 +404,7 @@ const difficultyColors: Record<string, string> = {
           <NordButton variant="ghost" type="button" @click="showAddModal = false"
             >Cancel</NordButton
           >
-          <NordButton variant="primary" type="submit">Add Song</NordButton>
+          <NordButton variant="primary" type="submit" testid="submit-add-song">Add Song</NordButton>
         </div>
       </form>
     </NordModal>

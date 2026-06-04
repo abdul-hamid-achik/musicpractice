@@ -315,18 +315,27 @@ onMounted(async () => {
 
       <!-- End Session -->
       <div class="hidden lg:flex justify-center pb-8">
-        <NordButton variant="danger" size="lg" @click="handleEndClick"> End Session </NordButton>
+        <NordButton variant="danger" size="lg" testid="open-end-session" @click="handleEndClick">
+          End Session
+        </NordButton>
       </div>
     </template>
 
     <!-- End Session Confirmation Modal -->
-    <NordModal :open="showEndConfirm" title="End Session?" @close="handleCancelEnd">
+    <NordModal
+      :open="showEndConfirm"
+      title="End Session?"
+      testid="end-session-modal"
+      @close="handleCancelEnd"
+    >
       <p class="text-text-muted mb-4">
         Are you sure you want to end this practice session? Your session data will be saved.
       </p>
       <div class="flex justify-end gap-3">
         <NordButton variant="ghost" @click="handleCancelEnd">Cancel</NordButton>
-        <NordButton variant="danger" @click="handleConfirmEnd">End Session</NordButton>
+        <NordButton variant="danger" testid="confirm-end-session" @click="handleConfirmEnd">
+          End Session
+        </NordButton>
       </div>
     </NordModal>
 
