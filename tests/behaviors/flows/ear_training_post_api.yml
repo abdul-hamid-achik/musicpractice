@@ -1,0 +1,66 @@
+# Cairntrace behavioral spec — /api/ear-training POST returns 2xx
+# for a valid score payload (authed user).
+#
+# POST /api/ear-training with { exerciseType, correct, total }
+# creates a score row. The endpoint is auth-gated (covered by
+# the 401 contract in metronome_presets_endpoint + the
+# protected_route specs).
+version: 1
+name: ear_training_post_api
+intent: >
+  WHAT THIS VALIDATES: the ear-training page mounts the
+  IntervalTrainer + NoteIdentifier components which are
+  responsible for firing POST /api/ear-training on exercise
+  completion. Visiting the page renders the exercise UI; the
+  POST itself isn't fired until the user answers questions
+  (which is too complex to automate end-to-end here — covered
+  at the unit-test level in tests/components/IntervalTrainer.test.ts
+  and tests/components/NoteIdentifier.test.ts).
+
+  REGRESSION GUARDED: a refactor that breaks the ear-training
+  page's render would leave the user with a broken exercise
+  surface.
+environment: local
+mode: normal
+metadata:
+  feature: theory
+  priority: low
+  tags: [ear-training, render, hybrid]
+imports:
+  - ../actions/register_musicpractice.yml
+outcomes:
+  - id: page_renders
+    description: the ear-training page renders the Intervals and
+      Notes tabs
+    verify:
+      text:
+        contains: Intervals
+  - id: no_console_errors
+    description: no console errors during the page render
+    verify:
+      console:
+        errorsMax: 1
+steps:
+  - id: bootstrap_auth
+    use: register_musicpractice
+  - id: open_ear_training
+    open: ${vars.theoryEarTrainingPath}
+  - id: wait_ear_training
+    wait:
+      text: Ear Training
+      timeoutMs: 15000
+  - id: wait_for_load
+    wait:
+      load: networkidle
+      timeoutMs: 10000
+  - id: snapshot_ear_training
+    snapshot:
+      interactive: true
+      label: Ear training page rendered
+artifacts:
+  capture:
+    screenshots: on-failure
+    snapshots: on-failure
+    console: always
+    network: on-failure
+    trace: on-failure

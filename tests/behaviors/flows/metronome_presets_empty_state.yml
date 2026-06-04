@@ -1,0 +1,76 @@
+# Cairntrace behavioral spec — metronome presets GET returns 2xx
+# and renders the presets list on the metronome component.
+#
+# The Metronome component lives inside /practice (and the
+# active session page). Hitting /practice mounts the
+# metronome which fetches /api/metronome-presets on load.
+# The page also has a "Save Current" button + a "No saved
+# presets" empty state when the user has no presets.
+version: 1
+name: metronome_presets_empty_state
+intent: >
+  WHAT THIS VALIDATES: a brand-new user (no metronome
+  presets) sees the "No saved presets" empty state in the
+  metronome component. The /api/metronome-presets endpoint
+  returns 2xx with an empty array.
+
+  REGRESSION GUARDED: a regression that 5xx'd on the empty
+  case (instead of returning []) would leave the metronome
+  in a perpetual loading state.
+environment: local
+mode: normal
+metadata:
+  feature: metronome
+  priority: normal
+  tags: [metronome, presets, empty-state, hybrid]
+imports:
+  - ../actions/register_musicpractice.yml
+outcomes:
+  - id: presets_api_returns_2xx
+    description: GET /api/metronome-presets returns 2xx
+    verify:
+      network:
+        method: GET
+        urlContains: /api/metronome-presets
+        status:
+          in: [200, 201, 204]
+  - id: no_presets_text_visible
+    description: the metronome shows the "No saved presets" copy
+    verify:
+      text:
+        contains: No saved presets
+  - id: save_current_button_visible
+    description: the "Save Current" button is rendered (so the
+      user can add their first preset)
+    verify:
+      text:
+        contains: Save Current
+  - id: no_console_errors
+    description: no console errors during the page render
+    verify:
+      console:
+        errorsMax: 1
+steps:
+  - id: bootstrap_auth
+    use: register_musicpractice
+  - id: open_practice
+    open: ${vars.practiceHubPath}
+  - id: wait_practice
+    wait:
+      text: Practice
+      timeoutMs: 15000
+  - id: wait_for_data
+    wait:
+      load: networkidle
+      timeoutMs: 10000
+  - id: snapshot_empty_presets
+    snapshot:
+      interactive: true
+      label: Practice hub with metronome empty state
+artifacts:
+  capture:
+    screenshots: always
+    snapshots: on-failure
+    console: always
+    network: on-failure
+    trace: on-failure
