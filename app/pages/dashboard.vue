@@ -66,6 +66,9 @@ onMounted(() => {
         <PracticeGoals />
       </NordCard>
 
+      <!-- Teacher assignments (renders only when the user is in a studio) -->
+      <AssignmentsCard />
+
       <!-- Recent Sessions -->
       <NordCard title="Recent Sessions">
         <SessionLog :sessions="practiceStore.recentSessions" :limit="5" />

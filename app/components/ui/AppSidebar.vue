@@ -32,6 +32,7 @@ const sections = [
 ];
 
 const standaloneLinks = [
+  { label: 'My Studio', to: '/studio' },
   { label: 'Songs', to: '/songs' },
   { label: 'Settings', to: '/settings' },
   { label: 'Account', to: '/account' },

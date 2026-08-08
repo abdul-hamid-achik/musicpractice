@@ -177,6 +177,82 @@ export const earTrainingScores = pgTable(
   ],
 );
 
+// ── B2B: teacher studios ────────────────────────────────────────
+// A studio is owned by one teacher (unique ownerId — one studio per
+// teacher for now). Students join via invite links and their existing
+// practice data feeds the teacher's weekly board.
+
+export const studios = pgTable(
+  'studios',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    ownerId: uuid('owner_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    weeklyTargetMinutes: integer('weekly_target_minutes').notNull().default(90),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [uniqueIndex('studios_owner_id_idx').on(table.ownerId)],
+);
+
+export const studioMembers = pgTable(
+  'studio_members',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    studioId: uuid('studio_id')
+      .notNull()
+      .references(() => studios.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    joinedAt: timestamp('joined_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('studio_members_studio_id_idx').on(table.studioId),
+    index('studio_members_user_id_idx').on(table.userId),
+    uniqueIndex('studio_members_studio_id_user_id_idx').on(table.studioId, table.userId),
+  ],
+);
+
+export const studioInvites = pgTable(
+  'studio_invites',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    studioId: uuid('studio_id')
+      .notNull()
+      .references(() => studios.id, { onDelete: 'cascade' }),
+    token: text('token').notNull().unique(),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    revoked: boolean('revoked').notNull().default(false),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index('studio_invites_studio_id_idx').on(table.studioId)],
+);
+
+export const assignments = pgTable(
+  'assignments',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    studioId: uuid('studio_id')
+      .notNull()
+      .references(() => studios.id, { onDelete: 'cascade' }),
+    studentId: uuid('student_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    songId: uuid('song_id').references(() => songs.id, { onDelete: 'set null' }),
+    title: text('title').notNull(),
+    notes: text('notes'),
+    completedAt: timestamp('completed_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('assignments_studio_id_idx').on(table.studioId),
+    index('assignments_student_id_idx').on(table.studentId),
+  ],
+);
+
 export const metronomePresets = pgTable(
   'metronome_presets',
   {
