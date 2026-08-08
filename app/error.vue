@@ -18,6 +18,10 @@ const errorDetail = computed(() => {
   if (code === 401) return 'Please sign in to access this page.';
   return props.error?.message || 'An unexpected error occurred. Please try again later.';
 });
+
+function tryAgain() {
+  clearError({ redirect: '/' });
+}
 </script>
 
 <template>
@@ -37,7 +41,7 @@ const errorDetail = computed(() => {
         </NuxtLink>
         <button
           class="bg-surface-alt text-text px-6 py-2.5 rounded-lg text-sm font-medium border border-border hover:bg-border transition-all"
-          @click="clearError({ redirect: '/' })"
+          @click="tryAgain"
         >
           Try Again
         </button>
