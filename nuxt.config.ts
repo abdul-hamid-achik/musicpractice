@@ -71,6 +71,16 @@ export default defineNuxtConfig({
     },
   },
 
+  nitro: {
+    // Bundle Vue into the server build instead of resolving it from
+    // node_modules at runtime. Vercel's fresh `bun install` can hoist a
+    // different vue copy than the one node-file-trace records, which
+    // 500s SSR with ERR_MODULE_NOT_FOUND on vue/index.mjs.
+    externals: {
+      inline: ['vue', '@vue/', 'vue-bundle-renderer'],
+    },
+  },
+
   vite: {
     plugins: [tailwindcss() as any, ...(alphaTab() as any)],
     optimizeDeps: {
