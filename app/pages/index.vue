@@ -1,411 +1,308 @@
 <script setup lang="ts">
 definePageMeta({ layout: false });
 
-const features = [
-  {
-    icon: '🎸',
-    title: 'Interactive Instruments',
-    description:
-      'Practice guitar, bass, piano, and violin with realistic fretboards and keyboards.',
-  },
-  {
-    icon: '👂',
-    title: 'Ear Training',
-    description:
-      'Sharpen your musical ear with interval recognition and note identification exercises.',
-  },
-  {
-    icon: '📊',
-    title: 'Practice Tracking',
-    description: 'Log sessions, set goals, and watch your progress grow week after week.',
-  },
-  {
-    icon: '🎵',
-    title: 'Music Theory',
-    description:
-      'Explore scales, chords, and the Circle of Fifths with interactive visualizations.',
-  },
-];
+useHead({
+  title: 'MusicPractice — the practice board for music teachers',
+  meta: [
+    {
+      name: 'description',
+      content:
+        'Assign practice, give students real tools, and see who actually practiced — before they walk into the lesson.',
+    },
+  ],
+});
+
+// Demo roster for the hero board. Minutes are against a 90-minute weekly target;
+// the bar scale tops out at 150 so overachievers still fit.
+const WEEKLY_TARGET = 90;
+const BAR_MAX = 150;
+
+const roster = [
+  { name: 'Sofia R.', instrument: 'VIOLIN', minutes: 142, status: 'on' },
+  { name: 'Marcus T.', instrument: 'GUITAR', minutes: 96, status: 'on' },
+  { name: 'Priya S.', instrument: 'PIANO', minutes: 74, status: 'near' },
+  { name: 'Yuki A.', instrument: 'BASS', minutes: 51, status: 'near' },
+  { name: 'Leo M.', instrument: 'GUITAR', minutes: 12, status: 'off' },
+] as const;
+
+const ledClass = {
+  on: 'bg-led shadow-[0_0_6px_var(--color-led)]',
+  near: 'bg-vu shadow-[0_0_6px_var(--color-vu)]',
+  off: 'bg-peak shadow-[0_0_6px_var(--color-peak)]',
+} as const;
+
+const barWidth = (minutes: number) => `${Math.min(minutes / BAR_MAX, 1) * 100}%`;
 
 const steps = [
   {
-    number: '01',
-    title: 'Pick your instrument',
-    description: 'Choose from guitar, bass, piano, or violin to get started.',
+    number: '1',
+    title: 'Assign the week',
+    description:
+      'Pick pieces, exercises, and a minute target for each student. Takes a minute after the lesson.',
   },
   {
-    number: '02',
-    title: 'Set your goals',
-    description: 'Define daily and weekly practice targets that keep you motivated.',
+    number: '2',
+    title: 'Students practice in the app',
+    description:
+      'Fretboards, ear training, metronome, notation — every session logs itself while they play.',
   },
   {
-    number: '03',
-    title: 'Track your progress',
-    description: "Review session logs, streaks, and charts to see how far you've come.",
+    number: '3',
+    title: 'Open the board before the lesson',
+    description:
+      'Minutes, streaks, and finished assignments per student. You plan the lesson around what actually happened.',
   },
 ];
 
-// Floating notes animation data
-const floatingNotes = [
-  { symbol: '♪', x: 8, delay: 0, duration: 18, size: 'text-2xl' },
-  { symbol: '♫', x: 20, delay: 3, duration: 22, size: 'text-3xl' },
-  { symbol: '♩', x: 35, delay: 7, duration: 16, size: 'text-xl' },
-  { symbol: '♬', x: 55, delay: 1, duration: 20, size: 'text-2xl' },
-  { symbol: '♪', x: 70, delay: 5, duration: 19, size: 'text-3xl' },
-  { symbol: '♫', x: 85, delay: 9, duration: 17, size: 'text-xl' },
-  { symbol: '♩', x: 45, delay: 12, duration: 21, size: 'text-2xl' },
-  { symbol: '♬', x: 92, delay: 4, duration: 23, size: 'text-xl' },
+const toolkit = [
+  {
+    tag: 'FRETBOARD',
+    title: 'Fretboards & keys',
+    description: 'Interactive guitar, bass, violin, and piano diagrams students can actually poke.',
+  },
+  {
+    tag: 'EAR',
+    title: 'Ear training',
+    description: 'Interval and note recognition drills — scores land on your board automatically.',
+  },
+  {
+    tag: 'TEMPO',
+    title: 'Metronome',
+    description: 'Practice tempos are logged with every session, so you can hear progress in numbers.',
+  },
+  {
+    tag: 'REPERTOIRE',
+    title: 'Song library',
+    description: 'Guitar Pro, MusicXML, and AlphaTex notation rendered right in the browser.',
+  },
+  {
+    tag: 'THEORY',
+    title: 'Theory tools',
+    description: 'Scales, chords, and the circle of fifths — interactive, not flashcards.',
+  },
 ];
-
-// Mini piano keys for interactive demo
-const activeKey = ref<number | null>(null);
-
-function handleKeyPress(index: number) {
-  activeKey.value = index;
-  setTimeout(() => {
-    if (activeKey.value === index) activeKey.value = null;
-  }, 300);
-}
-
-const isBlackKey = (i: number) => [1, 3, 6, 8, 10, 13].includes(i);
-
-const keyNoteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B', 'C', 'C#'];
 </script>
 
 <template>
-  <div class="min-h-screen bg-surface overflow-hidden">
-    <!-- ═══════ NAVIGATION ═══════ -->
-    <nav class="fixed top-0 w-full z-50 backdrop-blur-md bg-surface/80 border-b border-border/50">
-      <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-        <NuxtLink to="/" class="flex items-center gap-2 group">
-          <span
-            class="text-primary text-2xl transition-transform duration-300 group-hover:scale-110"
-            >♪</span
-          >
-          <span class="font-bold text-xl text-text"
-            >Music<span class="text-primary">Practice</span></span
-          >
+  <div class="landing min-h-screen bg-booth text-tape">
+    <!-- ═══════ NAV ═══════ -->
+    <nav class="sticky top-0 z-50 border-b border-line bg-booth/85 backdrop-blur-md">
+      <div class="mx-auto flex h-16 max-w-6xl items-center justify-between px-5 sm:px-8">
+        <NuxtLink to="/" class="font-display text-lg font-extrabold tracking-tight">
+          Music<span class="text-vu">Practice</span>
         </NuxtLink>
-        <div class="flex items-center gap-4">
-          <ThemeToggle />
+        <div class="flex items-center gap-3 sm:gap-5">
           <NuxtLink
             to="/auth/login"
-            class="text-text-muted hover:text-text transition-colors duration-200 text-sm font-medium"
+            class="text-sm font-medium text-tape-dim transition-colors hover:text-tape"
           >
-            Sign In
+            Sign in
           </NuxtLink>
           <NuxtLink
             to="/auth/register"
-            class="bg-primary text-on-primary px-4 py-2 rounded-md text-sm font-medium hover:brightness-110 transition-all duration-200"
+            class="rounded-md bg-vu px-4 py-2 text-sm font-semibold text-booth transition-all hover:brightness-110"
           >
-            Get Started Free
+            Set up your studio
           </NuxtLink>
         </div>
       </div>
     </nav>
 
-    <!-- ═══════ HERO SECTION ═══════ -->
-    <section class="relative min-h-screen flex items-center justify-center pt-16">
-      <!-- Animated background gradient -->
-      <div class="absolute inset-0 bg-gradient-to-br from-surface via-surface-alt to-surface" />
-
-      <!-- Animated grid overlay -->
+    <!-- ═══════ HERO ═══════ -->
+    <section class="relative overflow-hidden">
       <div
-        class="absolute inset-0 opacity-[0.03]"
-        style="
-          background-image:
-            linear-gradient(rgba(136, 192, 208, 0.3) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(136, 192, 208, 0.3) 1px, transparent 1px);
-          background-size: 60px 60px;
-        "
-      />
-
-      <!-- Floating music notes -->
-      <div
-        v-for="(note, i) in floatingNotes"
-        :key="i"
-        class="absolute text-primary/20 pointer-events-none select-none animate-float"
-        :class="note.size"
-        :style="{
-          left: note.x + '%',
-          animationDelay: note.delay + 's',
-          animationDuration: note.duration + 's',
-        }"
+        class="mx-auto grid max-w-6xl items-center gap-12 px-5 pb-20 pt-16 sm:px-8 sm:pt-24 lg:grid-cols-[1.1fr_1fr] lg:gap-16 lg:pb-28"
       >
-        {{ note.symbol }}
-      </div>
-
-      <!-- Radial glow -->
-      <div
-        class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-primary/5 blur-3xl"
-      />
-
-      <!-- Hero content -->
-      <div class="relative z-10 text-center px-6 max-w-4xl mx-auto">
-        <!-- Waveform decoration -->
-        <div class="flex items-center justify-center gap-1 mb-8">
-          <div
-            v-for="i in 24"
-            :key="i"
-            class="w-1 rounded-full bg-primary/40 animate-waveform"
-            :style="{
-              height: 12 + Math.sin(i * 0.8) * 16 + 'px',
-              animationDelay: i * 0.08 + 's',
-            }"
-          />
-        </div>
-
-        <h1 class="text-5xl sm:text-6xl md:text-7xl font-bold leading-tight mb-6">
-          <span class="text-text">Your personal</span><br />
-          <span
-            class="bg-gradient-to-r from-nord8 via-nord9 to-nord10 bg-clip-text text-transparent"
-            >music practice</span
-          ><br />
-          <span class="text-text">studio</span>
-        </h1>
-
-        <p class="text-text-muted text-lg sm:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
-          Interactive instruments, ear training, music theory, and practice tracking — everything
-          you need to become a better musician.
-        </p>
-
-        <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <NuxtLink
-            to="/auth/register"
-            class="group relative bg-primary text-on-primary px-8 py-3.5 rounded-lg text-lg font-semibold hover:brightness-110 transition-all duration-200 shadow-lg shadow-primary/20"
+        <div>
+          <p class="mb-5 font-mono text-xs tracking-[0.25em] text-vu">FOR MUSIC TEACHERS</p>
+          <h1
+            class="font-display text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl"
           >
-            <span class="relative z-10">Get Started Free</span>
-            <div
-              class="absolute inset-0 rounded-lg bg-gradient-to-r from-nord8 to-nord9 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-            />
-          </NuxtLink>
-          <NuxtLink
-            to="#features"
-            class="text-text-muted hover:text-text px-8 py-3.5 rounded-lg text-lg font-medium border border-border hover:border-nord3 transition-all duration-200"
-          >
-            Explore Features
-          </NuxtLink>
-        </div>
-      </div>
-
-      <!-- Scroll indicator -->
-      <div class="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce z-10">
-        <div class="w-6 h-10 rounded-full border-2 border-text-muted/30 flex justify-center pt-2">
-          <div class="w-1 h-2.5 rounded-full bg-text-muted/50 animate-scroll-dot" />
-        </div>
-      </div>
-    </section>
-
-    <!-- ═══════ FEATURES SECTION ═══════ -->
-    <section id="features" class="relative py-24 sm:py-32">
-      <div class="max-w-6xl mx-auto px-6">
-        <div class="text-center mb-16">
-          <p class="text-primary text-sm font-semibold tracking-widest uppercase mb-3">Features</p>
-          <h2 class="text-3xl sm:text-4xl font-bold text-text">Everything you need to practice</h2>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div
-            v-for="(feature, i) in features"
-            :key="i"
-            class="group bg-card border border-border rounded-xl p-6 hover:border-primary/30 hover:-translate-y-1 transition-all duration-300"
-          >
-            <div class="text-4xl mb-4 transition-transform duration-300 group-hover:scale-110">
-              {{ feature.icon }}
-            </div>
-            <h3 class="text-lg font-semibold text-text mb-2">{{ feature.title }}</h3>
-            <p class="text-text-muted text-sm leading-relaxed">{{ feature.description }}</p>
+            Know who practiced<br />
+            <span class="text-vu">before they walk in.</span>
+          </h1>
+          <p class="mt-6 max-w-xl text-base leading-relaxed text-tape-dim sm:text-lg">
+            Give your students real practice tools — fretboards, ear training, a metronome, their
+            repertoire. Every session logs itself. You get the board: minutes, streaks, and
+            assignments, per student, before the lesson starts.
+          </p>
+          <div class="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <NuxtLink
+              to="/auth/register"
+              class="rounded-md bg-vu px-6 py-3 text-center text-base font-semibold text-booth shadow-lg shadow-vu/20 transition-all hover:brightness-110"
+            >
+              Set up your studio — free
+            </NuxtLink>
+            <a
+              href="#how"
+              class="rounded-md border border-line px-6 py-3 text-center text-base font-medium text-tape-dim transition-colors hover:border-tape-dim hover:text-tape"
+            >
+              See how it works
+            </a>
           </div>
         </div>
-      </div>
-    </section>
 
-    <!-- ═══════ INTERACTIVE DEMO SECTION ═══════ -->
-    <section class="relative py-24 sm:py-32 bg-surface-alt/50">
-      <div class="max-w-6xl mx-auto px-6">
-        <div class="text-center mb-16">
-          <p class="text-primary text-sm font-semibold tracking-widest uppercase mb-3">
-            Try it out
-          </p>
-          <h2 class="text-3xl sm:text-4xl font-bold text-text">Interactive music tools</h2>
-          <p class="text-text-muted mt-4 max-w-xl mx-auto">
-            Tap the piano keys or explore the Circle of Fifths below.
-          </p>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-          <!-- Mini Piano -->
-          <div class="bg-card border border-border rounded-xl p-6">
-            <h3 class="text-lg font-semibold text-text mb-4 text-center">Piano</h3>
-            <div class="relative flex justify-center">
-              <div class="flex gap-px">
-                <template v-for="i in 14" :key="i">
-                  <button
-                    v-if="!isBlackKey(i - 1)"
-                    class="relative w-10 sm:w-12 h-32 sm:h-40 rounded-b-md border border-border transition-all duration-100"
-                    :class="
-                      activeKey === i - 1
-                        ? 'bg-primary/30 border-primary'
-                        : 'bg-nord5 hover:bg-nord4'
-                    "
-                    :aria-label="`Piano key ${keyNoteNames[i - 1]}`"
-                    @mousedown="handleKeyPress(i - 1)"
-                    @touchstart.prevent="handleKeyPress(i - 1)"
-                  />
-                  <button
-                    v-else
-                    class="relative w-6 sm:w-7 h-20 sm:h-24 -mx-3 sm:-mx-3.5 z-10 rounded-b-md border border-nord1 transition-all duration-100"
-                    :class="
-                      activeKey === i - 1 ? 'bg-primary border-primary' : 'bg-nord1 hover:bg-nord2'
-                    "
-                    :aria-label="`Piano key ${keyNoteNames[i - 1]}`"
-                    @mousedown="handleKeyPress(i - 1)"
-                    @touchstart.prevent="handleKeyPress(i - 1)"
-                  />
-                </template>
+        <!-- Signature: the practice board, styled as a console -->
+        <div class="board rounded-xl border border-line bg-panel p-1.5 shadow-2xl shadow-black/40">
+          <div
+            class="flex items-center justify-between rounded-t-lg border-b border-line bg-raised px-4 py-3"
+          >
+            <span class="font-mono text-[11px] tracking-[0.2em] text-tape-dim">THIS WEEK</span>
+            <span class="font-mono text-[11px] tracking-[0.2em] text-tape-dim"
+              >TARGET {{ WEEKLY_TARGET }} MIN</span
+            >
+          </div>
+          <ul class="divide-y divide-line/60">
+            <li
+              v-for="(student, i) in roster"
+              :key="student.name"
+              class="flex items-center gap-3 px-4 py-3.5"
+            >
+              <span
+                class="h-2 w-2 shrink-0 rounded-full"
+                :class="ledClass[student.status]"
+                :title="student.status === 'on' ? 'On track' : student.status === 'near' ? 'Getting there' : 'Behind'"
+              />
+              <div class="w-24 shrink-0 sm:w-28">
+                <p class="truncate text-sm font-medium">{{ student.name }}</p>
+                <p class="font-mono text-[10px] tracking-[0.15em] text-tape-dim">
+                  {{ student.instrument }}
+                </p>
               </div>
-            </div>
-          </div>
-
-          <!-- Circle of Fifths (reused component) -->
-          <CircleOfFifths />
+              <div class="h-2 flex-1 overflow-hidden rounded-full bg-booth">
+                <div
+                  class="meter h-full rounded-full bg-gradient-to-r from-vu-deep to-vu"
+                  :style="{ width: barWidth(student.minutes), animationDelay: `${i * 120}ms` }"
+                />
+              </div>
+              <span class="w-14 shrink-0 text-right font-mono text-xs text-tape-dim"
+                >{{ student.minutes }}<span class="text-[10px]"> min</span></span
+              >
+            </li>
+          </ul>
         </div>
       </div>
     </section>
 
     <!-- ═══════ HOW IT WORKS ═══════ -->
-    <section class="relative py-24 sm:py-32">
-      <div class="max-w-5xl mx-auto px-6">
-        <div class="text-center mb-16">
-          <p class="text-primary text-sm font-semibold tracking-widest uppercase mb-3">
-            How it works
-          </p>
-          <h2 class="text-3xl sm:text-4xl font-bold text-text">Three steps to better practice</h2>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div v-for="(step, i) in steps" :key="i" class="relative text-center">
-            <!-- Connector line (between cards) -->
-            <div
-              v-if="i < steps.length - 1"
-              class="hidden md:block absolute top-10 left-[60%] w-[80%] border-t border-dashed border-border"
-            />
-            <div
-              class="relative inline-flex items-center justify-center w-20 h-20 rounded-full bg-card border border-border mb-6"
-            >
-              <span class="text-primary text-2xl font-bold font-mono">{{ step.number }}</span>
-            </div>
-            <h3 class="text-lg font-semibold text-text mb-2">{{ step.title }}</h3>
-            <p class="text-text-muted text-sm leading-relaxed">{{ step.description }}</p>
+    <section id="how" class="border-y border-line bg-panel">
+      <div class="mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-24">
+        <p class="mb-3 font-mono text-xs tracking-[0.25em] text-vu">HOW IT WORKS</p>
+        <h2 class="font-display text-3xl font-extrabold tracking-tight sm:text-4xl">
+          The loop between lessons
+        </h2>
+        <div class="mt-12 grid gap-10 sm:grid-cols-3 sm:gap-8">
+          <div v-for="step in steps" :key="step.number" class="relative">
+            <span class="font-mono text-sm text-vu">{{ step.number }} —</span>
+            <h3 class="mt-2 font-display text-xl font-bold">{{ step.title }}</h3>
+            <p class="mt-2 text-sm leading-relaxed text-tape-dim">{{ step.description }}</p>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ═══════ CTA SECTION ═══════ -->
-    <section class="relative py-24 sm:py-32">
-      <div class="max-w-3xl mx-auto px-6 text-center">
-        <!-- Glow backdrop -->
-        <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div class="w-96 h-96 rounded-full bg-primary/5 blur-3xl" />
-        </div>
+    <!-- ═══════ STUDENT TOOLKIT ═══════ -->
+    <section class="mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-24">
+      <p class="mb-3 font-mono text-xs tracking-[0.25em] text-vu">THE STUDENT SIDE</p>
+      <h2 class="max-w-2xl font-display text-3xl font-extrabold tracking-tight sm:text-4xl">
+        Practice they'll actually do, in one place
+      </h2>
+      <p class="mt-4 max-w-xl text-tape-dim">
+        No PDFs, no separate metronome app, no honor system. Everything they need is where the
+        logging happens.
+      </p>
+      <ul class="mt-10 divide-y divide-line border-y border-line">
+        <li
+          v-for="unit in toolkit"
+          :key="unit.tag"
+          class="grid gap-1 py-5 sm:grid-cols-[10rem_14rem_1fr] sm:items-baseline sm:gap-6"
+        >
+          <span class="font-mono text-[11px] tracking-[0.2em] text-vu">{{ unit.tag }}</span>
+          <h3 class="font-display text-lg font-bold">{{ unit.title }}</h3>
+          <p class="text-sm leading-relaxed text-tape-dim">{{ unit.description }}</p>
+        </li>
+      </ul>
+    </section>
 
-        <div class="relative">
-          <h2 class="text-3xl sm:text-4xl font-bold text-text mb-4">Ready to start practicing?</h2>
-          <p class="text-text-muted text-lg max-w-xl mx-auto mb-10">
-            Join MusicPractice today and take your skills to the next level — completely free.
-          </p>
-          <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+    <!-- ═══════ PRICING ═══════ -->
+    <section class="border-y border-line bg-panel">
+      <div class="mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-24">
+        <p class="mb-3 font-mono text-xs tracking-[0.25em] text-vu">PRICING</p>
+        <h2 class="font-display text-3xl font-extrabold tracking-tight sm:text-4xl">
+          Free to start. Pay when it pays for itself.
+        </h2>
+        <div class="mt-12 grid gap-6 sm:grid-cols-2 lg:max-w-4xl">
+          <div class="flex flex-col rounded-xl border border-line bg-raised p-7">
+            <p class="font-mono text-[11px] tracking-[0.2em] text-tape-dim">SOLO</p>
+            <p class="mt-3 font-display text-4xl font-extrabold">Free</p>
+            <ul class="mb-8 mt-6 space-y-2.5 text-sm text-tape-dim">
+              <li>Up to 3 students</li>
+              <li>All practice tools</li>
+              <li>The weekly board</li>
+            </ul>
             <NuxtLink
               to="/auth/register"
-              class="bg-primary text-on-primary px-8 py-3.5 rounded-lg text-lg font-semibold hover:brightness-110 transition-all duration-200 shadow-lg shadow-primary/20"
+              class="mt-auto block rounded-md border border-line py-2.5 text-center text-sm font-semibold transition-colors hover:border-tape-dim"
             >
-              Get Started Free
+              Start free
             </NuxtLink>
+          </div>
+          <div class="rounded-xl border border-vu/40 bg-raised p-7">
+            <p class="font-mono text-[11px] tracking-[0.2em] text-vu">STUDIO</p>
+            <p class="mt-3 font-display text-4xl font-extrabold">
+              $15<span class="text-lg font-semibold text-tape-dim"> /month</span>
+            </p>
+            <ul class="mt-6 space-y-2.5 text-sm text-tape-dim">
+              <li>Unlimited students</li>
+              <li>Assignment templates</li>
+              <li>Weekly email digest</li>
+              <li>Practice insights over time</li>
+            </ul>
             <NuxtLink
-              to="/auth/login"
-              class="text-text-muted hover:text-text px-8 py-3.5 rounded-lg text-lg font-medium border border-border hover:border-nord3 transition-all duration-200"
+              to="/auth/register"
+              class="mt-8 block rounded-md bg-vu py-2.5 text-center text-sm font-semibold text-booth transition-all hover:brightness-110"
             >
-              Sign In
+              Join as a founding studio
             </NuxtLink>
+            <p class="mt-3 text-center text-xs text-tape-dim">
+              Founding studios practice free while billing is being built.
+            </p>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ═══════ FOOTER ═══════ -->
-    <footer class="border-t border-border py-12">
-      <div class="max-w-6xl mx-auto px-6">
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-8">
-          <!-- Brand -->
-          <div>
-            <div class="flex items-center gap-2 mb-3">
-              <span class="text-primary text-xl">♪</span>
-              <span class="font-bold text-lg text-text"
-                >Music<span class="text-primary">Practice</span></span
-              >
-            </div>
-            <p class="text-text-muted text-sm">Your personal music practice studio.</p>
-          </div>
+    <!-- ═══════ FINAL CTA + FOOTER ═══════ -->
+    <section class="mx-auto max-w-6xl px-5 py-20 text-center sm:px-8 sm:py-24">
+      <h2 class="mx-auto max-w-2xl font-display text-3xl font-extrabold tracking-tight sm:text-4xl">
+        Stop asking <span class="text-vu">"did you practice?"</span>
+      </h2>
+      <p class="mx-auto mt-4 max-w-md text-tape-dim">
+        Set up your studio, invite your students, and open the board next week.
+      </p>
+      <NuxtLink
+        to="/auth/register"
+        class="mt-8 inline-block rounded-md bg-vu px-8 py-3 text-base font-semibold text-booth shadow-lg shadow-vu/20 transition-all hover:brightness-110"
+      >
+        Set up your studio — free
+      </NuxtLink>
+    </section>
 
-          <!-- Practice Links -->
-          <div>
-            <h4 class="text-text font-semibold text-sm mb-3">Practice</h4>
-            <ul class="space-y-2 text-sm">
-              <li>
-                <NuxtLink
-                  to="/instruments"
-                  class="text-text-muted hover:text-text transition-colors"
-                  >Instruments</NuxtLink
-                >
-              </li>
-              <li>
-                <NuxtLink to="/theory" class="text-text-muted hover:text-text transition-colors"
-                  >Music Theory</NuxtLink
-                >
-              </li>
-              <li>
-                <NuxtLink to="/practice" class="text-text-muted hover:text-text transition-colors"
-                  >Practice Sessions</NuxtLink
-                >
-              </li>
-              <li>
-                <NuxtLink to="/songs" class="text-text-muted hover:text-text transition-colors"
-                  >Songs</NuxtLink
-                >
-              </li>
-            </ul>
-          </div>
-
-          <!-- Account Links -->
-          <div>
-            <h4 class="text-text font-semibold text-sm mb-3">Account</h4>
-            <ul class="space-y-2 text-sm">
-              <li>
-                <NuxtLink to="/auth/login" class="text-text-muted hover:text-text transition-colors"
-                  >Sign In</NuxtLink
-                >
-              </li>
-              <li>
-                <NuxtLink
-                  to="/auth/register"
-                  class="text-text-muted hover:text-text transition-colors"
-                  >Create Account</NuxtLink
-                >
-              </li>
-              <li>
-                <NuxtLink to="/settings" class="text-text-muted hover:text-text transition-colors"
-                  >Settings</NuxtLink
-                >
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="mt-10 pt-6 border-t border-border text-center">
-          <p class="text-text-muted text-xs">
-            &copy; {{ new Date().getFullYear() }} MusicPractice. Built for musicians, by musicians.
-          </p>
+    <footer class="border-t border-line">
+      <div
+        class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-5 py-8 sm:flex-row sm:px-8"
+      >
+        <p class="font-display text-sm font-bold">
+          Music<span class="text-vu">Practice</span>
+          <span class="ml-2 font-sans font-normal text-tape-dim"
+            >— the practice board for music teachers.</span
+          >
+        </p>
+        <div class="flex gap-5 text-sm text-tape-dim">
+          <NuxtLink to="/auth/login" class="transition-colors hover:text-tape">Sign in</NuxtLink>
+          <NuxtLink to="/auth/register" class="transition-colors hover:text-tape"
+            >Create account</NuxtLink
+          >
         </div>
       </div>
     </footer>
@@ -413,54 +310,29 @@ const keyNoteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#'
 </template>
 
 <style scoped>
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(100vh) rotate(0deg);
-    opacity: 0;
+/* Landing commits to the studio look regardless of app theme toggle. */
+.landing :where(a, button):focus-visible {
+  outline: 2px solid var(--color-vu);
+}
+
+/* Meter bars sweep in like a console coming online. */
+@keyframes meter-in {
+  from {
+    transform: scaleX(0);
   }
-  10% {
-    opacity: 1;
-  }
-  90% {
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(-100px) rotate(360deg);
-    opacity: 0;
+  to {
+    transform: scaleX(1);
   }
 }
 
-@keyframes waveform {
-  0%,
-  100% {
-    transform: scaleY(1);
-  }
-  50% {
-    transform: scaleY(2.5);
-  }
+.meter {
+  transform-origin: left;
+  animation: meter-in 900ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
 }
 
-@keyframes scroll-dot {
-  0% {
-    transform: translateY(0);
-    opacity: 1;
+@media (prefers-reduced-motion: reduce) {
+  .meter {
+    animation: none;
   }
-  100% {
-    transform: translateY(12px);
-    opacity: 0;
-  }
-}
-
-.animate-float {
-  animation: float linear infinite;
-}
-
-.animate-waveform {
-  animation: waveform 1.5s ease-in-out infinite;
-}
-
-.animate-scroll-dot {
-  animation: scroll-dot 1.5s ease-in-out infinite;
 }
 </style>
