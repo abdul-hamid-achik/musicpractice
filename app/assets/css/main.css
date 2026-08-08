@@ -4,64 +4,56 @@
    Studio Theme — Tailwind CSS 4
    Warm recording-studio palette: walnut panels, tape cream text,
    VU-meter amber accents, channel-LED status colors.
-
-   NOTE: the --color-nordN names are legacy — components reference
-   them in SVGs and style blocks, so the rebrand remaps their VALUES
-   to studio equivalents (same lightness role, warm hue). A rename
-   sweep to semantic names is pending.
    ═══════════════════════════════════════════════════════════════ */
 
 @theme {
-  /* ── Room (dark backgrounds, was Polar Night) ── */
-  --color-nord0: #131110; /* booth — page background   */
-  --color-nord1: #1d1915; /* panel                     */
-  --color-nord2: #27211b; /* raised module / card      */
-  --color-nord3: #3b3229; /* hairline / border         */
+  /* ── Room (dark backgrounds) ── */
+  --color-booth: #131110; /* the room — page background */
+  --color-panel: #1d1915; /* walnut panel               */
+  --color-raised: #27211b; /* raised module / card       */
+  --color-line: #3b3229; /* hairline / border          */
 
-  /* ── Tape (light foregrounds, was Snow Storm) ── */
-  --color-nord4: #a2957f; /* faded label               */
-  --color-nord5: #d9cdb6; /* mid cream                 */
-  --color-nord6: #f1e8d7; /* tape cream — primary text */
+  /* ── Tape (light foregrounds) ── */
+  --color-tape: #f1e8d7; /* tape cream — primary text  */
+  --color-tape-mid: #d9cdb6; /* mid cream                  */
+  --color-tape-dim: #a2957f; /* faded label                */
 
-  /* ── VU (amber accents, was Frost) ── */
-  --color-nord7: #d18f2b;
-  --color-nord8: #e8a33b; /* primary accent            */
-  --color-nord9: #c9871f;
-  --color-nord10: #a06c15;
+  /* ── VU (amber accents) ── */
+  --color-vu: #e8a33b; /* needle — primary accent    */
+  --color-vu-deep: #b97c1e; /* gradient end / shadow      */
+  --color-vu-dark: #a06c15; /* pressed / active fill      */
 
-  /* ── LEDs (status colors, was Aurora) ── */
-  --color-nord11: #d3604e; /* Red    — error / danger   */
-  --color-nord12: #d97f3e; /* Orange — warning          */
-  --color-nord13: #e8c06a; /* Yellow — caution / accent */
-  --color-nord14: #86b96f; /* Green  — success          */
-  --color-nord15: #ab86a0; /* Mauve  — info / creative  */
+  /* ── LEDs (status colors) ── */
+  --color-peak: #d3604e; /* red — clipping / behind    */
+  --color-led: #86b96f; /* green — on track           */
+  --color-caution: #e8c06a; /* yellow — caution           */
 
   /* ── Semantic Aliases ── */
-  --color-surface: var(--color-nord0);
-  --color-surface-alt: var(--color-nord1);
-  --color-card: var(--color-nord2);
-  --color-border: var(--color-nord3);
-  --color-text: var(--color-nord6);
-  --color-text-muted: var(--color-nord4);
-  --color-primary: var(--color-nord8);
-  --color-secondary: var(--color-nord9);
-  --color-accent: var(--color-nord7);
-  --color-error: var(--color-nord11);
-  --color-warning: var(--color-nord12);
-  --color-success: var(--color-nord14);
-  --color-info: var(--color-nord15);
+  --color-surface: var(--color-booth);
+  --color-surface-alt: var(--color-panel);
+  --color-card: var(--color-raised);
+  --color-border: var(--color-line);
+  --color-text: var(--color-tape);
+  --color-text-muted: var(--color-tape-dim);
+  --color-primary: var(--color-vu);
+  --color-secondary: #c9871f;
+  --color-accent: #d18f2b;
+  --color-error: var(--color-peak);
+  --color-warning: #d97f3e;
+  --color-success: var(--color-led);
+  --color-info: #ab86a0;
 
   /* ── Typography ── */
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 
   /* ── "On" tokens (text on colored backgrounds) ── */
-  --color-on-primary: #2e3440;
-  --color-on-secondary: #2e3440;
-  --color-on-error: #eceff4;
-  --color-on-success: #2e3440;
-  --color-on-warning: #2e3440;
-  --color-on-info: #2e3440;
+  --color-on-primary: var(--color-booth);
+  --color-on-secondary: var(--color-booth);
+  --color-on-error: var(--color-tape);
+  --color-on-success: var(--color-booth);
+  --color-on-warning: var(--color-booth);
+  --color-on-info: var(--color-booth);
 
   /* ── Overlay / Backdrop ── */
   --color-backdrop: rgba(0, 0, 0, 0.5);
@@ -79,18 +71,6 @@
   --radius-md: 0.5rem;
   --radius-lg: 0.75rem;
   --radius-xl: 1rem;
-
-  /* ── Studio-vocabulary aliases (used by the landing page) ── */
-  --color-booth: var(--color-nord0); /* room — page background        */
-  --color-panel: var(--color-nord1); /* walnut panel — section bands  */
-  --color-raised: var(--color-nord2); /* raised module — cards, strips */
-  --color-line: var(--color-nord3); /* hairline between modules      */
-  --color-tape: var(--color-nord6); /* tape cream — primary text     */
-  --color-tape-dim: var(--color-nord4); /* faded label — secondary text  */
-  --color-vu: var(--color-nord8); /* VU amber — accent, CTAs       */
-  --color-vu-deep: #b97c1e; /* amber shadow / gradient end   */
-  --color-led: var(--color-nord14); /* green LED — on track          */
-  --color-peak: var(--color-nord11); /* red peak — missed / behind    */
 
   --font-display: 'Bricolage Grotesque', 'Inter', ui-sans-serif, system-ui, sans-serif;
 }
@@ -116,13 +96,13 @@
   }
 
   ::selection {
-    background-color: var(--color-nord8);
-    color: var(--color-nord0);
+    background-color: var(--color-vu);
+    color: var(--color-booth);
   }
 
   /* Enhanced focus styles for keyboard navigation */
   :focus-visible {
-    outline: 2px solid var(--color-nord8);
+    outline: 2px solid var(--color-vu);
     outline-offset: 2px;
     border-radius: 4px;
   }
@@ -139,7 +119,7 @@
   select:focus-visible,
   textarea:focus-visible,
   [tabindex]:focus-visible {
-    outline: 2px solid var(--color-nord8);
+    outline: 2px solid var(--color-vu);
     outline-offset: 2px;
   }
 
@@ -156,8 +136,8 @@
     transform: translateX(-50%);
     z-index: 9999;
     transition: top 0.3s;
-    background-color: var(--color-nord8);
-    color: var(--color-nord0);
+    background-color: var(--color-vu);
+    color: var(--color-booth);
     padding: 0.5rem 1rem;
     border-radius: 0.375rem;
     font-weight: 600;
@@ -235,10 +215,10 @@ html.light {
    ═══════════════════════════════════════════════════════════════ */
 @keyframes beat-ripple {
   from {
-    box-shadow: 0 0 0 0 rgba(136, 192, 208, 0.5);
+    box-shadow: 0 0 0 0 rgba(232, 163, 59, 0.5);
   }
   to {
-    box-shadow: 0 0 0 10px rgba(136, 192, 208, 0);
+    box-shadow: 0 0 0 10px rgba(232, 163, 59, 0);
   }
 }
 

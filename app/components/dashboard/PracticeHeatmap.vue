@@ -194,7 +194,7 @@ function formatDate(dateStr: string) {
   background: rgba(163, 190, 140, 0.75);
 }
 .level-4 {
-  background: var(--color-nord14);
+  background: var(--color-success);
 }
 
 .heatmap-legend {

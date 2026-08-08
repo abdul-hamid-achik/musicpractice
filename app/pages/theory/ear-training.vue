@@ -148,7 +148,7 @@ onMounted(() => {
                   Math.round((entry.correct / entry.total) * 100) >= 80
                     ? 'bg-success/20 text-success'
                     : Math.round((entry.correct / entry.total) * 100) >= 50
-                      ? 'bg-nord13/20 text-nord13'
+                      ? 'bg-caution/20 text-caution'
                       : 'bg-error/20 text-error'
                 "
               >

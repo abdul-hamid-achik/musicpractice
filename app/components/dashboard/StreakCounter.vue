@@ -84,7 +84,7 @@ const practicedToday = computed(() => streak.value?.practicedToday ?? false);
 }
 
 .streak-counter.streak-active {
-  border-color: var(--color-nord12);
+  border-color: var(--color-warning);
   box-shadow: 0 0 20px rgba(208, 135, 112, 0.15);
 }
 
@@ -110,11 +110,11 @@ const practicedToday = computed(() => streak.value?.practicedToday ?? false);
 }
 
 .flame-outer {
-  fill: var(--color-nord12);
+  fill: var(--color-warning);
 }
 
 .flame-inner {
-  fill: var(--color-nord13);
+  fill: var(--color-caution);
 }
 
 .streak-info {
@@ -130,7 +130,7 @@ const practicedToday = computed(() => streak.value?.practicedToday ?? false);
 }
 
 .streak-active .streak-number {
-  color: var(--color-nord12);
+  color: var(--color-warning);
 }
 
 .streak-label {
@@ -174,7 +174,7 @@ const practicedToday = computed(() => streak.value?.practicedToday ?? false);
 
 .status-pending {
   font-size: 0.75rem;
-  color: var(--color-nord12);
+  color: var(--color-warning);
   font-weight: 500;
 }
 

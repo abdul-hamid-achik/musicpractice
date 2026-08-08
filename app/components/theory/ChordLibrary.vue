@@ -345,7 +345,7 @@ onMounted(async () => {
                 :fill="
                   pianoKeys.active.includes(key) ? 'var(--color-primary)' : 'var(--color-key-white)'
                 "
-                style="stroke: var(--color-nord3)"
+                style="stroke: var(--color-line)"
                 stroke-width="1"
               />
               <text
@@ -373,9 +373,9 @@ onMounted(async () => {
                 height="68"
                 rx="3"
                 :fill="
-                  pianoKeys.active.includes(key) ? 'var(--color-nord10)' : 'var(--color-key-black)'
+                  pianoKeys.active.includes(key) ? 'var(--color-vu-dark)' : 'var(--color-key-black)'
                 "
-                style="stroke: var(--color-nord1)"
+                style="stroke: var(--color-panel)"
                 stroke-width="1"
               />
               <text
@@ -397,7 +397,7 @@ onMounted(async () => {
         <div v-if="viewMode === 'guitar'" class="bg-surface rounded-lg p-4 border border-border">
           <svg viewBox="0 0 200 160" class="w-full max-w-xs mx-auto">
             <!-- Nut -->
-            <rect x="28" y="18" width="144" height="4" style="fill: var(--color-nord6)" rx="1" />
+            <rect x="28" y="18" width="144" height="4" style="fill: var(--color-tape)" rx="1" />
             <!-- Fret lines -->
             <line
               v-for="f in 4"
@@ -406,7 +406,7 @@ onMounted(async () => {
               :y1="20 + f * 32"
               x2="172"
               :y2="20 + f * 32"
-              style="stroke: var(--color-nord3)"
+              style="stroke: var(--color-line)"
               stroke-width="1.5"
             />
             <!-- String lines -->
@@ -417,7 +417,7 @@ onMounted(async () => {
               y1="18"
               :x2="28 + (s - 1) * 28.8"
               y2="148"
-              style="stroke: var(--color-nord4)"
+              style="stroke: var(--color-tape-dim)"
               :stroke-width="s <= 3 ? 1 : 1.5"
             />
             <!-- String labels -->
@@ -427,7 +427,7 @@ onMounted(async () => {
               :x="28 + s * 28.8"
               y="12"
               text-anchor="middle"
-              style="fill: var(--color-nord4)"
+              style="fill: var(--color-tape-dim)"
               font-size="10"
             >
               {{ label }}

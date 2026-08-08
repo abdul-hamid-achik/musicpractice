@@ -120,10 +120,10 @@ async function submitSong() {
 }
 
 const difficultyColors: Record<string, string> = {
-  beginner: 'bg-nord14/20 text-nord14',
-  intermediate: 'bg-nord13/20 text-nord13',
-  advanced: 'bg-nord12/20 text-nord12',
-  expert: 'bg-nord11/20 text-nord11',
+  beginner: 'bg-success/20 text-success',
+  intermediate: 'bg-caution/20 text-caution',
+  advanced: 'bg-warning/20 text-warning',
+  expert: 'bg-error/20 text-error',
 };
 </script>
 

@@ -160,7 +160,7 @@ function getNoteLabel(string: number, fret: number): string {
       :y1="topPadding - 8"
       :x2="nutX"
       :y2="topPadding + (tuning.length - 1) * stringSpacing + 8"
-      style="stroke: var(--color-nord6)"
+      style="stroke: var(--color-tape)"
       stroke-width="5"
     />
 
@@ -172,7 +172,7 @@ function getNoteLabel(string: number, fret: number): string {
       :y1="topPadding - 6"
       :x2="fretX(f)"
       :y2="topPadding + (tuning.length - 1) * stringSpacing + 6"
-      style="stroke: var(--color-nord3)"
+      style="stroke: var(--color-line)"
       stroke-width="2"
     />
 
@@ -184,13 +184,13 @@ function getNoteLabel(string: number, fret: number): string {
             :cx="fretX(marker) - fretSpacing / 2"
             :cy="markerY(marker) - 12"
             r="4"
-            style="fill: var(--color-nord3)"
+            style="fill: var(--color-line)"
           />
           <circle
             :cx="fretX(marker) - fretSpacing / 2"
             :cy="markerY(marker) + 12"
             r="4"
-            style="fill: var(--color-nord3)"
+            style="fill: var(--color-line)"
           />
         </template>
         <circle
@@ -198,7 +198,7 @@ function getNoteLabel(string: number, fret: number): string {
           :cx="fretX(marker) - fretSpacing / 2"
           :cy="markerY(marker)"
           r="4"
-          style="fill: var(--color-nord3)"
+          style="fill: var(--color-line)"
         />
       </template>
     </template>
@@ -211,7 +211,7 @@ function getNoteLabel(string: number, fret: number): string {
       :y1="topPadding + (tuning.length - 1 - s) * stringSpacing"
       :x2="fretboardWidth"
       :y2="topPadding + (tuning.length - 1 - s) * stringSpacing"
-      style="stroke: var(--color-nord4)"
+      style="stroke: var(--color-tape-dim)"
       :stroke-width="stringThickness[s] || 1"
     />
 
@@ -285,7 +285,7 @@ function getNoteLabel(string: number, fret: number): string {
   transition: fill 0.15s;
 }
 g:hover .hover-dot {
-  fill: var(--color-nord3);
+  fill: var(--color-line);
 }
 
 @keyframes note-glow {

@@ -180,7 +180,7 @@ function getPositionLabel(string: number, finger: number): string {
       text-anchor="middle"
       font-size="14"
       font-weight="bold"
-      style="fill: var(--color-nord6)"
+      style="fill: var(--color-tape)"
     >
       Position {{ position }}
     </text>
@@ -193,7 +193,7 @@ function getPositionLabel(string: number, finger: number): string {
       :y1="topPadding - 15"
       :x2="leftPadding + (s - 1) * stringSpacing"
       :y2="topPadding + 4.5 * fingerSpacing"
-      style="stroke: var(--color-nord4)"
+      style="stroke: var(--color-tape-dim)"
       :stroke-width="2.4 - (s - 1) * 0.4"
     />
 
@@ -205,7 +205,7 @@ function getPositionLabel(string: number, finger: number): string {
       :y="topPadding + 5 * fingerSpacing"
       text-anchor="middle"
       font-size="12"
-      style="fill: var(--color-nord4)"
+      style="fill: var(--color-tape-dim)"
     >
       {{ label }}
     </text>
@@ -218,7 +218,7 @@ function getPositionLabel(string: number, finger: number): string {
       :y1="topPadding + f * fingerSpacing"
       :x2="leftPadding + 3 * stringSpacing + 15"
       :y2="topPadding + f * fingerSpacing"
-      style="stroke: var(--color-nord3)"
+      style="stroke: var(--color-line)"
       stroke-width="1"
       stroke-dasharray="4,3"
     />
@@ -231,7 +231,7 @@ function getPositionLabel(string: number, finger: number): string {
       :y="topPadding + f * fingerSpacing + 4"
       text-anchor="middle"
       font-size="11"
-      style="fill: var(--color-nord3)"
+      style="fill: var(--color-line)"
     >
       {{ f }}
     </text>
@@ -260,7 +260,7 @@ function getPositionLabel(string: number, finger: number): string {
                 ? 'var(--color-secondary)'
                 : 'transparent'
           "
-          :stroke="isHighlighted(fp.note) || isRoot(fp.note) ? 'none' : 'var(--color-nord3)'"
+          :stroke="isHighlighted(fp.note) || isRoot(fp.note) ? 'none' : 'var(--color-line)'"
           :stroke-width="isHighlighted(fp.note) || isRoot(fp.note) ? 0 : 1"
           class="hover-circle"
         />
@@ -301,7 +301,7 @@ function getPositionLabel(string: number, finger: number): string {
   transition: fill 0.15s;
 }
 g:hover .hover-circle {
-  fill: var(--color-nord3);
+  fill: var(--color-line);
 }
 .hover-text {
   opacity: 0.5;

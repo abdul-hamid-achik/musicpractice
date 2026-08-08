@@ -418,7 +418,7 @@ const popularSections = [
 a:focus-visible,
 button:focus-visible,
 input:focus-visible {
-  outline: 2px solid var(--nord8);
+  outline: 2px solid var(--color-vu);
   outline-offset: 2px;
 }
 
