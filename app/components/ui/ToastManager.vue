@@ -26,7 +26,7 @@ function dismiss(id: string) {
         leave-to-class="translate-x-full opacity-0"
         move-class="transition-all duration-300"
       >
-        <NordToast
+        <UiToast
           v-for="toast in toastStore.toasts"
           :key="toast.id"
           :message="toast.message"

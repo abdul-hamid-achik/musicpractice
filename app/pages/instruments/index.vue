@@ -33,7 +33,7 @@ const instruments = [
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <NuxtLink v-for="inst in instruments" :key="inst.name" :to="inst.to" class="block group">
-        <NordCard>
+        <UiCard>
           <div class="flex items-start gap-4">
             <!-- Guitar SVG -->
             <div
@@ -135,7 +135,7 @@ const instruments = [
               <p class="text-text-muted text-sm">{{ inst.description }}</p>
             </div>
           </div>
-        </NordCard>
+        </UiCard>
       </NuxtLink>
     </div>
   </div>

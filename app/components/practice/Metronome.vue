@@ -198,7 +198,7 @@ defineExpose({ setBpm, adjustBpm, togglePlayback, bpm, isRunning });
       role="group"
       aria-label="Time signature selection"
     >
-      <NordButton
+      <UiButton
         v-for="sig in timeSignatures"
         :key="sig.label"
         :variant="selectedTimeSig === sig.label ? 'primary' : 'ghost'"
@@ -207,7 +207,7 @@ defineExpose({ setBpm, adjustBpm, togglePlayback, bpm, isRunning });
         @click="setTimeSignature(sig)"
       >
         {{ sig.label }}
-      </NordButton>
+      </UiButton>
     </div>
 
     <!-- Visual Beat Indicator -->
@@ -234,7 +234,7 @@ defineExpose({ setBpm, adjustBpm, togglePlayback, bpm, isRunning });
 
     <!-- Controls -->
     <div class="flex justify-center gap-4">
-      <NordButton
+      <UiButton
         :variant="isRunning ? 'danger' : 'success'"
         size="lg"
         :aria-pressed="isRunning"
@@ -242,11 +242,11 @@ defineExpose({ setBpm, adjustBpm, togglePlayback, bpm, isRunning });
         @click="togglePlayback"
       >
         {{ isRunning ? 'Stop' : 'Start' }}
-      </NordButton>
+      </UiButton>
 
-      <NordButton variant="ghost" size="lg" aria-label="Tap tempo" @click="handleTap">
+      <UiButton variant="ghost" size="lg" aria-label="Tap tempo" @click="handleTap">
         Tap Tempo
-      </NordButton>
+      </UiButton>
     </div>
 
     <!-- Presets -->

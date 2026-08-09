@@ -43,9 +43,9 @@ const bars = computed(() => {
     aria-label="Loading chart..."
   >
     <div v-for="i in 7" :key="i" class="flex-1 flex flex-col items-center">
-      <NordSkeleton height="0.75rem" width="30px" class="mb-1" />
-      <NordSkeleton height="80px" width="20px" class="flex-1" />
-      <NordSkeleton height="0.625rem" width="25px" class="mt-1" />
+      <UiSkeleton height="0.75rem" width="30px" class="mb-1" />
+      <UiSkeleton height="80px" width="20px" class="flex-1" />
+      <UiSkeleton height="0.625rem" width="25px" class="mt-1" />
     </div>
   </div>
 

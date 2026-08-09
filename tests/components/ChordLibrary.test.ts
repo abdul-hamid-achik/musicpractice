@@ -55,8 +55,8 @@ const theoryStoreMock = {
 };
 vi.mock('~/stores/theory', () => ({ useTheoryStore: () => theoryStoreMock }));
 
-const NordSkeletonStub = {
-  template: '<div class="nord-skeleton" :style="{ width, height }" />',
+const UiSkeletonStub = {
+  template: '<div class="ui-skeleton" :style="{ width, height }" />',
   props: ['width', 'height', 'rounded', 'variant'],
 };
 
@@ -73,7 +73,7 @@ describe('ChordLibrary', () => {
 
   it('renders the title and chord name', async () => {
     const wrapper = mount(ChordLibrary, {
-      global: { stubs: { NordSkeleton: NordSkeletonStub } },
+      global: { stubs: { UiSkeleton: UiSkeletonStub } },
     });
     await wrapper.vm.$nextTick();
     expect(wrapper.text()).toContain('Chord Library');
@@ -82,7 +82,7 @@ describe('ChordLibrary', () => {
 
   it('renders a Play Chord control', async () => {
     const wrapper = mount(ChordLibrary, {
-      global: { stubs: { NordSkeleton: NordSkeletonStub } },
+      global: { stubs: { UiSkeleton: UiSkeletonStub } },
     });
     await wrapper.vm.$nextTick();
     expect(wrapper.text()).toContain('Play Chord');
@@ -90,7 +90,7 @@ describe('ChordLibrary', () => {
 
   it('renders 12 root note buttons (C through B)', async () => {
     const wrapper = mount(ChordLibrary, {
-      global: { stubs: { NordSkeleton: NordSkeletonStub } },
+      global: { stubs: { UiSkeleton: UiSkeletonStub } },
     });
     await wrapper.vm.$nextTick();
     // Find buttons whose text is exactly a note name
@@ -103,7 +103,7 @@ describe('ChordLibrary', () => {
 
   it('emits chordSelected when the component first loads with a default chord', async () => {
     const wrapper = mount(ChordLibrary, {
-      global: { stubs: { NordSkeleton: NordSkeletonStub } },
+      global: { stubs: { UiSkeleton: UiSkeletonStub } },
     });
     await wrapper.vm.$nextTick();
     expect(wrapper.emitted('chordSelected')).toBeTruthy();
@@ -114,7 +114,7 @@ describe('ChordLibrary', () => {
 
   it('calls setRoot and emits chordSelected when a different root is picked (state transition)', async () => {
     const wrapper = mount(ChordLibrary, {
-      global: { stubs: { NordSkeleton: NordSkeletonStub } },
+      global: { stubs: { UiSkeleton: UiSkeletonStub } },
     });
     await wrapper.vm.$nextTick();
     wrapper.emitted('chordSelected')!.length = 0; // reset
@@ -134,7 +134,7 @@ describe('ChordLibrary', () => {
 
   it('renders the notes of the current chord', async () => {
     const wrapper = mount(ChordLibrary, {
-      global: { stubs: { NordSkeleton: NordSkeletonStub } },
+      global: { stubs: { UiSkeleton: UiSkeletonStub } },
     });
     await wrapper.vm.$nextTick();
     expect(wrapper.text()).toContain('C E G');

@@ -18,19 +18,19 @@ export function useAlphaTab(containerRef: Ref<HTMLElement | null>) {
 
     const Color = ColorClass as new (r: number, g: number, b: number) => unknown;
     if (isDark) {
-      s.display.resources.staffLineColor = new Color(76, 86, 106); // #4C566A nord3
-      s.display.resources.barSeparatorColor = new Color(76, 86, 106); // #4C566A nord3
-      s.display.resources.barNumberColor = new Color(191, 97, 106); // #BF616A nord11 (red)
-      s.display.resources.mainGlyphColor = new Color(236, 239, 244); // #ECEFF4 nord6
-      s.display.resources.secondaryGlyphColor = new Color(216, 222, 233); // #D8DEE9 nord4
-      s.display.resources.scoreInfoColor = new Color(216, 222, 233); // #D8DEE9 nord4
+      s.display.resources.staffLineColor = new Color(59, 50, 41); // #3B3229 line
+      s.display.resources.barSeparatorColor = new Color(59, 50, 41); // #3B3229 line
+      s.display.resources.barNumberColor = new Color(211, 96, 78); // #D3604E peak
+      s.display.resources.mainGlyphColor = new Color(241, 232, 215); // #F1E8D7 tape
+      s.display.resources.secondaryGlyphColor = new Color(217, 205, 182); // #D9CDB6 tape-mid
+      s.display.resources.scoreInfoColor = new Color(217, 205, 182); // #D9CDB6 tape-mid
     } else {
-      s.display.resources.staffLineColor = new Color(76, 86, 106); // #4C566A nord3
-      s.display.resources.barSeparatorColor = new Color(59, 66, 82); // #3B4252 nord1
-      s.display.resources.barNumberColor = new Color(191, 97, 106); // #BF616A nord11 (red)
-      s.display.resources.mainGlyphColor = new Color(46, 52, 64); // #2E3440 nord0
-      s.display.resources.secondaryGlyphColor = new Color(59, 66, 82); // #3B4252 nord1
-      s.display.resources.scoreInfoColor = new Color(59, 66, 82); // #3B4252 nord1
+      s.display.resources.staffLineColor = new Color(107, 95, 77); // #6B5F4D light text-muted
+      s.display.resources.barSeparatorColor = new Color(107, 95, 77); // #6B5F4D light text-muted
+      s.display.resources.barNumberColor = new Color(211, 96, 78); // #D3604E peak
+      s.display.resources.mainGlyphColor = new Color(38, 32, 26); // #26201A light text
+      s.display.resources.secondaryGlyphColor = new Color(107, 95, 77); // #6B5F4D light text-muted
+      s.display.resources.scoreInfoColor = new Color(107, 95, 77); // #6B5F4D light text-muted
     }
   }
 

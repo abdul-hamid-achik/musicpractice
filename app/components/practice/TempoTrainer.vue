@@ -87,7 +87,7 @@ onBeforeUnmount(() => {
     </div>
 
     <!-- Progress bar -->
-    <NordProgressBar
+    <UiProgressBar
       :value="progress"
       :color="isComplete ? 'success' : 'primary'"
       size="md"
@@ -116,15 +116,15 @@ onBeforeUnmount(() => {
 
     <!-- Controls -->
     <div class="flex justify-center gap-3">
-      <NordButton
+      <UiButton
         v-if="!isRunning"
         :variant="isComplete ? 'primary' : 'success'"
         @click="startTraining"
       >
         {{ isComplete ? 'Restart' : 'Start' }}
-      </NordButton>
-      <NordButton v-else variant="danger" @click="stopTraining"> Stop </NordButton>
-      <NordButton variant="ghost" @click="reset"> Reset </NordButton>
+      </UiButton>
+      <UiButton v-else variant="danger" @click="stopTraining"> Stop </UiButton>
+      <UiButton variant="ghost" @click="reset"> Reset </UiButton>
     </div>
   </div>
 </template>

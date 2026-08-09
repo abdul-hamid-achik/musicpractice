@@ -41,17 +41,17 @@ function goTo(path: string) {
         Practice like you always do — your sessions now count toward your teacher's board.
       </p>
       <div class="mt-8 flex justify-center gap-3">
-        <NordButton @click="goTo('/practice')">Start practicing</NordButton>
-        <NordButton variant="ghost" @click="goTo('/studio')">View my studio</NordButton>
+        <UiButton @click="goTo('/practice')">Start practicing</UiButton>
+        <UiButton variant="ghost" @click="goTo('/studio')">View my studio</UiButton>
       </div>
     </template>
 
     <template v-else>
       <h1 class="text-2xl font-bold text-text">Couldn't join</h1>
       <p class="mt-3 text-text-muted">{{ errorMessage }}</p>
-      <NordButton class="mt-8" variant="ghost" @click="goTo('/dashboard')">
+      <UiButton class="mt-8" variant="ghost" @click="goTo('/dashboard')">
         Back to dashboard
-      </NordButton>
+      </UiButton>
     </template>
   </div>
 </template>

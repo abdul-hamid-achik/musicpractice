@@ -7,8 +7,8 @@ vi.stubGlobal('useFetch', useFetchMock);
 
 import PracticeHeatmap from '~/components/dashboard/PracticeHeatmap.vue';
 
-const NordSkeletonStub = {
-  template: '<div class="nord-skeleton" :style="{ width, height }" />',
+const UiSkeletonStub = {
+  template: '<div class="ui-skeleton" :style="{ width, height }" />',
   props: ['width', 'height', 'rounded', 'variant'],
 };
 
@@ -17,7 +17,7 @@ describe('PracticeHeatmap', () => {
     useFetchMock.mockReturnValue({ data: ref(null), status: ref('pending') });
     const wrapper = mount(
       { template: '<Suspense><PracticeHeatmap /></Suspense>', components: { PracticeHeatmap } },
-      { global: { stubs: { NordSkeleton: NordSkeletonStub } } },
+      { global: { stubs: { UiSkeleton: UiSkeletonStub } } },
     );
     await flushPromises();
     expect(wrapper.html()).toContain('Loading heatmap');
@@ -27,7 +27,7 @@ describe('PracticeHeatmap', () => {
     useFetchMock.mockReturnValue({ data: ref([]), status: ref('success') });
     const wrapper = mount(
       { template: '<Suspense><PracticeHeatmap /></Suspense>', components: { PracticeHeatmap } },
-      { global: { stubs: { NordSkeleton: NordSkeletonStub } } },
+      { global: { stubs: { UiSkeleton: UiSkeletonStub } } },
     );
     await flushPromises();
     // Total cells = 90 data + 5 legend = 95
@@ -63,7 +63,7 @@ describe('PracticeHeatmap', () => {
     });
     const wrapper = mount(
       { template: '<Suspense><PracticeHeatmap /></Suspense>', components: { PracticeHeatmap } },
-      { global: { stubs: { NordSkeleton: NordSkeletonStub } } },
+      { global: { stubs: { UiSkeleton: UiSkeletonStub } } },
     );
     await flushPromises();
 
@@ -78,7 +78,7 @@ describe('PracticeHeatmap', () => {
     useFetchMock.mockReturnValue({ data: ref([]), status: ref('success') });
     const wrapper = mount(
       { template: '<Suspense><PracticeHeatmap /></Suspense>', components: { PracticeHeatmap } },
-      { global: { stubs: { NordSkeleton: NordSkeletonStub } } },
+      { global: { stubs: { UiSkeleton: UiSkeletonStub } } },
     );
     await flushPromises();
     const legend = wrapper.find('.heatmap-legend');
@@ -90,7 +90,7 @@ describe('PracticeHeatmap', () => {
     useFetchMock.mockReturnValue({ data: ref([]), status: ref('success') });
     const wrapper = mount(
       { template: '<Suspense><PracticeHeatmap /></Suspense>', components: { PracticeHeatmap } },
-      { global: { stubs: { NordSkeleton: NordSkeletonStub } } },
+      { global: { stubs: { UiSkeleton: UiSkeletonStub } } },
     );
     await flushPromises();
     // All 90 data cells have a title attribute with "min" in it

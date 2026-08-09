@@ -83,7 +83,7 @@ onMounted(async () => {
     <div class="flex items-center justify-between mb-2">
       <h1 class="text-3xl font-bold text-text">Bass</h1>
       <NuxtLink to="/practice/session?instrument=bass">
-        <NordButton variant="primary" size="sm">Practice Bass</NordButton>
+        <UiButton variant="primary" size="sm">Practice Bass</UiButton>
       </NuxtLink>
     </div>
     <p class="text-text-muted mb-6">
@@ -110,7 +110,7 @@ onMounted(async () => {
     <!-- Loaded Content -->
     <template v-else>
       <!-- Tuning Selector -->
-      <NordCard class="mb-4">
+      <UiCard class="mb-4">
         <div class="flex flex-wrap items-center gap-3">
           <div class="flex items-center gap-2">
             <svg
@@ -140,10 +140,10 @@ onMounted(async () => {
             {{ tuningLabel }}
           </span>
         </div>
-      </NordCard>
+      </UiCard>
 
       <!-- Controls -->
-      <NordCard class="mb-6">
+      <UiCard class="mb-6">
         <div class="flex flex-wrap items-end gap-4">
           <!-- String Count -->
           <div>
@@ -232,12 +232,12 @@ onMounted(async () => {
           </div>
 
           <!-- Clear -->
-          <NordButton variant="ghost" size="sm" @click="clearSelection">Clear</NordButton>
+          <UiButton variant="ghost" size="sm" @click="clearSelection">Clear</UiButton>
         </div>
-      </NordCard>
+      </UiCard>
 
       <!-- Fretboard -->
-      <NordCard>
+      <UiCard>
         <BassFretboard
           :strings="stringCount"
           :tuning="activeTuning"
@@ -245,14 +245,14 @@ onMounted(async () => {
           :root-note="selectedRoot"
           @note-click="handleNoteClick"
         />
-      </NordCard>
+      </UiCard>
 
       <!-- Note Display -->
-      <NordCard v-if="lastClickedNote" title="Last Played" class="mt-6">
+      <UiCard v-if="lastClickedNote" title="Last Played" class="mt-6">
         <div class="text-center">
           <span class="text-2xl font-bold text-primary">{{ lastClickedNote }}</span>
         </div>
-      </NordCard>
+      </UiCard>
     </template>
   </div>
 </template>

@@ -60,15 +60,15 @@ const mockToastStore = {
 };
 vi.stubGlobal('useToastStore', () => mockToastStore);
 
-// Stub the Nord* components used in the template
-const NordButtonStub = {
+// Stub the Ui* components used in the template
+const UiButtonStub = {
   template:
     '<button :disabled="disabled || loading" :aria-pressed="ariaPressed" :aria-label="ariaLabel" :aria-busy="loading" @click="$emit(\'click\', $event)"><slot /></button>',
   props: ['variant', 'size', 'disabled', 'loading', 'ariaLabel', 'ariaPressed', 'type'],
   emits: ['click'],
 };
-const NordProgressBarStub = {
-  template: '<div class="nord-progress" :style="{ width: value + \'%\' }" :data-color="color" />',
+const UiProgressBarStub = {
+  template: '<div class="ui-progress" :style="{ width: value + \'%\' }" :data-color="color" />',
   props: ['value', 'color', 'size', 'animated'],
 };
 
@@ -77,7 +77,7 @@ import Metronome from '~/components/practice/Metronome.vue';
 describe('Metronome (expanded)', () => {
   it('renders the BPM display', () => {
     const wrapper = mount(Metronome, {
-      global: { stubs: { NordButton: NordButtonStub, NordProgressBar: NordProgressBarStub } },
+      global: { stubs: { UiButton: UiButtonStub, UiProgressBar: UiProgressBarStub } },
     });
     expect(wrapper.text()).toContain('120');
     expect(wrapper.text()).toContain('BPM');
@@ -85,7 +85,7 @@ describe('Metronome (expanded)', () => {
 
   it('renders 5 BPM adjustment buttons (-5, -, +, +5, Start, Tap Tempo, etc.)', () => {
     const wrapper = mount(Metronome, {
-      global: { stubs: { NordButton: NordButtonStub, NordProgressBar: NordProgressBarStub } },
+      global: { stubs: { UiButton: UiButtonStub, UiProgressBar: UiProgressBarStub } },
     });
     const buttons = wrapper.findAll('button');
     // -5, -, +, +5 are 4 native buttons; Start, Tap Tempo, 6 time-sig buttons = 11 total
@@ -94,7 +94,7 @@ describe('Metronome (expanded)', () => {
 
   it('has aria labels for the BPM adjustment buttons', () => {
     const wrapper = mount(Metronome, {
-      global: { stubs: { NordButton: NordButtonStub, NordProgressBar: NordProgressBarStub } },
+      global: { stubs: { UiButton: UiButtonStub, UiProgressBar: UiProgressBarStub } },
     });
     expect(wrapper.html()).toContain('Decrease tempo by 5 BPM');
     expect(wrapper.html()).toContain('Decrease tempo by 1 BPM');
@@ -104,7 +104,7 @@ describe('Metronome (expanded)', () => {
 
   it('renders a tempo slider with min=30 and max=300', () => {
     const wrapper = mount(Metronome, {
-      global: { stubs: { NordButton: NordButtonStub, NordProgressBar: NordProgressBarStub } },
+      global: { stubs: { UiButton: UiButtonStub, UiProgressBar: UiProgressBarStub } },
     });
     const slider = wrapper.find('input[type="range"]');
     expect(slider.exists()).toBe(true);
@@ -114,7 +114,7 @@ describe('Metronome (expanded)', () => {
 
   it('renders 6 time signature buttons', () => {
     const wrapper = mount(Metronome, {
-      global: { stubs: { NordButton: NordButtonStub, NordProgressBar: NordProgressBarStub } },
+      global: { stubs: { UiButton: UiButtonStub, UiProgressBar: UiProgressBarStub } },
     });
     for (const sig of ['2/4', '3/4', '4/4', '5/4', '6/8', '7/8']) {
       expect(wrapper.text()).toContain(sig);
@@ -123,7 +123,7 @@ describe('Metronome (expanded)', () => {
 
   it('renders the visual beat indicator group with aria-live="polite"', () => {
     const wrapper = mount(Metronome, {
-      global: { stubs: { NordButton: NordButtonStub, NordProgressBar: NordProgressBarStub } },
+      global: { stubs: { UiButton: UiButtonStub, UiProgressBar: UiProgressBarStub } },
     });
     expect(wrapper.html()).toContain('aria-live="polite"');
     expect(wrapper.html()).toContain('Beat indicator');
@@ -131,7 +131,7 @@ describe('Metronome (expanded)', () => {
 
   it('renders 4 beat dots by default (4/4 time)', () => {
     const wrapper = mount(Metronome, {
-      global: { stubs: { NordButton: NordButtonStub, NordProgressBar: NordProgressBarStub } },
+      global: { stubs: { UiButton: UiButtonStub, UiProgressBar: UiProgressBarStub } },
     });
     // Beat dots are the round divs in the beat indicator group
     // They have w-8 h-8 rounded-full classes
@@ -142,7 +142,7 @@ describe('Metronome (expanded)', () => {
 
   it('exposes setBpm, adjustBpm, togglePlayback, bpm, isRunning via defineExpose', () => {
     const wrapper = mount(Metronome, {
-      global: { stubs: { NordButton: NordButtonStub, NordProgressBar: NordProgressBarStub } },
+      global: { stubs: { UiButton: UiButtonStub, UiProgressBar: UiProgressBarStub } },
     });
     // @ts-expect-error — accessing exposed methods on component instance
     expect(typeof wrapper.vm.setBpm).toBe('function');

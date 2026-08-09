@@ -9,38 +9,38 @@
 
     <StaggeredList tag="div" class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <!-- Start Session -->
-      <NordCard title="Start Session">
+      <UiCard title="Start Session">
         <p class="text-text-muted mb-4">
           Begin a timed practice session with metronome, tempo trainer, and session tracking.
         </p>
         <template #footer>
           <NuxtLink to="/practice/session">
-            <NordButton variant="primary">Start Practicing</NordButton>
+            <UiButton variant="primary">Start Practicing</UiButton>
           </NuxtLink>
         </template>
-      </NordCard>
+      </UiCard>
 
       <!-- Session History -->
-      <NordCard title="Session History">
+      <UiCard title="Session History">
         <p class="text-text-muted mb-4">
           Review your past sessions, track progress, and see stats over time.
         </p>
         <template #footer>
           <NuxtLink to="/practice/history">
-            <NordButton variant="secondary">View History</NordButton>
+            <UiButton variant="secondary">View History</UiButton>
           </NuxtLink>
         </template>
-      </NordCard>
+      </UiCard>
 
       <!-- Metronome -->
-      <NordCard title="Metronome">
+      <UiCard title="Metronome">
         <Metronome />
-      </NordCard>
+      </UiCard>
 
       <!-- Practice Goals -->
-      <NordCard title="Practice Goals">
+      <UiCard title="Practice Goals">
         <PracticeGoals />
-      </NordCard>
+      </UiCard>
     </StaggeredList>
   </div>
 </template>

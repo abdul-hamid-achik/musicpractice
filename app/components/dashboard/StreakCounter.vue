@@ -23,14 +23,14 @@ const practicedToday = computed(() => streak.value?.practicedToday ?? false);
     aria-label="Loading streak..."
   >
     <div class="flex items-center gap-4">
-      <NordSkeleton variant="circle" width="48px" height="48px" />
+      <UiSkeleton variant="circle" width="48px" height="48px" />
       <div class="flex-1">
-        <NordSkeleton height="2.5rem" width="60px" />
-        <NordSkeleton height="0.875rem" width="80px" class="mt-1" />
+        <UiSkeleton height="2.5rem" width="60px" />
+        <UiSkeleton height="0.875rem" width="80px" class="mt-1" />
       </div>
       <div class="text-right">
-        <NordSkeleton height="1.25rem" width="40px" />
-        <NordSkeleton height="0.75rem" width="30px" class="mt-1" />
+        <UiSkeleton height="1.25rem" width="40px" />
+        <UiSkeleton height="0.75rem" width="30px" class="mt-1" />
       </div>
     </div>
   </div>

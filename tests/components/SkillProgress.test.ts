@@ -7,8 +7,8 @@ vi.stubGlobal('useFetch', useFetchMock);
 
 import SkillProgress from '~/components/dashboard/SkillProgress.vue';
 
-const NordSkeletonStub = {
-  template: '<div class="nord-skeleton" :style="{ width, height }" />',
+const UiSkeletonStub = {
+  template: '<div class="ui-skeleton" :style="{ width, height }" />',
   props: ['width', 'height', 'rounded', 'variant'],
 };
 
@@ -44,7 +44,7 @@ describe('SkillProgress', () => {
     useFetchMock.mockReturnValue({ data: ref(null), status: ref('pending') });
     const wrapper = mount(
       { template: '<Suspense><SkillProgress /></Suspense>', components: { SkillProgress } },
-      { global: { stubs: { NordSkeleton: NordSkeletonStub } } },
+      { global: { stubs: { UiSkeleton: UiSkeletonStub } } },
     );
     await flushPromises();
     expect(wrapper.html()).toContain('Loading progress');
@@ -54,7 +54,7 @@ describe('SkillProgress', () => {
     useFetchMock.mockReturnValue({ data: ref({ data: [] }), status: ref('success') });
     const wrapper = mount(
       { template: '<Suspense><SkillProgress /></Suspense>', components: { SkillProgress } },
-      { global: { stubs: { NordSkeleton: NordSkeletonStub } } },
+      { global: { stubs: { UiSkeleton: UiSkeletonStub } } },
     );
     await flushPromises();
     expect(wrapper.text()).toContain('No song progress tracked yet');
@@ -64,7 +64,7 @@ describe('SkillProgress', () => {
     useFetchMock.mockReturnValue({ data: ref({ data: skills }), status: ref('success') });
     const wrapper = mount(
       { template: '<Suspense><SkillProgress /></Suspense>', components: { SkillProgress } },
-      { global: { stubs: { NordSkeleton: NordSkeletonStub } } },
+      { global: { stubs: { UiSkeleton: UiSkeletonStub } } },
     );
     await flushPromises();
     const items = wrapper.findAll('.skill-item');
@@ -75,7 +75,7 @@ describe('SkillProgress', () => {
     useFetchMock.mockReturnValue({ data: ref({ data: skills }), status: ref('success') });
     const wrapper = mount(
       { template: '<Suspense><SkillProgress /></Suspense>', components: { SkillProgress } },
-      { global: { stubs: { NordSkeleton: NordSkeletonStub } } },
+      { global: { stubs: { UiSkeleton: UiSkeletonStub } } },
     );
     await flushPromises();
     expect(wrapper.text()).toContain('Wonderwall');
@@ -88,7 +88,7 @@ describe('SkillProgress', () => {
     useFetchMock.mockReturnValue({ data: ref({ data: skills }), status: ref('success') });
     const wrapper = mount(
       { template: '<Suspense><SkillProgress /></Suspense>', components: { SkillProgress } },
-      { global: { stubs: { NordSkeleton: NordSkeletonStub } } },
+      { global: { stubs: { UiSkeleton: UiSkeletonStub } } },
     );
     await flushPromises();
     expect(wrapper.text()).toContain('Unknown Song');
@@ -98,7 +98,7 @@ describe('SkillProgress', () => {
     useFetchMock.mockReturnValue({ data: ref({ data: skills }), status: ref('success') });
     const wrapper = mount(
       { template: '<Suspense><SkillProgress /></Suspense>', components: { SkillProgress } },
-      { global: { stubs: { NordSkeleton: NordSkeletonStub } } },
+      { global: { stubs: { UiSkeleton: UiSkeletonStub } } },
     );
     await flushPromises();
     expect(wrapper.text()).toContain('92 BPM max');
@@ -108,7 +108,7 @@ describe('SkillProgress', () => {
     useFetchMock.mockReturnValue({ data: ref({ data: skills }), status: ref('success') });
     const wrapper = mount(
       { template: '<Suspense><SkillProgress /></Suspense>', components: { SkillProgress } },
-      { global: { stubs: { NordSkeleton: NordSkeletonStub } } },
+      { global: { stubs: { UiSkeleton: UiSkeletonStub } } },
     );
     await flushPromises();
     expect(wrapper.text()).toContain('12 sessions');
@@ -119,7 +119,7 @@ describe('SkillProgress', () => {
     useFetchMock.mockReturnValue({ data: ref({ data: skills }), status: ref('success') });
     const wrapper = mount(
       { template: '<Suspense><SkillProgress /></Suspense>', components: { SkillProgress } },
-      { global: { stubs: { NordSkeleton: NordSkeletonStub } } },
+      { global: { stubs: { UiSkeleton: UiSkeletonStub } } },
     );
     await flushPromises();
     const fills = wrapper.findAll('.progress-fill');

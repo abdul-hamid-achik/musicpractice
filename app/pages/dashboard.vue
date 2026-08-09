@@ -50,7 +50,7 @@ onMounted(() => {
       class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
     >
       <!-- This Week's Practice -->
-      <NordCard title="This Week's Practice">
+      <UiCard title="This Week's Practice">
         <div class="text-center py-4">
           <div class="text-4xl font-bold text-primary">{{ weeklyFormatted }}</div>
           <p class="text-text-muted mt-2">
@@ -59,33 +59,33 @@ onMounted(() => {
             }}
           </p>
         </div>
-      </NordCard>
+      </UiCard>
 
       <!-- Goals -->
-      <NordCard title="Goals">
+      <UiCard title="Goals">
         <PracticeGoals />
-      </NordCard>
+      </UiCard>
 
       <!-- Teacher assignments (renders only when the user is in a studio) -->
       <AssignmentsCard />
 
       <!-- Recent Sessions -->
-      <NordCard title="Recent Sessions">
+      <UiCard title="Recent Sessions">
         <SessionLog :sessions="practiceStore.recentSessions" :limit="5" />
         <template #footer>
           <NuxtLink to="/practice/history" class="text-primary text-sm hover:underline">
             View full history
           </NuxtLink>
         </template>
-      </NordCard>
+      </UiCard>
 
       <!-- Daily Activity (last 2 weeks bar chart) -->
-      <NordCard title="Daily Activity" class="md:col-span-2">
+      <UiCard title="Daily Activity" class="md:col-span-2">
         <PracticeChart />
-      </NordCard>
+      </UiCard>
 
       <!-- Quick Start -->
-      <NordCard title="Quick Start">
+      <UiCard title="Quick Start">
         <div class="grid grid-cols-2 gap-3">
           <NuxtLink
             v-for="item in quickStartItems"
@@ -97,7 +97,7 @@ onMounted(() => {
             <span class="text-sm font-medium text-text">{{ item.label }}</span>
           </NuxtLink>
         </div>
-      </NordCard>
+      </UiCard>
     </StaggeredList>
 
     <!-- Loading Skeletons -->
@@ -120,17 +120,17 @@ onMounted(() => {
 
     <!-- Practice Heatmap — full width -->
     <div class="mt-6">
-      <NordCard title="Practice Heatmap">
+      <UiCard title="Practice Heatmap">
         <p class="text-text-muted text-xs mb-3">Last 90 days of practice activity</p>
         <PracticeHeatmap />
-      </NordCard>
+      </UiCard>
     </div>
 
     <!-- Skill Progress -->
     <div class="mt-6">
-      <NordCard title="Song Progress">
+      <UiCard title="Song Progress">
         <SkillProgress />
-      </NordCard>
+      </UiCard>
     </div>
   </div>
 </template>

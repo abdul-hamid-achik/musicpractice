@@ -3,13 +3,13 @@ import { mount } from '@vue/test-utils';
 
 import TempoTrainer from '~/components/practice/TempoTrainer.vue';
 
-// Stubs for the auto-imported Nord* components
-const NordProgressBarStub = {
+// Stubs for the auto-imported Ui* components
+const UiProgressBarStub = {
   template:
-    '<div class="nord-progress" :data-value="value" :data-color="color" :data-animated="animated" />',
+    '<div class="ui-progress" :data-value="value" :data-color="color" :data-animated="animated" />',
   props: ['value', 'color', 'size', 'animated'],
 };
-const NordButtonStub = {
+const UiButtonStub = {
   template: '<button :disabled="disabled" @click="$emit(\'click\', $event)"><slot /></button>',
   props: ['variant', 'size', 'disabled', 'loading', 'ariaLabel', 'ariaPressed', 'type'],
   emits: ['click'],
@@ -18,7 +18,7 @@ const NordButtonStub = {
 const mountWithStubs = (props: Record<string, unknown> = {}) =>
   mount(TempoTrainer, {
     props,
-    global: { stubs: { NordButton: NordButtonStub, NordProgressBar: NordProgressBarStub } },
+    global: { stubs: { UiButton: UiButtonStub, UiProgressBar: UiProgressBarStub } },
   });
 
 describe('TempoTrainer', () => {

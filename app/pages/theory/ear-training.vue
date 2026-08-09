@@ -84,9 +84,9 @@ onMounted(() => {
           <span class="text-primary font-bold">{{ score.correct }}/{{ score.total }}</span>
           <span class="text-text-muted text-sm ml-2">({{ accuracy }}%)</span>
         </div>
-        <NordButton variant="primary" size="sm" :loading="isSaving" @click="saveScore">
+        <UiButton variant="primary" size="sm" :loading="isSaving" @click="saveScore">
           Save Score
-        </NordButton>
+        </UiButton>
       </div>
     </div>
 
@@ -132,7 +132,7 @@ onMounted(() => {
       <NoteIdentifier v-else @score-update="handleScoreUpdate" />
 
       <!-- Recent Scores -->
-      <NordCard v-if="tabScores.length > 0" title="Recent Scores" class="mt-6">
+      <UiCard v-if="tabScores.length > 0" title="Recent Scores" class="mt-6">
         <div class="space-y-2">
           <div
             v-for="entry in tabScores.slice(0, 10)"
@@ -157,7 +157,7 @@ onMounted(() => {
             </div>
           </div>
         </div>
-      </NordCard>
+      </UiCard>
     </template>
   </div>
 </template>

@@ -8,8 +8,8 @@ vi.stubGlobal('useFetch', useFetchMock);
 
 import StreakCounter from '~/components/dashboard/StreakCounter.vue';
 
-const NordSkeletonStub = {
-  template: '<div class="nord-skeleton" :style="{ width, height }" />',
+const UiSkeletonStub = {
+  template: '<div class="ui-skeleton" :style="{ width, height }" />',
   props: ['width', 'height', 'rounded', 'variant'],
 };
 
@@ -22,7 +22,7 @@ describe('StreakCounter', () => {
     const wrapper = mount(
       { template: '<Suspense><StreakCounter /></Suspense>', components: { StreakCounter } },
       {
-        global: { stubs: { NordSkeleton: NordSkeletonStub } },
+        global: { stubs: { UiSkeleton: UiSkeletonStub } },
       },
     );
     await flushPromises();
@@ -38,7 +38,7 @@ describe('StreakCounter', () => {
     const wrapper = mount(
       { template: '<Suspense><StreakCounter /></Suspense>', components: { StreakCounter } },
       {
-        global: { stubs: { NordSkeleton: NordSkeletonStub } },
+        global: { stubs: { UiSkeleton: UiSkeletonStub } },
       },
     );
     await flushPromises();
@@ -57,7 +57,7 @@ describe('StreakCounter', () => {
     const wrapper = mount(
       { template: '<Suspense><StreakCounter /></Suspense>', components: { StreakCounter } },
       {
-        global: { stubs: { NordSkeleton: NordSkeletonStub } },
+        global: { stubs: { UiSkeleton: UiSkeletonStub } },
       },
     );
     await flushPromises();
@@ -72,7 +72,7 @@ describe('StreakCounter', () => {
     const wrapper = mount(
       { template: '<Suspense><StreakCounter /></Suspense>', components: { StreakCounter } },
       {
-        global: { stubs: { NordSkeleton: NordSkeletonStub } },
+        global: { stubs: { UiSkeleton: UiSkeletonStub } },
       },
     );
     await flushPromises();
@@ -88,11 +88,11 @@ describe('StreakCounter', () => {
     const wrapper = mount(
       { template: '<Suspense><StreakCounter /></Suspense>', components: { StreakCounter } },
       {
-        global: { stubs: { NordSkeleton: NordSkeletonStub } },
+        global: { stubs: { UiSkeleton: UiSkeletonStub } },
       },
     );
     await flushPromises();
     // The skeleton is shown
-    expect(wrapper.find('.nord-skeleton').exists()).toBe(true);
+    expect(wrapper.find('.ui-skeleton').exists()).toBe(true);
   });
 });

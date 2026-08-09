@@ -91,18 +91,18 @@ onMounted(async () => {
 
     <!-- Summary Stats -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-      <NordCard title="Total Sessions">
+      <UiCard title="Total Sessions">
         <div class="text-2xl font-bold text-primary">{{ totalSessions }}</div>
-      </NordCard>
-      <NordCard title="Total Time">
+      </UiCard>
+      <UiCard title="Total Time">
         <div class="text-2xl font-bold text-primary">{{ totalTimeFormatted }}</div>
-      </NordCard>
-      <NordCard title="Average Duration">
+      </UiCard>
+      <UiCard title="Average Duration">
         <div class="text-2xl font-bold text-primary">{{ averageDuration }}</div>
-      </NordCard>
-      <NordCard title="Most Practiced">
+      </UiCard>
+      <UiCard title="Most Practiced">
         <div class="text-2xl font-bold text-primary capitalize">{{ mostPracticedInstrument }}</div>
-      </NordCard>
+      </UiCard>
     </div>
 
     <!-- Filters -->
@@ -155,7 +155,7 @@ onMounted(async () => {
         Track your progress by starting your first practice session.
       </p>
       <NuxtLink to="/practice/session">
-        <NordButton variant="primary">Start Your First Session</NordButton>
+        <UiButton variant="primary">Start Your First Session</UiButton>
       </NuxtLink>
     </div>
 

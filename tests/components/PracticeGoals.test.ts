@@ -56,19 +56,19 @@ const mockToastStore = {
 };
 vi.stubGlobal('useToastStore', () => mockToastStore);
 
-const NordCardStub = {
-  template: '<div class="nord-card"><h3 v-if="title">{{ title }}</h3><slot /></div>',
+const UiCardStub = {
+  template: '<div class="ui-card"><h3 v-if="title">{{ title }}</h3><slot /></div>',
   props: ['title', 'padding'],
 };
-const NordProgressBarStub = {
-  template: '<div class="nord-progress" :style="{ width: value + \'%\' }" :data-color="color" />',
+const UiProgressBarStub = {
+  template: '<div class="ui-progress" :style="{ width: value + \'%\' }" :data-color="color" />',
   props: ['value', 'color', 'size', 'animated'],
 };
-const NordSkeletonStub = {
-  template: '<div class="nord-skeleton" :style="{ width, height }" />',
+const UiSkeletonStub = {
+  template: '<div class="ui-skeleton" :style="{ width, height }" />',
   props: ['width', 'height', 'rounded', 'variant'],
 };
-const NordButtonStub = {
+const UiButtonStub = {
   template: '<button :disabled="disabled" @click="$emit(\'click\', $event)"><slot /></button>',
   props: ['variant', 'size', 'disabled', 'loading', 'ariaLabel', 'ariaPressed', 'type'],
   emits: ['click'],
@@ -94,10 +94,10 @@ describe('PracticeGoals', () => {
     const wrapper = mount(PracticeGoals, {
       global: {
         stubs: {
-          NordCard: NordCardStub,
-          NordProgressBar: NordProgressBarStub,
-          NordSkeleton: NordSkeletonStub,
-          NordButton: NordButtonStub,
+          UiCard: UiCardStub,
+          UiProgressBar: UiProgressBarStub,
+          UiSkeleton: UiSkeletonStub,
+          UiButton: UiButtonStub,
           StaggeredList: StaggeredListStub,
         },
       },
@@ -110,10 +110,10 @@ describe('PracticeGoals', () => {
     const wrapper = mount(PracticeGoals, {
       global: {
         stubs: {
-          NordCard: NordCardStub,
-          NordProgressBar: NordProgressBarStub,
-          NordSkeleton: NordSkeletonStub,
-          NordButton: NordButtonStub,
+          UiCard: UiCardStub,
+          UiProgressBar: UiProgressBarStub,
+          UiSkeleton: UiSkeletonStub,
+          UiButton: UiButtonStub,
           StaggeredList: StaggeredListStub,
         },
       },
@@ -126,10 +126,10 @@ describe('PracticeGoals', () => {
     const wrapper = mount(PracticeGoals, {
       global: {
         stubs: {
-          NordCard: NordCardStub,
-          NordProgressBar: NordProgressBarStub,
-          NordSkeleton: NordSkeletonStub,
-          NordButton: NordButtonStub,
+          UiCard: UiCardStub,
+          UiProgressBar: UiProgressBarStub,
+          UiSkeleton: UiSkeletonStub,
+          UiButton: UiButtonStub,
           StaggeredList: StaggeredListStub,
         },
       },
@@ -160,10 +160,10 @@ describe('PracticeGoals', () => {
     const wrapper = mount(PracticeGoals, {
       global: {
         stubs: {
-          NordCard: NordCardStub,
-          NordProgressBar: NordProgressBarStub,
-          NordSkeleton: NordSkeletonStub,
-          NordButton: NordButtonStub,
+          UiCard: UiCardStub,
+          UiProgressBar: UiProgressBarStub,
+          UiSkeleton: UiSkeletonStub,
+          UiButton: UiButtonStub,
           StaggeredList: StaggeredListStub,
         },
       },
@@ -180,7 +180,7 @@ describe('PracticeGoals', () => {
     await titleInput.setValue('Practice guitar daily');
     await wrapper.vm.$nextTick();
 
-    // The Save Goal button is rendered via NordButton stub — find by text
+    // The Save Goal button is rendered via UiButton stub — find by text
     const saveButton = wrapper.findAll('button').find((b) => b.text().includes('Save Goal'))!;
     await saveButton.trigger('click');
     await flushPromises();
@@ -216,10 +216,10 @@ describe('PracticeGoals', () => {
     const wrapper = mount(PracticeGoals, {
       global: {
         stubs: {
-          NordCard: NordCardStub,
-          NordProgressBar: NordProgressBarStub,
-          NordSkeleton: NordSkeletonStub,
-          NordButton: NordButtonStub,
+          UiCard: UiCardStub,
+          UiProgressBar: UiProgressBarStub,
+          UiSkeleton: UiSkeletonStub,
+          UiButton: UiButtonStub,
           StaggeredList: StaggeredListStub,
         },
       },
@@ -259,10 +259,10 @@ describe('PracticeGoals', () => {
     const wrapper = mount(PracticeGoals, {
       global: {
         stubs: {
-          NordCard: NordCardStub,
-          NordProgressBar: NordProgressBarStub,
-          NordSkeleton: NordSkeletonStub,
-          NordButton: NordButtonStub,
+          UiCard: UiCardStub,
+          UiProgressBar: UiProgressBarStub,
+          UiSkeleton: UiSkeletonStub,
+          UiButton: UiButtonStub,
           StaggeredList: StaggeredListStub,
         },
       },
@@ -310,10 +310,10 @@ describe('PracticeGoals', () => {
     const wrapper = mount(PracticeGoals, {
       global: {
         stubs: {
-          NordCard: NordCardStub,
-          NordProgressBar: NordProgressBarStub,
-          NordSkeleton: NordSkeletonStub,
-          NordButton: NordButtonStub,
+          UiCard: UiCardStub,
+          UiProgressBar: UiProgressBarStub,
+          UiSkeleton: UiSkeletonStub,
+          UiButton: UiButtonStub,
           StaggeredList: StaggeredListStub,
         },
       },
@@ -341,10 +341,10 @@ describe('PracticeGoals', () => {
     const wrapper = mount(PracticeGoals, {
       global: {
         stubs: {
-          NordCard: NordCardStub,
-          NordProgressBar: NordProgressBarStub,
-          NordSkeleton: NordSkeletonStub,
-          NordButton: NordButtonStub,
+          UiCard: UiCardStub,
+          UiProgressBar: UiProgressBarStub,
+          UiSkeleton: UiSkeletonStub,
+          UiButton: UiButtonStub,
           StaggeredList: StaggeredListStub,
         },
       },

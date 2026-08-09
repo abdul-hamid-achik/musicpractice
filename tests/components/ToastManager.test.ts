@@ -21,9 +21,9 @@ vi.stubGlobal('useToastStore', () => toastStoreMock);
 
 import ToastManager from '~/components/ui/ToastManager.vue';
 
-const NordToastStub = {
+const UiToastStub = {
   template:
-    '<div class="nord-toast-stub" :data-type="type" :data-message="message"><slot /><button class="dismiss-stub" @click="$emit(\'dismiss\')">x</button></div>',
+    '<div class="ui-toast-stub" :data-type="type" :data-message="message"><slot /><button class="dismiss-stub" @click="$emit(\'dismiss\')">x</button></div>',
   props: ['message', 'type', 'duration'],
   emits: ['dismiss'],
 };
@@ -43,9 +43,9 @@ describe('ToastManager', () => {
   it('renders no toasts when the store is empty', () => {
     const wrapper = mount(ToastManager, {
       attachTo: document.body,
-      global: { stubs: { NordToast: NordToastStub } },
+      global: { stubs: { UiToast: UiToastStub } },
     });
-    expect(document.body.querySelectorAll('.nord-toast-stub').length).toBe(0);
+    expect(document.body.querySelectorAll('.ui-toast-stub').length).toBe(0);
     wrapper.unmount();
   });
 
@@ -56,9 +56,9 @@ describe('ToastManager', () => {
     );
     const wrapper = mount(ToastManager, {
       attachTo: document.body,
-      global: { stubs: { NordToast: NordToastStub } },
+      global: { stubs: { UiToast: UiToastStub } },
     });
-    const toastsRendered = document.body.querySelectorAll('.nord-toast-stub');
+    const toastsRendered = document.body.querySelectorAll('.ui-toast-stub');
     expect(toastsRendered.length).toBe(2);
     expect(toastsRendered[0]!.getAttribute('data-message')).toBe('First toast');
     expect(toastsRendered[1]!.getAttribute('data-type')).toBe('error');
@@ -69,7 +69,7 @@ describe('ToastManager', () => {
     toasts.push({ id: '1', message: 'Announce me', type: 'info' });
     const wrapper = mount(ToastManager, {
       attachTo: document.body,
-      global: { stubs: { NordToast: NordToastStub } },
+      global: { stubs: { UiToast: UiToastStub } },
     });
     const status = document.body.querySelector('[role="status"][aria-live="polite"]');
     expect(status).not.toBeNull();
@@ -81,7 +81,7 @@ describe('ToastManager', () => {
     toasts.push({ id: 'a', message: 'A', type: 'info' });
     const wrapper = mount(ToastManager, {
       attachTo: document.body,
-      global: { stubs: { NordToast: NordToastStub } },
+      global: { stubs: { UiToast: UiToastStub } },
     });
     const dismissBtn = document.body.querySelector('.dismiss-stub') as HTMLElement;
     expect(dismissBtn).not.toBeNull();

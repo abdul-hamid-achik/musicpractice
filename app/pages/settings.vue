@@ -41,7 +41,7 @@ onMounted(() => {
     <!-- Loaded Settings -->
     <div v-else class="max-w-2xl space-y-6">
       <!-- Theme -->
-      <NordCard title="Theme">
+      <UiCard title="Theme">
         <label class="flex items-center justify-between cursor-pointer">
           <div>
             <span class="text-text">Dark Mode</span>
@@ -67,10 +67,10 @@ onMounted(() => {
             />
           </div>
         </label>
-      </NordCard>
+      </UiCard>
 
       <!-- Instrument -->
-      <NordCard title="Instrument">
+      <UiCard title="Instrument">
         <div>
           <label class="block text-sm text-text-muted mb-2">Default Instrument</label>
           <select
@@ -90,10 +90,10 @@ onMounted(() => {
             <option value="violin">Violin</option>
           </select>
         </div>
-      </NordCard>
+      </UiCard>
 
       <!-- Metronome -->
-      <NordCard title="Metronome">
+      <UiCard title="Metronome">
         <div>
           <label class="block text-sm text-text-muted mb-2">
             Default Tempo:
@@ -119,10 +119,10 @@ onMounted(() => {
             <span>300</span>
           </div>
         </div>
-      </NordCard>
+      </UiCard>
 
       <!-- Display -->
-      <NordCard title="Display">
+      <UiCard title="Display">
         <div class="space-y-4">
           <label class="flex items-center justify-between cursor-pointer">
             <span class="text-text">Show Notation</span>
@@ -160,10 +160,10 @@ onMounted(() => {
             </div>
           </label>
         </div>
-      </NordCard>
+      </UiCard>
 
       <!-- Audio -->
-      <NordCard title="Audio">
+      <UiCard title="Audio">
         <div>
           <label class="block text-sm text-text-muted mb-2">
             Volume: <span class="text-primary font-medium">{{ settingsStore.volume }}%</span>
@@ -188,7 +188,7 @@ onMounted(() => {
             <span>100</span>
           </div>
         </div>
-      </NordCard>
+      </UiCard>
     </div>
   </div>
 </template>

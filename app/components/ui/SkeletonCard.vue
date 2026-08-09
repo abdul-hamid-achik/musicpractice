@@ -24,9 +24,9 @@ withDefaults(
     aria-label="Loading content..."
   >
     <div class="space-y-3">
-      <NordSkeleton height="1.25rem" width="60%" />
-      <NordSkeleton height="0.75rem" width="80%" />
-      <NordSkeleton height="0.75rem" width="70%" />
+      <UiSkeleton height="1.25rem" width="60%" />
+      <UiSkeleton height="0.75rem" width="80%" />
+      <UiSkeleton height="0.75rem" width="70%" />
     </div>
   </div>
 
@@ -37,7 +37,7 @@ withDefaults(
     aria-busy="true"
     aria-label="Loading text..."
   >
-    <NordSkeleton
+    <UiSkeleton
       v-for="i in lines"
       :key="i"
       height="0.75rem"

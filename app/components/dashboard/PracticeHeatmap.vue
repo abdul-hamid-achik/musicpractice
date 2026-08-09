@@ -92,11 +92,11 @@ function formatDate(dateStr: string) {
   <!-- Loading Skeleton -->
   <div v-if="isLoading" class="space-y-2" aria-busy="true" aria-label="Loading heatmap...">
     <div class="flex gap-1">
-      <NordSkeleton v-for="i in 13" :key="i" height="0.625rem" width="40px" />
+      <UiSkeleton v-for="i in 13" :key="i" height="0.625rem" width="40px" />
     </div>
     <div class="flex gap-1">
       <div class="flex flex-col gap-1" v-for="i in 13" :key="i">
-        <NordSkeleton v-for="j in 7" :key="j" variant="circle" width="14px" height="14px" />
+        <UiSkeleton v-for="j in 7" :key="j" variant="circle" width="14px" height="14px" />
       </div>
     </div>
   </div>

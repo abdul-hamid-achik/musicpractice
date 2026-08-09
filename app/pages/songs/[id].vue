@@ -151,9 +151,9 @@ function formatDate(dateString: string | Date | null): string {
           <p v-if="song.artist" class="text-text-muted text-lg mt-1">{{ song.artist }}</p>
         </div>
         <div class="flex gap-2">
-          <NordButton variant="ghost" size="sm" @click="openEdit">Edit</NordButton>
-          <NordButton variant="danger" size="sm" @click="showDeleteConfirm = true"
-            >Delete</NordButton
+          <UiButton variant="ghost" size="sm" @click="openEdit">Edit</UiButton>
+          <UiButton variant="danger" size="sm" @click="showDeleteConfirm = true"
+            >Delete</UiButton
           >
         </div>
       </div>
@@ -162,15 +162,15 @@ function formatDate(dateString: string | Date | null): string {
     <div class="grid grid-cols-1 xl:grid-cols-4 gap-6">
       <!-- Notation Viewer -->
       <div class="xl:col-span-3">
-        <NordCard title="Score">
+        <UiCard title="Score">
           <AlphaTabViewer v-if="song.notationData" :alpha-tex="song.notationData" />
           <p v-else class="text-text-muted">No notation data available for this song.</p>
-        </NordCard>
+        </UiCard>
       </div>
 
       <!-- Sidebar -->
       <div class="space-y-4">
-        <NordCard title="Details">
+        <UiCard title="Details">
           <div class="space-y-3">
             <div v-if="song.artist">
               <span class="text-sm text-text-muted block">Artist</span>
@@ -190,10 +190,10 @@ function formatDate(dateString: string | Date | null): string {
               </span>
             </div>
           </div>
-        </NordCard>
+        </UiCard>
 
         <!-- Progress Card -->
-        <NordCard title="Your Progress">
+        <UiCard title="Your Progress">
           <div v-if="progress" class="space-y-4">
             <!-- Completion Progress Bar -->
             <div>
@@ -234,26 +234,26 @@ function formatDate(dateString: string | Date | null): string {
               }}</span>
             </div>
 
-            <NordButton variant="secondary" size="sm" class="w-full" @click="openProgressEdit">
+            <UiButton variant="secondary" size="sm" class="w-full" @click="openProgressEdit">
               Edit Progress
-            </NordButton>
+            </UiButton>
           </div>
           <div v-else class="text-center py-4">
             <p class="text-text-muted text-sm mb-3">No progress tracked yet</p>
-            <NordButton variant="secondary" size="sm" @click="openProgressEdit">
+            <UiButton variant="secondary" size="sm" @click="openProgressEdit">
               Add Progress
-            </NordButton>
+            </UiButton>
           </div>
-        </NordCard>
+        </UiCard>
 
         <NuxtLink :to="`/practice/session?instrument=${song.instrumentType}&song=${songId}`">
-          <NordButton variant="primary" class="w-full">Practice This Song</NordButton>
+          <UiButton variant="primary" class="w-full">Practice This Song</UiButton>
         </NuxtLink>
       </div>
     </div>
 
     <!-- Edit Modal -->
-    <NordModal :open="showEditModal" title="Edit Song" @close="showEditModal = false">
+    <UiModal :open="showEditModal" title="Edit Song" @close="showEditModal = false">
       <form class="space-y-4" @submit.prevent="saveEdit">
         <div>
           <label class="block text-sm text-text-muted mb-1">Title</label>
@@ -324,27 +324,27 @@ function formatDate(dateString: string | Date | null): string {
         </div>
 
         <div class="flex justify-end gap-3 pt-2">
-          <NordButton variant="ghost" type="button" @click="showEditModal = false"
-            >Cancel</NordButton
+          <UiButton variant="ghost" type="button" @click="showEditModal = false"
+            >Cancel</UiButton
           >
-          <NordButton variant="primary" type="submit">Save Changes</NordButton>
+          <UiButton variant="primary" type="submit">Save Changes</UiButton>
         </div>
       </form>
-    </NordModal>
+    </UiModal>
 
     <!-- Delete Confirmation -->
-    <NordModal :open="showDeleteConfirm" title="Delete Song?" @close="showDeleteConfirm = false">
+    <UiModal :open="showDeleteConfirm" title="Delete Song?" @close="showDeleteConfirm = false">
       <p class="text-text-muted mb-4">
         Are you sure you want to delete "{{ song.title }}"? This action cannot be undone.
       </p>
       <div class="flex justify-end gap-3">
-        <NordButton variant="ghost" @click="showDeleteConfirm = false">Cancel</NordButton>
-        <NordButton variant="danger" @click="deleteSong">Delete Song</NordButton>
+        <UiButton variant="ghost" @click="showDeleteConfirm = false">Cancel</UiButton>
+        <UiButton variant="danger" @click="deleteSong">Delete Song</UiButton>
       </div>
-    </NordModal>
+    </UiModal>
 
     <!-- Progress Edit Modal -->
-    <NordModal
+    <UiModal
       :open="showProgressEditModal"
       title="Edit Progress"
       @close="showProgressEditModal = false"
@@ -399,13 +399,13 @@ function formatDate(dateString: string | Date | null): string {
         </div>
 
         <div class="flex justify-end gap-3 pt-2">
-          <NordButton variant="ghost" type="button" @click="showProgressEditModal = false"
-            >Cancel</NordButton
+          <UiButton variant="ghost" type="button" @click="showProgressEditModal = false"
+            >Cancel</UiButton
           >
-          <NordButton variant="primary" type="submit">Save Progress</NordButton>
+          <UiButton variant="primary" type="submit">Save Progress</UiButton>
         </div>
       </form>
-    </NordModal>
+    </UiModal>
   </div>
 
   <div v-else class="text-center py-12">

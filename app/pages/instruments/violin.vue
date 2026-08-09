@@ -48,7 +48,7 @@ onMounted(async () => {
     <div class="flex items-center justify-between mb-2">
       <h1 class="text-3xl font-bold text-text">Violin</h1>
       <NuxtLink to="/practice/session?instrument=violin">
-        <NordButton variant="primary" size="sm">Practice Violin</NordButton>
+        <UiButton variant="primary" size="sm">Practice Violin</UiButton>
       </NuxtLink>
     </div>
     <p class="text-text-muted mb-6">
@@ -72,7 +72,7 @@ onMounted(async () => {
     <!-- Loaded Content -->
     <template v-else>
       <!-- Controls -->
-      <NordCard class="mb-6">
+      <UiCard class="mb-6">
         <div class="flex flex-wrap items-end gap-4">
           <!-- Root Note -->
           <div>
@@ -112,24 +112,24 @@ onMounted(async () => {
             </select>
           </div>
         </div>
-      </NordCard>
+      </UiCard>
 
       <!-- Fingerboard -->
-      <NordCard>
+      <UiCard>
         <ViolinFingerboard
           :position="position"
           :highlighted-notes="highlightedNotes"
           :root-note="selectedRoot"
           @note-click="handleNoteClick"
         />
-      </NordCard>
+      </UiCard>
 
       <!-- Note Display -->
-      <NordCard v-if="lastClickedNote" title="Last Played" class="mt-6">
+      <UiCard v-if="lastClickedNote" title="Last Played" class="mt-6">
         <div class="text-center">
           <span class="text-2xl font-bold text-primary">{{ lastClickedNote }}</span>
         </div>
-      </NordCard>
+      </UiCard>
     </template>
   </div>
 </template>

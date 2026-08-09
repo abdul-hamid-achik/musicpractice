@@ -52,8 +52,8 @@ const theoryStoreMock = {
 };
 vi.mock('~/stores/theory', () => ({ useTheoryStore: () => theoryStoreMock }));
 
-const NordSkeletonStub = {
-  template: '<div class="nord-skeleton" :style="{ width, height }" />',
+const UiSkeletonStub = {
+  template: '<div class="ui-skeleton" :style="{ width, height }" />',
   props: ['width', 'height', 'rounded', 'variant'],
 };
 
@@ -68,7 +68,7 @@ describe('ScaleExplorer', () => {
 
   it('renders the title and scale name', async () => {
     const wrapper = mount(ScaleExplorer, {
-      global: { stubs: { NordSkeleton: NordSkeletonStub } },
+      global: { stubs: { UiSkeleton: UiSkeletonStub } },
     });
     await wrapper.vm.$nextTick();
     expect(wrapper.text()).toContain('Scale Explorer');
@@ -77,7 +77,7 @@ describe('ScaleExplorer', () => {
 
   it('renders a Play Scale control', async () => {
     const wrapper = mount(ScaleExplorer, {
-      global: { stubs: { NordSkeleton: NordSkeletonStub } },
+      global: { stubs: { UiSkeleton: UiSkeletonStub } },
     });
     await wrapper.vm.$nextTick();
     expect(wrapper.text()).toContain('Play Scale');
@@ -85,7 +85,7 @@ describe('ScaleExplorer', () => {
 
   it('renders 12 root note buttons (C through B)', async () => {
     const wrapper = mount(ScaleExplorer, {
-      global: { stubs: { NordSkeleton: NordSkeletonStub } },
+      global: { stubs: { UiSkeleton: UiSkeletonStub } },
     });
     await wrapper.vm.$nextTick();
     const noteButtons = wrapper.findAll('button').filter((b) => {
@@ -97,7 +97,7 @@ describe('ScaleExplorer', () => {
 
   it('emits scaleSelected on initial load with the first scale', async () => {
     const wrapper = mount(ScaleExplorer, {
-      global: { stubs: { NordSkeleton: NordSkeletonStub } },
+      global: { stubs: { UiSkeleton: UiSkeletonStub } },
     });
     await wrapper.vm.$nextTick();
     expect(wrapper.emitted('scaleSelected')).toBeTruthy();
@@ -113,7 +113,7 @@ describe('ScaleExplorer', () => {
 
   it('calls setRoot and emits scaleSelected when a different root is picked (state transition)', async () => {
     const wrapper = mount(ScaleExplorer, {
-      global: { stubs: { NordSkeleton: NordSkeletonStub } },
+      global: { stubs: { UiSkeleton: UiSkeletonStub } },
     });
     await wrapper.vm.$nextTick();
     wrapper.emitted('scaleSelected')!.length = 0;
@@ -133,7 +133,7 @@ describe('ScaleExplorer', () => {
 
   it('renders the scale description', async () => {
     const wrapper = mount(ScaleExplorer, {
-      global: { stubs: { NordSkeleton: NordSkeletonStub } },
+      global: { stubs: { UiSkeleton: UiSkeletonStub } },
     });
     await wrapper.vm.$nextTick();
     expect(wrapper.text()).toContain('The standard major scale.');

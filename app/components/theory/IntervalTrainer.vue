@@ -156,7 +156,7 @@ function buttonClass(interval: Interval): string {
   <div class="bg-card border border-border rounded-lg p-6 space-y-6">
     <div class="flex items-center justify-between">
       <h2 class="text-xl font-semibold text-text">Interval Trainer</h2>
-      <NordButton variant="ghost" size="sm" @click="reset"> Reset </NordButton>
+      <UiButton variant="ghost" size="sm" @click="reset"> Reset </UiButton>
     </div>
 
     <!-- Score Display -->
@@ -168,14 +168,14 @@ function buttonClass(interval: Interval): string {
           <span v-if="total > 0" class="text-text-muted">({{ scorePercent }}%)</span>
         </span>
       </div>
-      <NordProgressBar :value="scorePercent" color="primary" size="sm" />
+      <UiProgressBar :value="scorePercent" color="primary" size="sm" />
     </div>
 
     <!-- Mode Toggle -->
     <div>
       <label class="block text-sm font-medium text-text-muted mb-2">Direction</label>
       <div class="flex gap-2">
-        <NordButton
+        <UiButton
           v-for="m in ['ascending', 'descending', 'both'] as const"
           :key="m"
           :variant="mode === m ? 'primary' : 'ghost'"
@@ -184,13 +184,13 @@ function buttonClass(interval: Interval): string {
           @click="mode = m"
         >
           {{ m }}
-        </NordButton>
+        </UiButton>
       </div>
     </div>
 
     <!-- Play Button -->
     <div class="flex gap-3">
-      <NordButton
+      <UiButton
         class="flex-1"
         :variant="currentInterval ? 'secondary' : 'primary'"
         :disabled="isPlaying"
@@ -207,10 +207,10 @@ function buttonClass(interval: Interval): string {
           <path d="M8 5v14l11-7z" />
         </svg>
         {{ !currentInterval ? 'Start' : isPlaying ? 'Playing...' : 'Replay' }}
-      </NordButton>
-      <NordButton v-if="answered && !lastGuessCorrect" variant="primary" @click="newQuestion()">
+      </UiButton>
+      <UiButton v-if="answered && !lastGuessCorrect" variant="primary" @click="newQuestion()">
         Next
-      </NordButton>
+      </UiButton>
     </div>
 
     <!-- Answer Buttons -->

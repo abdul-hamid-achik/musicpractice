@@ -42,7 +42,7 @@ onMounted(load);
 </script>
 
 <template>
-  <NordCard v-if="isLoaded && open.length > 0" title="From your teacher">
+  <UiCard v-if="isLoaded && open.length > 0" title="From your teacher">
     <ul class="space-y-2">
       <li
         v-for="assignment in open"
@@ -66,5 +66,5 @@ onMounted(load);
     <template #footer>
       <NuxtLink to="/studio" class="text-primary text-sm hover:underline">My studio</NuxtLink>
     </template>
-  </NordCard>
+  </UiCard>
 </template>

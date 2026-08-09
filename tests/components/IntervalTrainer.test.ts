@@ -21,15 +21,15 @@ vi.mock('~/composables/useMusicTheory', () => ({
   useMusicTheory: () => ({ midiToNote }),
 }));
 
-// Stub the Nord* UI components (auto-registered by Nuxt, missing in vitest)
-const NordButtonStub = {
+// Stub the Ui* UI components (auto-registered by Nuxt, missing in vitest)
+const UiButtonStub = {
   template:
     '<button :disabled="disabled" :aria-pressed="ariaPressed" :aria-label="ariaLabel" @click="$emit(\'click\', $event)"><slot /></button>',
   props: ['variant', 'size', 'disabled', 'loading', 'ariaLabel', 'ariaPressed', 'type'],
   emits: ['click'],
 };
-const NordProgressBarStub = {
-  template: '<div class="nord-progress" :style="{ width: value + \'%\' }" :data-color="color" />',
+const UiProgressBarStub = {
+  template: '<div class="ui-progress" :style="{ width: value + \'%\' }" :data-color="color" />',
   props: ['value', 'color', 'size', 'animated'],
 };
 
@@ -38,7 +38,7 @@ import IntervalTrainer from '~/components/theory/IntervalTrainer.vue';
 describe('IntervalTrainer', () => {
   it('renders title and reset control', () => {
     const wrapper = mount(IntervalTrainer, {
-      global: { stubs: { NordButton: NordButtonStub, NordProgressBar: NordProgressBarStub } },
+      global: { stubs: { UiButton: UiButtonStub, UiProgressBar: UiProgressBarStub } },
     });
     expect(wrapper.text()).toContain('Interval Trainer');
     expect(wrapper.text()).toContain('Reset');
@@ -46,14 +46,14 @@ describe('IntervalTrainer', () => {
 
   it('starts with score 0/0', () => {
     const wrapper = mount(IntervalTrainer, {
-      global: { stubs: { NordButton: NordButtonStub, NordProgressBar: NordProgressBarStub } },
+      global: { stubs: { UiButton: UiButtonStub, UiProgressBar: UiProgressBarStub } },
     });
     expect(wrapper.text()).toContain('0/0 correct');
   });
 
   it('renders direction toggle buttons', () => {
     const wrapper = mount(IntervalTrainer, {
-      global: { stubs: { NordButton: NordButtonStub, NordProgressBar: NordProgressBarStub } },
+      global: { stubs: { UiButton: UiButtonStub, UiProgressBar: UiProgressBarStub } },
     });
     expect(wrapper.text()).toContain('ascending');
     expect(wrapper.text()).toContain('descending');
@@ -62,7 +62,7 @@ describe('IntervalTrainer', () => {
 
   it('renders the Start button before any question is loaded', () => {
     const wrapper = mount(IntervalTrainer, {
-      global: { stubs: { NordButton: NordButtonStub, NordProgressBar: NordProgressBarStub } },
+      global: { stubs: { UiButton: UiButtonStub, UiProgressBar: UiProgressBarStub } },
     });
     expect(wrapper.text()).toContain('Start');
     // No answer grid yet
@@ -71,7 +71,7 @@ describe('IntervalTrainer', () => {
 
   it('emits scoreUpdate when an answer is guessed (state transition)', async () => {
     const wrapper = mount(IntervalTrainer, {
-      global: { stubs: { NordButton: NordButtonStub, NordProgressBar: NordProgressBarStub } },
+      global: { stubs: { UiButton: UiButtonStub, UiProgressBar: UiProgressBarStub } },
     });
 
     // Click Start to load a question. playInterval will be called but it's mocked.

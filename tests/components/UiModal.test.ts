@@ -1,13 +1,13 @@
 import { describe, it, expect } from 'vitest';
 import { mount } from '@vue/test-utils';
 
-import NordModal from '~/components/ui/NordModal.vue';
+import UiModal from '~/components/ui/UiModal.vue';
 
-describe('NordModal', () => {
+describe('UiModal', () => {
   // Teleport to body works only when the component is attached to the DOM.
   // Without attachTo, @vue/test-utils renders Teleport content outside the wrapper.
   it('does not render the dialog when open is false', () => {
-    const wrapper = mount(NordModal, {
+    const wrapper = mount(UiModal, {
       attachTo: document.body,
       props: { open: false, title: 'Test' },
       slots: { default: 'Content' },
@@ -17,7 +17,7 @@ describe('NordModal', () => {
   });
 
   it('renders the dialog when open is true', () => {
-    const wrapper = mount(NordModal, {
+    const wrapper = mount(UiModal, {
       attachTo: document.body,
       props: { open: true, title: 'Test' },
       slots: { default: 'Content' },
@@ -30,7 +30,7 @@ describe('NordModal', () => {
   });
 
   it('renders the slot content inside the dialog', () => {
-    const wrapper = mount(NordModal, {
+    const wrapper = mount(UiModal, {
       attachTo: document.body,
       props: { open: true, title: 'Test' },
       slots: { default: '<p>Hello world</p>' },
@@ -40,7 +40,7 @@ describe('NordModal', () => {
   });
 
   it('renders the title as an h2', () => {
-    const wrapper = mount(NordModal, {
+    const wrapper = mount(UiModal, {
       attachTo: document.body,
       props: { open: true, title: 'My Title' },
       slots: { default: 'Body' },
@@ -52,7 +52,7 @@ describe('NordModal', () => {
   });
 
   it('renders a close button with an aria-label', () => {
-    const wrapper = mount(NordModal, {
+    const wrapper = mount(UiModal, {
       attachTo: document.body,
       props: { open: true, title: 'T' },
       slots: { default: 'C' },
@@ -63,7 +63,7 @@ describe('NordModal', () => {
   });
 
   it('emits close when the close button is clicked (state transition)', async () => {
-    const wrapper = mount(NordModal, {
+    const wrapper = mount(UiModal, {
       attachTo: document.body,
       props: { open: true, title: 'T' },
       slots: { default: 'C' },
@@ -76,7 +76,7 @@ describe('NordModal', () => {
   });
 
   it('emits close when Escape key is pressed (state transition)', async () => {
-    const wrapper = mount(NordModal, {
+    const wrapper = mount(UiModal, {
       attachTo: document.body,
       props: { open: true, title: 'T' },
       slots: { default: 'C' },
@@ -91,7 +91,7 @@ describe('NordModal', () => {
   });
 
   it('does not render an h2 when no title is provided', () => {
-    const wrapper = mount(NordModal, {
+    const wrapper = mount(UiModal, {
       attachTo: document.body,
       props: { open: true },
       slots: { default: 'C' },

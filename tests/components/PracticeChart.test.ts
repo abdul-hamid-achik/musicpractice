@@ -7,8 +7,8 @@ vi.stubGlobal('useFetch', useFetchMock);
 
 import PracticeChart from '~/components/dashboard/PracticeChart.vue';
 
-const NordSkeletonStub = {
-  template: '<div class="nord-skeleton" :style="{ width, height }" />',
+const UiSkeletonStub = {
+  template: '<div class="ui-skeleton" :style="{ width, height }" />',
   props: ['width', 'height', 'rounded', 'variant'],
 };
 
@@ -27,7 +27,7 @@ describe('PracticeChart', () => {
     useFetchMock.mockReturnValue({ data: ref(null), status: ref('pending') });
     const wrapper = mount(
       { template: '<Suspense><PracticeChart /></Suspense>', components: { PracticeChart } },
-      { global: { stubs: { NordSkeleton: NordSkeletonStub } } },
+      { global: { stubs: { UiSkeleton: UiSkeletonStub } } },
     );
     await flushPromises();
     expect(wrapper.html()).toContain('Loading chart');
@@ -37,7 +37,7 @@ describe('PracticeChart', () => {
     useFetchMock.mockReturnValue({ data: ref(sampleData), status: ref('success') });
     const wrapper = mount(
       { template: '<Suspense><PracticeChart /></Suspense>', components: { PracticeChart } },
-      { global: { stubs: { NordSkeleton: NordSkeletonStub } } },
+      { global: { stubs: { UiSkeleton: UiSkeletonStub } } },
     );
     await flushPromises();
     const barGroups = wrapper.findAll('.bar-group');
@@ -48,7 +48,7 @@ describe('PracticeChart', () => {
     useFetchMock.mockReturnValue({ data: ref(sampleData), status: ref('success') });
     const wrapper = mount(
       { template: '<Suspense><PracticeChart /></Suspense>', components: { PracticeChart } },
-      { global: { stubs: { NordSkeleton: NordSkeletonStub } } },
+      { global: { stubs: { UiSkeleton: UiSkeletonStub } } },
     );
     await flushPromises();
     // Round 30, 45, 60, 15, 90
@@ -63,7 +63,7 @@ describe('PracticeChart', () => {
     useFetchMock.mockReturnValue({ data: ref(sampleData), status: ref('success') });
     const wrapper = mount(
       { template: '<Suspense><PracticeChart /></Suspense>', components: { PracticeChart } },
-      { global: { stubs: { NordSkeleton: NordSkeletonStub } } },
+      { global: { stubs: { UiSkeleton: UiSkeletonStub } } },
     );
     await flushPromises();
     // The two zero-minute days have empty bar-value divs
@@ -75,7 +75,7 @@ describe('PracticeChart', () => {
     useFetchMock.mockReturnValue({ data: ref(sampleData), status: ref('success') });
     const wrapper = mount(
       { template: '<Suspense><PracticeChart /></Suspense>', components: { PracticeChart } },
-      { global: { stubs: { NordSkeleton: NordSkeletonStub } } },
+      { global: { stubs: { UiSkeleton: UiSkeletonStub } } },
     );
     await flushPromises();
     const labels = wrapper.findAll('.bar-label');
@@ -86,7 +86,7 @@ describe('PracticeChart', () => {
     useFetchMock.mockReturnValue({ data: ref(sampleData), status: ref('success') });
     const wrapper = mount(
       { template: '<Suspense><PracticeChart /></Suspense>', components: { PracticeChart } },
-      { global: { stubs: { NordSkeleton: NordSkeletonStub } } },
+      { global: { stubs: { UiSkeleton: UiSkeletonStub } } },
     );
     await flushPromises();
     const fills = wrapper.findAll('.bar-fill');

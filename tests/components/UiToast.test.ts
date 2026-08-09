@@ -1,11 +1,11 @@
 import { describe, it, expect, vi } from 'vitest';
 import { mount, attachTo } from '@vue/test-utils';
 
-import NordToast from '~/components/ui/NordToast.vue';
+import UiToast from '~/components/ui/UiToast.vue';
 
-describe('NordToast', () => {
+describe('UiToast', () => {
   it('renders the message text', () => {
-    const wrapper = mount(NordToast, {
+    const wrapper = mount(UiToast, {
       attachTo: document.body,
       props: { message: 'Hello' },
     });
@@ -14,7 +14,7 @@ describe('NordToast', () => {
   });
 
   it('has role="alert" and aria-live="polite"', () => {
-    const wrapper = mount(NordToast, {
+    const wrapper = mount(UiToast, {
       attachTo: document.body,
       props: { message: 'Test' },
     });
@@ -25,7 +25,7 @@ describe('NordToast', () => {
   });
 
   it('applies the type class for success', () => {
-    const wrapper = mount(NordToast, {
+    const wrapper = mount(UiToast, {
       attachTo: document.body,
       props: { message: 'OK', type: 'success' },
     });
@@ -35,7 +35,7 @@ describe('NordToast', () => {
   });
 
   it('applies the type class for error', () => {
-    const wrapper = mount(NordToast, {
+    const wrapper = mount(UiToast, {
       attachTo: document.body,
       props: { message: 'Bad', type: 'error' },
     });
@@ -45,7 +45,7 @@ describe('NordToast', () => {
   });
 
   it('applies the type class for warning', () => {
-    const wrapper = mount(NordToast, {
+    const wrapper = mount(UiToast, {
       attachTo: document.body,
       props: { message: 'Warn', type: 'warning' },
     });
@@ -55,7 +55,7 @@ describe('NordToast', () => {
   });
 
   it('applies the type class for info', () => {
-    const wrapper = mount(NordToast, {
+    const wrapper = mount(UiToast, {
       attachTo: document.body,
       props: { message: 'Info', type: 'info' },
     });
@@ -65,7 +65,7 @@ describe('NordToast', () => {
   });
 
   it('defaults to info class when no type is provided', () => {
-    const wrapper = mount(NordToast, {
+    const wrapper = mount(UiToast, {
       attachTo: document.body,
       props: { message: 'Default' },
     });
@@ -75,7 +75,7 @@ describe('NordToast', () => {
   });
 
   it('emits dismiss when the dismiss button is clicked (state transition)', async () => {
-    const wrapper = mount(NordToast, {
+    const wrapper = mount(UiToast, {
       attachTo: document.body,
       props: { message: 'Test', type: 'info', duration: 60000 }, // long duration to prevent auto-dismiss
     });

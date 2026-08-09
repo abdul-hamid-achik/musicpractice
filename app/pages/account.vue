@@ -251,7 +251,7 @@ function closeDeleteModal() {
     <!-- Account Settings -->
     <div v-else class="max-w-2xl space-y-6">
       <!-- Profile Section -->
-      <NordCard title="Profile Information">
+      <UiCard title="Profile Information">
         <div class="space-y-4">
           <!-- Email -->
           <div>
@@ -302,14 +302,14 @@ function closeDeleteModal() {
           </div>
 
           <!-- Save Button -->
-          <NordButton variant="primary" :disabled="isSavingProfile" @click="updateProfile">
+          <UiButton variant="primary" :disabled="isSavingProfile" @click="updateProfile">
             {{ isSavingProfile ? 'Saving...' : 'Save Changes' }}
-          </NordButton>
+          </UiButton>
         </div>
-      </NordCard>
+      </UiCard>
 
       <!-- Change Password Section -->
-      <NordCard title="Change Password">
+      <UiCard title="Change Password">
         <div class="space-y-4">
           <!-- Current Password -->
           <div>
@@ -364,14 +364,14 @@ function closeDeleteModal() {
           </div>
 
           <!-- Save Button -->
-          <NordButton variant="primary" :disabled="isSavingPassword" @click="changePassword">
+          <UiButton variant="primary" :disabled="isSavingPassword" @click="changePassword">
             {{ isSavingPassword ? 'Changing...' : 'Change Password' }}
-          </NordButton>
+          </UiButton>
         </div>
-      </NordCard>
+      </UiCard>
 
       <!-- Danger Zone -->
-      <NordCard title="Danger Zone">
+      <UiCard title="Danger Zone">
         <div class="space-y-4">
           <div>
             <p class="text-sm text-text-muted">
@@ -386,13 +386,13 @@ function closeDeleteModal() {
               <li>All metronome presets</li>
             </ul>
           </div>
-          <NordButton variant="danger" @click="openDeleteModal"> Delete Account </NordButton>
+          <UiButton variant="danger" @click="openDeleteModal"> Delete Account </UiButton>
         </div>
-      </NordCard>
+      </UiCard>
     </div>
 
     <!-- Delete Confirmation Modal -->
-    <NordModal :open="isDeleteModalOpen" title="Delete Account" @close="closeDeleteModal">
+    <UiModal :open="isDeleteModalOpen" title="Delete Account" @close="closeDeleteModal">
       <div class="space-y-4">
         <p class="text-text">
           Are you absolutely sure you want to delete your account? This action cannot be undone.
@@ -408,18 +408,18 @@ function closeDeleteModal() {
           @keyup.enter="deleteAccount"
         />
         <div class="flex gap-3 pt-4">
-          <NordButton variant="secondary" :disabled="isDeletingAccount" @click="closeDeleteModal">
+          <UiButton variant="secondary" :disabled="isDeletingAccount" @click="closeDeleteModal">
             Cancel
-          </NordButton>
-          <NordButton
+          </UiButton>
+          <UiButton
             variant="danger"
             :disabled="isDeletingAccount || deleteConfirmation !== 'DELETE'"
             @click="deleteAccount"
           >
             {{ isDeletingAccount ? 'Deleting...' : 'Delete Account' }}
-          </NordButton>
+          </UiButton>
         </div>
       </div>
-    </NordModal>
+    </UiModal>
   </div>
 </template>

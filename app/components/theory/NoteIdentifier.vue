@@ -81,7 +81,7 @@ async function renderNote(quiz: NoteQuiz) {
     const context = renderer.getContext();
     context.setFont('Arial', 10);
 
-    // Style for Nord theme
+    // Style for the studio theme
     const svg = vexContainer.value.querySelector('svg');
     if (svg) {
       svg.style.background = 'transparent';

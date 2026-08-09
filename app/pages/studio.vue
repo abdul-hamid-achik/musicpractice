@@ -251,21 +251,21 @@ onMounted(loadContext);
               {{ student.assignmentsOpen }} open
             </span>
             <div class="flex shrink-0 gap-2">
-              <NordButton
+              <UiButton
                 size="sm"
                 variant="secondary"
                 :testid="`assign-${student.username}`"
                 @click="openAssignModal(student)"
               >
                 Assign
-              </NordButton>
-              <NordButton
+              </UiButton>
+              <UiButton
                 size="sm"
                 :variant="armedRemove === student.userId ? 'danger' : 'ghost'"
                 @click="removeStudent(student)"
               >
                 {{ armedRemove === student.userId ? 'Confirm' : 'Remove' }}
-              </NordButton>
+              </UiButton>
             </div>
           </li>
         </ul>
@@ -292,13 +292,13 @@ onMounted(loadContext);
               free plan
             </p>
           </div>
-          <NordButton
+          <UiButton
             :loading="isMintingInvite"
             testid="mint-invite"
             @click="mintInvite"
           >
             {{ inviteUrl ? 'New invite link' : 'Create invite link' }}
-          </NordButton>
+          </UiButton>
         </div>
         <div
           v-if="inviteUrl"
@@ -307,12 +307,12 @@ onMounted(loadContext);
           <code class="min-w-0 flex-1 truncate font-mono text-xs text-text-muted">{{
             inviteUrl
           }}</code>
-          <NordButton size="sm" variant="ghost" @click="copyInvite">Copy</NordButton>
+          <UiButton size="sm" variant="ghost" @click="copyInvite">Copy</UiButton>
         </div>
       </div>
 
       <!-- Assign modal -->
-      <NordModal
+      <UiModal
         :open="assignTarget !== null"
         :title="assignTarget ? `Assign practice to ${assignTarget.name}` : ''"
         testid="assign-modal"
@@ -348,18 +348,18 @@ onMounted(loadContext);
             />
           </div>
           <div class="flex justify-end gap-2">
-            <NordButton variant="ghost" @click="assignTarget = null">Cancel</NordButton>
-            <NordButton
+            <UiButton variant="ghost" @click="assignTarget = null">Cancel</UiButton>
+            <UiButton
               type="submit"
               :loading="isAssigning"
               :disabled="!assignmentTitle.trim()"
               testid="assignment-submit"
             >
               Assign
-            </NordButton>
+            </UiButton>
           </div>
         </form>
-      </NordModal>
+      </UiModal>
     </template>
 
     <!-- ═══════ STUDENT VIEW ═══════ -->
@@ -451,7 +451,7 @@ onMounted(loadContext);
               class="w-32 rounded-md border border-border bg-surface px-3 py-2 text-text"
             />
           </div>
-          <NordButton
+          <UiButton
             type="submit"
             class="mt-6"
             :loading="isCreating"
@@ -459,7 +459,7 @@ onMounted(loadContext);
             testid="create-studio-submit"
           >
             Create studio — free
-          </NordButton>
+          </UiButton>
           <p class="mt-2 text-xs text-text-muted">
             Free for up to {{ FREE_STUDENT_LIMIT }} students.
           </p>

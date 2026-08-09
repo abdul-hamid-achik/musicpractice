@@ -48,18 +48,18 @@ onMounted(async () => {
 
       <!-- Preview Panel -->
       <div class="space-y-4">
-        <NordCard title="Piano Preview">
+        <UiCard title="Piano Preview">
           <PianoKeyboard
             :octaves="2"
             :start-octave="4"
             :highlighted-notes="previewNotes"
             :root-note="previewRoot"
           />
-        </NordCard>
+        </UiCard>
 
-        <NordCard title="Guitar Preview">
+        <UiCard title="Guitar Preview">
           <GuitarFretboard :frets="12" :highlighted-notes="previewNotes" :root-note="previewRoot" />
-        </NordCard>
+        </UiCard>
       </div>
     </div>
   </div>

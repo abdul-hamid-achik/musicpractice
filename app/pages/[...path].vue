@@ -117,7 +117,7 @@ const popularSections = [
       <!-- Fade-in wrapper -->
       <div class="animate-fade-in">
         <!-- 404 Card -->
-        <NordCard class="text-center">
+        <UiCard class="text-center">
           <!-- Music illustration -->
           <div class="mb-8 relative">
             <!-- Broken string illustration -->
@@ -227,7 +227,7 @@ const popularSections = [
                 class="flex-1 px-4 py-2.5 bg-surface-alt border border-border rounded-md text-text placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
                 @keydown="handleSearchKeyDown"
               />
-              <NordButton variant="primary" aria-label="Search" @click="handleSearch">
+              <UiButton variant="primary" aria-label="Search" @click="handleSearch">
                 <svg
                   class="w-5 h-5"
                   fill="none"
@@ -242,14 +242,14 @@ const popularSections = [
                     d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                   />
                 </svg>
-              </NordButton>
+              </UiButton>
             </div>
           </div>
 
           <!-- Primary action buttons -->
           <div class="flex flex-wrap items-center justify-center gap-3 mb-8">
             <NuxtLink to="/">
-              <NordButton variant="primary" size="md">
+              <UiButton variant="primary" size="md">
                 <svg
                   class="w-5 h-5 mr-2"
                   fill="none"
@@ -265,11 +265,11 @@ const popularSections = [
                   />
                 </svg>
                 Home
-              </NordButton>
+              </UiButton>
             </NuxtLink>
 
             <NuxtLink v-if="authStore.isAuthenticated" to="/dashboard">
-              <NordButton variant="secondary" size="md">
+              <UiButton variant="secondary" size="md">
                 <svg
                   class="w-5 h-5 mr-2"
                   fill="none"
@@ -285,11 +285,11 @@ const popularSections = [
                   />
                 </svg>
                 Dashboard
-              </NordButton>
+              </UiButton>
             </NuxtLink>
 
             <NuxtLink v-else to="/auth/login">
-              <NordButton variant="secondary" size="md">
+              <UiButton variant="secondary" size="md">
                 <svg
                   class="w-5 h-5 mr-2"
                   fill="none"
@@ -305,7 +305,7 @@ const popularSections = [
                   />
                 </svg>
                 Sign In
-              </NordButton>
+              </UiButton>
             </NuxtLink>
           </div>
 
@@ -340,7 +340,7 @@ const popularSections = [
               </NuxtLink>
             </div>
           </div>
-        </NordCard>
+        </UiCard>
 
         <!-- Additional help text -->
         <p class="text-center text-text-muted text-sm mt-6">

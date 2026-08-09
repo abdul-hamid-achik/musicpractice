@@ -178,7 +178,7 @@ onMounted(async () => {
   <div class="max-w-6xl mx-auto space-y-6">
     <!-- Pre-session: instrument selection + start button -->
     <template v-if="!sessionStarted">
-      <NordCard title="Start a Practice Session">
+      <UiCard title="Start a Practice Session">
         <div class="flex flex-col gap-4 items-center py-8">
           <InstrumentSelector v-model="selectedInstrumentId" />
           <div class="w-full max-w-xs">
@@ -193,16 +193,16 @@ onMounted(async () => {
               </option>
             </select>
           </div>
-          <NordButton
+          <UiButton
             variant="primary"
             size="lg"
             :disabled="!selectedInstrumentId"
             @click="handleStart"
           >
             Start Session
-          </NordButton>
+          </UiButton>
         </div>
-      </NordCard>
+      </UiCard>
     </template>
 
     <!-- Active session -->
@@ -213,15 +213,15 @@ onMounted(async () => {
       >
         <span class="text-xl font-mono font-bold text-primary">{{ formatTime(elapsed) }}</span>
         <div class="flex gap-2">
-          <NordButton
+          <UiButton
             v-if="isActive"
             size="sm"
             :variant="isPaused ? 'primary' : 'ghost'"
             @click="togglePause"
           >
             {{ isPaused ? 'Resume' : 'Pause' }}
-          </NordButton>
-          <NordButton variant="danger" size="sm" @click="handleEndClick"> End </NordButton>
+          </UiButton>
+          <UiButton variant="danger" size="sm" @click="handleEndClick"> End </UiButton>
         </div>
       </div>
 
@@ -237,7 +237,7 @@ onMounted(async () => {
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Left: Timer + Tempo Trainer -->
         <div class="space-y-6">
-          <NordCard title="Session Timer">
+          <UiCard title="Session Timer">
             <PracticeTimer
               :is-active="isActive"
               :is-paused="isPaused"
@@ -245,17 +245,17 @@ onMounted(async () => {
               :format-time="formatTime"
             />
             <div class="flex justify-center gap-3 mt-4">
-              <NordButton
+              <UiButton
                 v-if="isActive"
                 :variant="isPaused ? 'primary' : 'ghost'"
                 @click="togglePause"
               >
                 {{ isPaused ? 'Resume' : 'Pause' }}
-              </NordButton>
+              </UiButton>
             </div>
-          </NordCard>
+          </UiCard>
 
-          <NordCard title="Tempo Trainer">
+          <UiCard title="Tempo Trainer">
             <div class="flex items-center gap-2 mb-4">
               <label class="text-sm text-text-muted">Target BPM:</label>
               <input
@@ -271,29 +271,29 @@ onMounted(async () => {
               :target-bpm="targetBpm"
               @tempo-change="handleTempoChange"
             />
-          </NordCard>
+          </UiCard>
         </div>
 
         <!-- Right: Metronome -->
         <div>
-          <NordCard title="Metronome">
+          <UiCard title="Metronome">
             <Metronome ref="metronomeRef" />
-          </NordCard>
+          </UiCard>
         </div>
       </div>
 
       <!-- Notes & Tags -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <NordCard title="Session Notes">
+        <UiCard title="Session Notes">
           <textarea
             v-model="sessionNotes"
             rows="4"
             placeholder="What did you work on?"
             class="w-full bg-surface-alt text-text border border-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary resize-none"
           />
-        </NordCard>
+        </UiCard>
 
-        <NordCard title="Tags">
+        <UiCard title="Tags">
           <input
             v-model="tagsInput"
             type="text"
@@ -310,19 +310,19 @@ onMounted(async () => {
               <button class="hover:text-error" @click="removeTag(i)">&times;</button>
             </span>
           </div>
-        </NordCard>
+        </UiCard>
       </div>
 
       <!-- End Session -->
       <div class="hidden lg:flex justify-center pb-8">
-        <NordButton variant="danger" size="lg" testid="open-end-session" @click="handleEndClick">
+        <UiButton variant="danger" size="lg" testid="open-end-session" @click="handleEndClick">
           End Session
-        </NordButton>
+        </UiButton>
       </div>
     </template>
 
     <!-- End Session Confirmation Modal -->
-    <NordModal
+    <UiModal
       :open="showEndConfirm"
       title="End Session?"
       testid="end-session-modal"
@@ -332,15 +332,15 @@ onMounted(async () => {
         Are you sure you want to end this practice session? Your session data will be saved.
       </p>
       <div class="flex justify-end gap-3">
-        <NordButton variant="ghost" @click="handleCancelEnd">Cancel</NordButton>
-        <NordButton variant="danger" testid="confirm-end-session" @click="handleConfirmEnd">
+        <UiButton variant="ghost" @click="handleCancelEnd">Cancel</UiButton>
+        <UiButton variant="danger" testid="confirm-end-session" @click="handleConfirmEnd">
           End Session
-        </NordButton>
+        </UiButton>
       </div>
-    </NordModal>
+    </UiModal>
 
     <!-- Session Recovery Modal -->
-    <NordModal :open="showRecovery" title="Resume Previous Session?" @close="handleRecoveryDiscard">
+    <UiModal :open="showRecovery" title="Resume Previous Session?" @close="handleRecoveryDiscard">
       <div class="space-y-4">
         <p class="text-text-muted">
           You have an unfinished practice session. Would you like to resume where you left off?
@@ -398,17 +398,17 @@ onMounted(async () => {
         </div>
 
         <div class="flex justify-end gap-3">
-          <NordButton
+          <UiButton
             v-if="sessionRecoveryInfo?.isStale"
             variant="ghost"
             @click="handleRecoveryDiscard"
           >
             Discard Old Session
-          </NordButton>
-          <NordButton v-else variant="ghost" @click="handleRecoveryDiscard">Discard</NordButton>
-          <NordButton variant="primary" @click="handleRecoveryResume">Resume Session</NordButton>
+          </UiButton>
+          <UiButton v-else variant="ghost" @click="handleRecoveryDiscard">Discard</UiButton>
+          <UiButton variant="primary" @click="handleRecoveryResume">Resume Session</UiButton>
         </div>
       </div>
-    </NordModal>
+    </UiModal>
   </div>
 </template>

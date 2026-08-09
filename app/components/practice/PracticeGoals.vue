@@ -300,7 +300,7 @@ function getStatusColorClass(status: string): string {
 <template>
   <div class="flex flex-col gap-4">
     <!-- Week Progress Overview -->
-    <NordCard title="Week Progress">
+    <UiCard title="Week Progress">
       <div class="space-y-4">
         <!-- Total minutes and comparison -->
         <div class="flex items-center justify-between">
@@ -333,7 +333,7 @@ function getStatusColorClass(status: string): string {
               {{ totalWeeklyTarget }} min</span
             >
           </div>
-          <NordProgressBar
+          <UiProgressBar
             :value="
               Math.min(100, Math.round((weeklyProgress.totalMinutes / totalWeeklyTarget) * 100))
             "
@@ -364,14 +364,14 @@ function getStatusColorClass(status: string): string {
           No practice sessions this week
         </div>
       </div>
-    </NordCard>
+    </UiCard>
 
     <!-- Loading skeletons -->
     <template v-if="isLoading">
       <div v-for="i in 2" :key="i" class="bg-card border border-border rounded-lg p-4 space-y-3">
-        <NordSkeleton height="1rem" width="60%" />
-        <NordSkeleton height="0.75rem" width="40%" />
-        <NordSkeleton height="0.625rem" rounded="rounded-full" />
+        <UiSkeleton height="1rem" width="60%" />
+        <UiSkeleton height="0.75rem" width="40%" />
+        <UiSkeleton height="0.625rem" rounded="rounded-full" />
       </div>
     </template>
 
@@ -456,7 +456,7 @@ function getStatusColorClass(status: string): string {
             </span>
           </div>
 
-          <NordProgressBar
+          <UiProgressBar
             :value="progressPercent(goal)"
             :color="getProgressColor(goal)"
             size="md"
@@ -519,10 +519,10 @@ function getStatusColorClass(status: string): string {
         </div>
       </div>
       <div class="flex gap-2 justify-end">
-        <NordButton variant="ghost" size="sm" @click="cancelForm"> Cancel </NordButton>
-        <NordButton variant="primary" size="sm" :disabled="!newGoal.title.trim()" @click="saveGoal">
+        <UiButton variant="ghost" size="sm" @click="cancelForm"> Cancel </UiButton>
+        <UiButton variant="primary" size="sm" :disabled="!newGoal.title.trim()" @click="saveGoal">
           {{ editingGoalId ? 'Update Goal' : 'Save Goal' }}
-        </NordButton>
+        </UiButton>
       </div>
     </div>
 

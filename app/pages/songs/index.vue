@@ -136,9 +136,9 @@ const difficultyColors: Record<string, string> = {
           Showing {{ songsData.length }} of {{ totalSongs }} songs
         </p>
       </div>
-      <NordButton variant="primary" testid="open-add-song-modal" @click="showAddModal = true">
+      <UiButton variant="primary" testid="open-add-song-modal" @click="showAddModal = true">
         Add Song
-      </NordButton>
+      </UiButton>
     </div>
 
     <!-- Search and Filters -->
@@ -258,7 +258,7 @@ const difficultyColors: Record<string, string> = {
     <!-- Song List -->
     <StaggeredList v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       <NuxtLink v-for="song in songsData" :key="song.id" :to="`/songs/${song.id}`" class="block">
-        <NordCard>
+        <UiCard>
           <h3 class="text-lg font-semibold text-text mb-1">{{ song.title }}</h3>
           <p v-if="song.artist" class="text-text-muted text-sm mb-3">{{ song.artist }}</p>
           <div class="flex gap-2">
@@ -273,7 +273,7 @@ const difficultyColors: Record<string, string> = {
               {{ song.difficulty }}
             </span>
           </div>
-        </NordCard>
+        </UiCard>
       </NuxtLink>
     </StaggeredList>
 
@@ -302,27 +302,27 @@ const difficultyColors: Record<string, string> = {
             : 'Add your first song to start building your personal library.'
         }}
       </p>
-      <NordButton v-if="hasActiveFilters" variant="secondary" @click="clearFilters">
+      <UiButton v-if="hasActiveFilters" variant="secondary" @click="clearFilters">
         Clear Filters
-      </NordButton>
-      <NordButton v-else variant="primary" @click="showAddModal = true">
+      </UiButton>
+      <UiButton v-else variant="primary" @click="showAddModal = true">
         Add Your First Song
-      </NordButton>
+      </UiButton>
     </div>
 
     <!-- Pagination -->
     <div v-if="!isLoading && totalPages > 1" class="flex justify-center items-center gap-2 mt-8">
-      <NordButton variant="ghost" :disabled="currentPage <= 1" @click="currentPage--">
+      <UiButton variant="ghost" :disabled="currentPage <= 1" @click="currentPage--">
         Previous
-      </NordButton>
+      </UiButton>
       <span class="text-text-muted"> Page {{ currentPage }} of {{ totalPages }} </span>
-      <NordButton variant="ghost" :disabled="currentPage >= totalPages" @click="currentPage++">
+      <UiButton variant="ghost" :disabled="currentPage >= totalPages" @click="currentPage++">
         Next
-      </NordButton>
+      </UiButton>
     </div>
 
     <!-- Add Song Modal -->
-    <NordModal
+    <UiModal
       :open="showAddModal"
       title="Add Song"
       testid="add-song-modal"
@@ -401,12 +401,12 @@ const difficultyColors: Record<string, string> = {
         </div>
 
         <div class="flex justify-end gap-3 pt-2">
-          <NordButton variant="ghost" type="button" @click="showAddModal = false"
-            >Cancel</NordButton
+          <UiButton variant="ghost" type="button" @click="showAddModal = false"
+            >Cancel</UiButton
           >
-          <NordButton variant="primary" type="submit" testid="submit-add-song">Add Song</NordButton>
+          <UiButton variant="primary" type="submit" testid="submit-add-song">Add Song</UiButton>
         </div>
       </form>
-    </NordModal>
+    </UiModal>
   </div>
 </template>

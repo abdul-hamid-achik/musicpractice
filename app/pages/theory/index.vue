@@ -26,19 +26,19 @@ const cards = [
     </p>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-      <NordCard v-for="card in cards" :key="card.title" :title="card.title">
+      <UiCard v-for="card in cards" :key="card.title" :title="card.title">
         <p class="text-text-muted text-sm mb-4">{{ card.description }}</p>
         <template #footer>
           <NuxtLink :to="card.to">
-            <NordButton variant="primary" size="sm">Open</NordButton>
+            <UiButton variant="primary" size="sm">Open</UiButton>
           </NuxtLink>
         </template>
-      </NordCard>
+      </UiCard>
     </div>
 
     <!-- Circle of Fifths full-width -->
-    <NordCard title="Circle of Fifths">
+    <UiCard title="Circle of Fifths">
       <CircleOfFifths />
-    </NordCard>
+    </UiCard>
   </div>
 </template>

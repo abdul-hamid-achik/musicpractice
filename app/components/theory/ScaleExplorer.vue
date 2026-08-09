@@ -161,18 +161,18 @@ onMounted(async () => {
     <!-- Loading Skeleton -->
     <div v-if="!isLoaded" class="space-y-4" aria-busy="true" aria-label="Loading scales...">
       <div class="flex justify-between">
-        <NordSkeleton height="1.5rem" width="150px" />
-        <NordSkeleton height="2.5rem" width="100px" />
+        <UiSkeleton height="1.5rem" width="150px" />
+        <UiSkeleton height="2.5rem" width="100px" />
       </div>
       <div class="space-y-2">
-        <NordSkeleton height="0.875rem" width="100px" />
+        <UiSkeleton height="0.875rem" width="100px" />
         <div class="flex flex-wrap gap-1">
-          <NordSkeleton v-for="i in 12" :key="i" variant="circle" width="40px" height="40px" />
+          <UiSkeleton v-for="i in 12" :key="i" variant="circle" width="40px" height="40px" />
         </div>
       </div>
       <div class="space-y-2">
-        <NordSkeleton height="0.875rem" width="100px" />
-        <NordSkeleton height="2.5rem" width="100%" />
+        <UiSkeleton height="0.875rem" width="100px" />
+        <UiSkeleton height="2.5rem" width="100%" />
       </div>
     </div>
 
