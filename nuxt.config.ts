@@ -41,7 +41,7 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-01-01',
   future: { compatibilityVersion: 4 },
 
-  modules: ['@pinia/nuxt'],
+  modules: ['@pinia/nuxt', '@vercel/analytics/nuxt'],
 
   components: [{ path: '~/components', pathPrefix: false }],
 
